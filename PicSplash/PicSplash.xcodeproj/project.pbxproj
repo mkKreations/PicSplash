@@ -12,6 +12,7 @@
 		2CD3C2A625CF04BE00BC0507 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2CD3C2A525CF04BE00BC0507 /* Assets.xcassets */; };
 		2CD3C2A925CF04BE00BC0507 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2CD3C2A725CF04BE00BC0507 /* LaunchScreen.storyboard */; };
 		2CD3C2BD25CF49A400BC0507 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CD3C2BC25CF49A400BC0507 /* HomeViewController.swift */; };
+		2CD3C2C125CF619B00BC0507 /* HomeImageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CD3C2C025CF619B00BC0507 /* HomeImageCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +23,7 @@
 		2CD3C2A825CF04BE00BC0507 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		2CD3C2AA25CF04BE00BC0507 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2CD3C2BC25CF49A400BC0507 /* HomeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
+		2CD3C2C025CF619B00BC0507 /* HomeImageCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeImageCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,6 +56,7 @@
 		2CD3C29B25CF04BB00BC0507 /* PicSplash */ = {
 			isa = PBXGroup;
 			children = (
+				2CD3C2BF25CF617E00BC0507 /* Cells */,
 				2CD3C2BB25CF49A400BC0507 /* Controllers */,
 				2CD3C2B325CF052C00BC0507 /* Storyboards */,
 				2CD3C2B525CF054300BC0507 /* Supporting Files */,
@@ -86,6 +89,14 @@
 				2CD3C2BC25CF49A400BC0507 /* HomeViewController.swift */,
 			);
 			path = Controllers;
+			sourceTree = "<group>";
+		};
+		2CD3C2BF25CF617E00BC0507 /* Cells */ = {
+			isa = PBXGroup;
+			children = (
+				2CD3C2C025CF619B00BC0507 /* HomeImageCell.swift */,
+			);
+			path = Cells;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -160,6 +171,7 @@
 			files = (
 				2CD3C29D25CF04BB00BC0507 /* AppDelegate.swift in Sources */,
 				2CD3C2BD25CF49A400BC0507 /* HomeViewController.swift in Sources */,
+				2CD3C2C125CF619B00BC0507 /* HomeImageCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
