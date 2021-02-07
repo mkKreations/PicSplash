@@ -10,6 +10,8 @@ import UIKit
 class ScrollingNavigationView: UIView {
 	override init(frame: CGRect) {
 		super.init(frame: frame)
+		
+		backgroundColor = .purple
 	}
 	required init?(coder: NSCoder) {
 		fatalError("Crash in ScrollingNavigationView")

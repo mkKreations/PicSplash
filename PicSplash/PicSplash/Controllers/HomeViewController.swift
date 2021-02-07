@@ -13,6 +13,8 @@ final class HomeViewController: UIViewController {
 		UICollectionView(frame: .zero, collectionViewLayout: configureCompositionalLayout())
 	}()
 	private var datasource: UICollectionViewDiffableDataSource<SectionPlaceHolder, ImagePlaceholder>!
+	private let scrollingNavView: ScrollingNavigationView = ScrollingNavigationView(frame: .zero)
+	private var navHeightConstraint: NSLayoutConstraint!
 	
 	
 	// MARK: view life cycle
@@ -20,16 +22,20 @@ final class HomeViewController: UIViewController {
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		
-		configureCollectionView()
+		configureSubviews()
 		configureDatasource()
 		applySnapshot()
 	}
 	
 	
-	// MARK: collection view config
+	// MARK: subviews config
 	
-	private func configureCollectionView() {
+	private func configureSubviews() {
+		scrollingNavView.translatesAutoresizingMaskIntoConstraints = false
+		view.addSubview(scrollingNavView)
+		
 		collectionView.translatesAutoresizingMaskIntoConstraints = false
+		collectionView.showsVerticalScrollIndicator = false
 		collectionView.register(HomeOrthogonalCell.self, forCellWithReuseIdentifier: HomeOrthogonalCell.reuseIdentifier)
 		collectionView.register(HomeImageCell.self, forCellWithReuseIdentifier: HomeImageCell.reuseIdentifier)
 		collectionView.register(HomeCollectionReusableView.self,
@@ -41,7 +47,13 @@ final class HomeViewController: UIViewController {
 	}
 	
 	private func constrainCollectionView() {
-		collectionView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+		scrollingNavView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+		scrollingNavView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+		scrollingNavView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+		navHeightConstraint = scrollingNavView.heightAnchor.constraint(equalToConstant: 200.0)
+		navHeightConstraint.isActive = true
+		
+		collectionView.topAnchor.constraint(equalTo: scrollingNavView.bottomAnchor).isActive = true
 		collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
 		collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
 		collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
@@ -175,7 +187,13 @@ extension HomeViewController {
 		sampleData.forEach { sampleSection in
 			snapshot.appendItems(sampleSection.images, toSection: sampleSection)
 		}
-		datasource.apply(snapshot)
+		
+		// applying snapshot like this - FOR INITIAL LOAD - fixes a
+		// slight compositional layout issue - a bit of a hack but
+		// works for now
+		datasource.apply(snapshot, animatingDifferences: true) {
+			self.datasource.apply(snapshot, animatingDifferences: true)
+		}
 	}
 
 }
