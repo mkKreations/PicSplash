@@ -46,6 +46,14 @@ final class HomeViewController: UIViewController {
 		collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
 		collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
 	}
+			
+}
+
+
+
+// MARK: compositional layout
+
+extension HomeViewController {
 	
 	private func configureCompositionalLayout() -> UICollectionViewCompositionalLayout {
 		let layout = UICollectionViewCompositionalLayout { sectionIndex, _ -> NSCollectionLayoutSection? in
@@ -103,6 +111,14 @@ final class HomeViewController: UIViewController {
 																																		alignment: .top)
 		section.boundarySupplementaryItems = [sectionHeader]
 	}
+
+}
+
+
+
+// MARK: diffable datasource
+
+extension HomeViewController {
 	
 	private func configureDatasource() {
 		datasource = UICollectionViewDiffableDataSource(collectionView: collectionView, cellProvider: {
@@ -161,5 +177,5 @@ final class HomeViewController: UIViewController {
 		}
 		datasource.apply(snapshot)
 	}
-	
+
 }
