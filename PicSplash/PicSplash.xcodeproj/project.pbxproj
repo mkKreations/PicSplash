@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2C88EFB425D07AF000150D54 /* ScrollingNavigationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C88EFB325D07AF000150D54 /* ScrollingNavigationView.swift */; };
 		2CD3C29D25CF04BB00BC0507 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CD3C29C25CF04BB00BC0507 /* AppDelegate.swift */; };
 		2CD3C2A425CF04BB00BC0507 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2CD3C2A225CF04BB00BC0507 /* Main.storyboard */; };
 		2CD3C2A625CF04BE00BC0507 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2CD3C2A525CF04BE00BC0507 /* Assets.xcassets */; };
@@ -20,6 +21,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		2C88EFB325D07AF000150D54 /* ScrollingNavigationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingNavigationView.swift; sourceTree = "<group>"; };
 		2CD3C29925CF04BB00BC0507 /* PicSplash.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PicSplash.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2CD3C29C25CF04BB00BC0507 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		2CD3C2A325CF04BB00BC0507 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -106,6 +108,7 @@
 				2CD3C2C725CF652600BC0507 /* Cells */,
 				2CD3C2CB25CF654900BC0507 /* ImageShadowOverlayView.swift */,
 				2CD3C2D725CF97F100BC0507 /* HomeCollectionReusableView.swift */,
+				2C88EFB325D07AF000150D54 /* ScrollingNavigationView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -197,6 +200,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2C88EFB425D07AF000150D54 /* ScrollingNavigationView.swift in Sources */,
 				2CD3C29D25CF04BB00BC0507 /* AppDelegate.swift in Sources */,
 				2CD3C2CC25CF654900BC0507 /* ImageShadowOverlayView.swift in Sources */,
 				2CD3C2D125CF686D00BC0507 /* ImagePlaceholder.swift in Sources */,
