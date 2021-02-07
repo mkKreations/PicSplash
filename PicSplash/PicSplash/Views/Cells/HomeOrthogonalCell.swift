@@ -66,6 +66,7 @@ class HomeOrthogonalCell: UICollectionViewCell {
 		
 		displayLabel.translatesAutoresizingMaskIntoConstraints = false
 		displayLabel.textColor = .white
+		displayLabel.textAlignment = .center
 		contentView.addSubview(displayLabel)
 	}
 	
