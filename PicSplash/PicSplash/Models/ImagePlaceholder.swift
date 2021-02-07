@@ -7,9 +7,19 @@
 
 import UIKit
 
-struct ImagePlaceholder {
-	let id = UUID()
+struct SectionPlaceHolder {
+	enum SectionType {
+		case orthogonal
+		case main
+	}
 	
+	let title: String
+	let type: SectionType
+	let images: [ImagePlaceholder]
+}
+extension SectionPlaceHolder: Hashable {}
+
+struct ImagePlaceholder {
 	// MARK: placeholder data
 	let height: Int = Int.random(in: 50...500)
 	lazy var placeholderColor: UIColor = {
@@ -41,8 +51,6 @@ struct ImagePlaceholder {
 extension ImagePlaceholder: Hashable {}
 
 
-
-// TODO: Delete later
 var samplePics = [
 	ImagePlaceholder(),
 	ImagePlaceholder(),
@@ -78,4 +86,11 @@ var orthogonalPics = [
 	ImagePlaceholder(),
 	ImagePlaceholder(),
 	ImagePlaceholder(),
+]
+
+
+// TODO: Delete later
+let sampleData = [
+	SectionPlaceHolder(title: "Explore", type: .orthogonal, images: orthogonalPics),
+	SectionPlaceHolder(title: "New", type: .main, images: samplePics),
 ]

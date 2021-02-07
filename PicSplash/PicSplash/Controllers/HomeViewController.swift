@@ -7,19 +7,12 @@
 
 import UIKit
 
-class HomeViewController: UIViewController {
+class HomeViewController: UIViewController {	
 	// instance vars
 	private lazy var collectionView: UICollectionView = {
 		UICollectionView(frame: .zero, collectionViewLayout: configureCompositionalLayout())
 	}()
-	private var datasource: UICollectionViewDiffableDataSource<Section, ImagePlaceholder>!
-		
-	
-	// collection view section enum
-	enum Section: CaseIterable {
-		case orthogonal
-		case main
-	}
+	private var datasource: UICollectionViewDiffableDataSource<SectionPlaceHolder, ImagePlaceholder>!
 	
 	
 	// MARK: view life cycle
@@ -41,6 +34,10 @@ class HomeViewController: UIViewController {
 		collectionView.register(HomeImageCell.self, forCellWithReuseIdentifier: HomeImageCell.reuseIdentifier)
 		view.addSubview(collectionView)
 		
+		constrainCollectionView()
+	}
+	
+	private func constrainCollectionView() {
 		collectionView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
 		collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
 		collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
@@ -49,9 +46,9 @@ class HomeViewController: UIViewController {
 	
 	private func configureCompositionalLayout() -> UICollectionViewCompositionalLayout {
 		let layout = UICollectionViewCompositionalLayout { sectionIndex, _ -> NSCollectionLayoutSection? in
-			let currentSection = Section.allCases[sectionIndex]
+			let currentSectionType = sampleData[sectionIndex].type
 			
-			switch currentSection {
+			switch currentSectionType {
 			case .orthogonal:
 				return self.sectionLayoutForHomeOrthogonalCell()
 			case .main:
@@ -93,9 +90,9 @@ class HomeViewController: UIViewController {
 		datasource = UICollectionViewDiffableDataSource(collectionView: collectionView, cellProvider: {
 			(collectionView, indexPath, imagePlaceholder) -> UICollectionViewCell? in
 					
-			let currentSection = Section.allCases[indexPath.section]
+			let currentSectionType = sampleData[indexPath.section].type
 			
-			switch currentSection {
+			switch currentSectionType {
 			case .orthogonal:
 				guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeOrthogonalCell.reuseIdentifier,
 																														for: indexPath) as? HomeOrthogonalCell else { return nil }
@@ -118,10 +115,11 @@ class HomeViewController: UIViewController {
 	}
 	
 	private func applySnapshot() {
-		var snapshot = NSDiffableDataSourceSnapshot<Section, ImagePlaceholder>()
-		snapshot.appendSections([.orthogonal, .main])
-		snapshot.appendItems(orthogonalPics, toSection: .orthogonal)
-		snapshot.appendItems(samplePics, toSection: .main)
+		var snapshot = NSDiffableDataSourceSnapshot<SectionPlaceHolder, ImagePlaceholder>()
+		snapshot.appendSections(sampleData)
+		sampleData.forEach { sampleSection in
+			snapshot.appendItems(sampleSection.images, toSection: sampleSection)
+		}
 		datasource.apply(snapshot)
 	}
 	
