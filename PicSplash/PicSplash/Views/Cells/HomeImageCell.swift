@@ -77,6 +77,7 @@ class HomeImageCell: UICollectionViewCell {
 		displayImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor).isActive = true
 		displayImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor).isActive = true
 		imageViewHeightConstraint = displayImageView.heightAnchor.constraint(equalToConstant: 0.0)
+		imageViewHeightConstraint.isActive = true
 
 		gradientOverlayView.topAnchor.constraint(equalTo: contentView.topAnchor).isActive = true
 		gradientOverlayView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
@@ -91,8 +92,6 @@ class HomeImageCell: UICollectionViewCell {
 	// keeping this logic separate
 	private func handleImageViewHeightConstraint(forText text: String) {
 		guard let height = Int(text) else { return }
-		
 		imageViewHeightConstraint.constant = CGFloat(height)
-		imageViewHeightConstraint.isActive = true // should move this to constrainSubviews() so we don't call more than once?
 	}
 }
