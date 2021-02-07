@@ -14,7 +14,6 @@ class HomeCollectionReusableView: UICollectionReusableView {
 	
 	// instance vars
 	private let displayLabel: UILabel = UILabel(frame: .zero)
-	private var labelLeadingConstraint: NSLayoutConstraint!
 	
 	
 	// enum to represent our different styles
@@ -29,10 +28,8 @@ class HomeCollectionReusableView: UICollectionReusableView {
 		didSet {
 			switch displayStyle {
 			case .large:
-				labelLeadingConstraint.constant = 15.0
 				displayLabel.font = UIFont.systemFont(ofSize: 18, weight: .bold)
 			case .small:
-				labelLeadingConstraint.constant = 10.0
 				displayLabel.font = UIFont.systemFont(ofSize: 16, weight: .bold)
 			}
 		}
@@ -57,8 +54,7 @@ class HomeCollectionReusableView: UICollectionReusableView {
 
 		displayLabel.centerYAnchor.constraint(equalTo: centerYAnchor, constant: 5.0).isActive = true
 		displayLabel.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
-		labelLeadingConstraint = displayLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 0.0)
-		labelLeadingConstraint.isActive = true
+		displayLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16.0).isActive = true
 	}
 	required init?(coder: NSCoder) {
 		fatalError("Crash in HomeCollectionReusableView")
