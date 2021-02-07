@@ -47,6 +47,10 @@ class HomeOrthogonalCell: UICollectionViewCell {
 	override init(frame: CGRect) {
 		super.init(frame: frame)
 		
+		// apply cornerRadius to layer & masksToBounds
+		layer.cornerRadius = 14.0
+		layer.masksToBounds = true
+		
 		configureSubviews()
 		constrainSubviews()
 	}
