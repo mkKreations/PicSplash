@@ -16,6 +16,7 @@ class HomeImageCell: UICollectionViewCell {
 	private let gradientOverlayView: ImageShadowOverlayView = ImageShadowOverlayView(frame: .zero)
 	private let displayImageView: UIImageView = UIImageView(frame: .zero)
 	private let displayLabel: UILabel = UILabel(frame: .zero)
+	private var imageViewHeightConstraint: NSLayoutConstraint! // manage imageView height manually
 	
 		
 	// public setters
@@ -36,6 +37,8 @@ class HomeImageCell: UICollectionViewCell {
 		didSet {
 			if let text = displayText {
 				displayLabel.text = text
+				
+				handleImageViewHeightConstraint(forText: text)
 			}
 		}
 	}
@@ -72,6 +75,7 @@ class HomeImageCell: UICollectionViewCell {
 		displayImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
 		displayImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor).isActive = true
 		displayImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor).isActive = true
+		imageViewHeightConstraint = displayImageView.heightAnchor.constraint(equalToConstant: 0.0)
 
 		gradientOverlayView.topAnchor.constraint(equalTo: contentView.topAnchor).isActive = true
 		gradientOverlayView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
@@ -81,5 +85,13 @@ class HomeImageCell: UICollectionViewCell {
 		displayLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -5.0).isActive = true
 		displayLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -5.0).isActive = true
 		displayLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 5.0).isActive = true
+	}
+	
+	// keeping this logic separate
+	private func handleImageViewHeightConstraint(forText text: String) {
+		guard let height = Int(text) else { return }
+		
+		imageViewHeightConstraint.constant = CGFloat(height)
+		imageViewHeightConstraint.isActive = true
 	}
 }
