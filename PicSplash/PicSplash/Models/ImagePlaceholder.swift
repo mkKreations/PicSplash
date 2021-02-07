@@ -13,6 +13,7 @@ struct SectionPlaceHolder {
 		case main
 	}
 	
+	let id = UUID()
 	let title: String
 	let type: SectionType
 	let images: [ImagePlaceholder]
@@ -20,6 +21,7 @@ struct SectionPlaceHolder {
 extension SectionPlaceHolder: Hashable {}
 
 struct ImagePlaceholder {
+	let id = UUID()
 	// MARK: placeholder data
 	let height: Int = Int.random(in: 50...500)
 	lazy var placeholderColor: UIColor = {
