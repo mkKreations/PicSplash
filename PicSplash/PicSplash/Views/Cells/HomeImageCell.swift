@@ -25,6 +25,7 @@ class HomeImageCell: UICollectionViewCell {
 //			displayImageView.image = displayImage
 //		}
 //	}
+	
 	var displayBackgroundColor: UIColor? {
 		didSet {
 			if let bgColor = displayBackgroundColor {

@@ -16,7 +16,8 @@ class HomeViewController: UIViewController {
 		
 	
 	// collection view section enum
-	enum Section {
+	enum Section: CaseIterable {
+		case orthogonal
 		case main
 	}
 	
@@ -36,6 +37,7 @@ class HomeViewController: UIViewController {
 	
 	private func configureCollectionView() {
 		collectionView.translatesAutoresizingMaskIntoConstraints = false
+		collectionView.register(HomeOrthogonalCell.self, forCellWithReuseIdentifier: HomeOrthogonalCell.reuseIdentifier)
 		collectionView.register(HomeImageCell.self, forCellWithReuseIdentifier: HomeImageCell.reuseIdentifier)
 		view.addSubview(collectionView)
 		
@@ -46,6 +48,35 @@ class HomeViewController: UIViewController {
 	}
 	
 	private func configureCompositionalLayout() -> UICollectionViewCompositionalLayout {
+		let layout = UICollectionViewCompositionalLayout { sectionIndex, _ -> NSCollectionLayoutSection? in
+			let currentSection = Section.allCases[sectionIndex]
+			
+			switch currentSection {
+			case .orthogonal:
+				return self.sectionLayoutForHomeOrthogonalCell()
+			case .main:
+				return self.sectionLayoutForHomeImageCell()
+			}
+		}
+		return layout
+	}
+	
+	private func sectionLayoutForHomeOrthogonalCell() -> NSCollectionLayoutSection {
+		let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+																					heightDimension: .fractionalHeight(1.0))
+		let item = NSCollectionLayoutItem(layoutSize: itemSize)
+		
+		let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.8),
+																					 heightDimension: .absolute(200.0))
+		let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize,
+																									 subitems: [item])
+		
+		let section = NSCollectionLayoutSection(group: group)
+		section.orthogonalScrollingBehavior = .groupPagingCentered
+		return section
+	}
+	
+	private func sectionLayoutForHomeImageCell() -> NSCollectionLayoutSection {
 		let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
 																					heightDimension: .estimated(100.0))
 		let item = NSCollectionLayoutItem(layoutSize: itemSize)
@@ -55,30 +86,43 @@ class HomeViewController: UIViewController {
 		let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize,
 																								 subitems: [item])
 		
-		let section = NSCollectionLayoutSection(group: group)
-		
-		return UICollectionViewCompositionalLayout(section: section)
+		return NSCollectionLayoutSection(group: group)
 	}
 	
 	private func configureDatasource() {
 		datasource = UICollectionViewDiffableDataSource(collectionView: collectionView, cellProvider: {
 			(collectionView, indexPath, imagePlaceholder) -> UICollectionViewCell? in
-			guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeImageCell.reuseIdentifier,
-																													for: indexPath) as? HomeImageCell else { return nil }
+					
+			let currentSection = Section.allCases[indexPath.section]
 			
-			cell.displayText = String(samplePics[indexPath.row].height)
-			cell.displayBackgroundColor = samplePics[indexPath.row].placeholderColor
+			switch currentSection {
+			case .orthogonal:
+				guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeOrthogonalCell.reuseIdentifier,
+																														for: indexPath) as? HomeOrthogonalCell else { return nil }
+				
+				cell.displayText = String(orthogonalPics[indexPath.row].height)
+				cell.displayBackgroundColor = orthogonalPics[indexPath.row].placeholderColor
+				
+				return cell
+			case .main:
+				guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeImageCell.reuseIdentifier,
+																														for: indexPath) as? HomeImageCell else { return nil }
+				
+				cell.displayText = String(samplePics[indexPath.row].height)
+				cell.displayBackgroundColor = samplePics[indexPath.row].placeholderColor
+				
+				return cell
+			}
 			
-			return cell
 		})
 	}
 	
 	private func applySnapshot() {
 		var snapshot = NSDiffableDataSourceSnapshot<Section, ImagePlaceholder>()
-		snapshot.appendSections([.main])
+		snapshot.appendSections([.orthogonal, .main])
+		snapshot.appendItems(orthogonalPics, toSection: .orthogonal)
 		snapshot.appendItems(samplePics, toSection: .main)
 		datasource.apply(snapshot)
 	}
-	
 	
 }
