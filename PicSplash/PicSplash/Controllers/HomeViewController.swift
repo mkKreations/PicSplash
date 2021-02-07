@@ -7,7 +7,7 @@
 
 import UIKit
 
-class HomeViewController: UIViewController {	
+final class HomeViewController: UIViewController {	
 	// instance vars
 	private lazy var collectionView: UICollectionView = {
 		UICollectionView(frame: .zero, collectionViewLayout: configureCompositionalLayout())
@@ -32,6 +32,9 @@ class HomeViewController: UIViewController {
 		collectionView.translatesAutoresizingMaskIntoConstraints = false
 		collectionView.register(HomeOrthogonalCell.self, forCellWithReuseIdentifier: HomeOrthogonalCell.reuseIdentifier)
 		collectionView.register(HomeImageCell.self, forCellWithReuseIdentifier: HomeImageCell.reuseIdentifier)
+		collectionView.register(HomeCollectionReusableView.self,
+														forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+														withReuseIdentifier: HomeCollectionReusableView.reuseIdentifier)
 		view.addSubview(collectionView)
 		
 		constrainCollectionView()
@@ -50,9 +53,13 @@ class HomeViewController: UIViewController {
 			
 			switch currentSectionType {
 			case .orthogonal:
-				return self.sectionLayoutForHomeOrthogonalCell()
+				let section = self.sectionLayoutForHomeOrthogonalCell()
+				self.createSectionHeaderLayout(forSection: section)
+				return section
 			case .main:
-				return self.sectionLayoutForHomeImageCell()
+				let section = self.sectionLayoutForHomeImageCell()
+				self.createSectionHeaderLayout(forSection: section)
+				return section
 			}
 		}
 		return layout
@@ -82,8 +89,18 @@ class HomeViewController: UIViewController {
 																					 heightDimension: .estimated(100.0))
 		let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize,
 																								 subitems: [item])
-		
-		return NSCollectionLayoutSection(group: group)
+
+		let section = NSCollectionLayoutSection(group: group)
+		return section
+	}
+	
+	private func createSectionHeaderLayout(forSection section: NSCollectionLayoutSection) {
+		let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+																						heightDimension: .absolute(50.0))
+		let sectionHeader = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize,
+																																		elementKind: UICollectionView.elementKindSectionHeader,
+																																		alignment: .top)
+		section.boundarySupplementaryItems = [sectionHeader]
 	}
 	
 	private func configureDatasource() {
@@ -112,6 +129,27 @@ class HomeViewController: UIViewController {
 			}
 			
 		})
+		
+		configureHomeReusableViewForDatasource()
+	}
+	
+	private func configureHomeReusableViewForDatasource() {
+		datasource.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
+			guard let self = self else { return nil }
+			
+			if kind == UICollectionView.elementKindSectionHeader {
+				let currentSection = self.datasource.snapshot().sectionIdentifiers[indexPath.section]
+				
+				guard let reusableView = collectionView.dequeueReusableSupplementaryView(ofKind: kind,
+																																								 withReuseIdentifier: HomeCollectionReusableView.reuseIdentifier,
+																																								 for: indexPath) as? HomeCollectionReusableView else { return nil }
+				reusableView.displayText = currentSection.title
+				reusableView.displayStyle = currentSection.type == .orthogonal ? .large : .small
+				return reusableView
+			}
+			
+			return nil
+		}
 	}
 	
 	private func applySnapshot() {
