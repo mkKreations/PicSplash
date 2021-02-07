@@ -13,6 +13,7 @@ class HomeImageCell: UICollectionViewCell {
 	
 	
 	// instance vars
+	private let gradientOverlayView: ImageShadowOverlayView = ImageShadowOverlayView(frame: .zero)
 	private let displayImageView: UIImageView = UIImageView(frame: .zero)
 	private let displayLabel: UILabel = UILabel(frame: .zero)
 	
@@ -58,6 +59,9 @@ class HomeImageCell: UICollectionViewCell {
 		displayImageView.contentMode = .scaleAspectFit
 		contentView.addSubview(displayImageView)
 		
+		gradientOverlayView.translatesAutoresizingMaskIntoConstraints = false
+		contentView.addSubview(gradientOverlayView)
+		
 		displayLabel.translatesAutoresizingMaskIntoConstraints = false
 		displayLabel.textColor = .white
 		contentView.addSubview(displayLabel)
@@ -68,7 +72,12 @@ class HomeImageCell: UICollectionViewCell {
 		displayImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
 		displayImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor).isActive = true
 		displayImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor).isActive = true
-		
+
+		gradientOverlayView.topAnchor.constraint(equalTo: contentView.topAnchor).isActive = true
+		gradientOverlayView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
+		gradientOverlayView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor).isActive = true
+		gradientOverlayView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor).isActive = true
+
 		displayLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -5.0).isActive = true
 		displayLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -5.0).isActive = true
 		displayLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 5.0).isActive = true
