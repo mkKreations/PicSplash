@@ -96,7 +96,7 @@ final class HomeViewController: UIViewController {
 	
 	private func createSectionHeaderLayout(forSection section: NSCollectionLayoutSection) {
 		let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-																						heightDimension: .absolute(50.0))
+																						heightDimension: .absolute(48.0))
 		let sectionHeader = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize,
 																																		elementKind: UICollectionView.elementKindSectionHeader,
 																																		alignment: .top)

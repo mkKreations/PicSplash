@@ -93,6 +93,6 @@ class HomeImageCell: UICollectionViewCell {
 		guard let height = Int(text) else { return }
 		
 		imageViewHeightConstraint.constant = CGFloat(height)
-		imageViewHeightConstraint.isActive = true
+		imageViewHeightConstraint.isActive = true // should move this to constrainSubviews() so we don't call more than once?
 	}
 }
