@@ -15,6 +15,7 @@
 		2CD3C2C925CF652600BC0507 /* HomeImageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CD3C2C825CF652600BC0507 /* HomeImageCell.swift */; };
 		2CD3C2CC25CF654900BC0507 /* ImageShadowOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CD3C2CB25CF654900BC0507 /* ImageShadowOverlayView.swift */; };
 		2CD3C2D125CF686D00BC0507 /* ImagePlaceholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CD3C2D025CF686D00BC0507 /* ImagePlaceholder.swift */; };
+		2CD3C2D525CF8B3500BC0507 /* HomeOrthogonalCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CD3C2D425CF8B3500BC0507 /* HomeOrthogonalCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 		2CD3C2C825CF652600BC0507 /* HomeImageCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeImageCell.swift; sourceTree = "<group>"; };
 		2CD3C2CB25CF654900BC0507 /* ImageShadowOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageShadowOverlayView.swift; sourceTree = "<group>"; };
 		2CD3C2D025CF686D00BC0507 /* ImagePlaceholder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePlaceholder.swift; sourceTree = "<group>"; };
+		2CD3C2D425CF8B3500BC0507 /* HomeOrthogonalCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeOrthogonalCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,6 +111,7 @@
 			isa = PBXGroup;
 			children = (
 				2CD3C2C825CF652600BC0507 /* HomeImageCell.swift */,
+				2CD3C2D425CF8B3500BC0507 /* HomeOrthogonalCell.swift */,
 			);
 			path = Cells;
 			sourceTree = "<group>";
@@ -194,6 +197,7 @@
 				2CD3C29D25CF04BB00BC0507 /* AppDelegate.swift in Sources */,
 				2CD3C2CC25CF654900BC0507 /* ImageShadowOverlayView.swift in Sources */,
 				2CD3C2D125CF686D00BC0507 /* ImagePlaceholder.swift in Sources */,
+				2CD3C2D525CF8B3500BC0507 /* HomeOrthogonalCell.swift in Sources */,
 				2CD3C2BD25CF49A400BC0507 /* HomeViewController.swift in Sources */,
 				2CD3C2C925CF652600BC0507 /* HomeImageCell.swift in Sources */,
 			);
