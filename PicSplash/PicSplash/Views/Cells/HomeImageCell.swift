@@ -13,7 +13,7 @@ class HomeImageCell: UICollectionViewCell {
 	
 	
 	// instance vars
-	private let gradientOverlayView: ImageShadowOverlayView = ImageShadowOverlayView(frame: .zero)
+	private let gradientOverlayView: ImageShadowOverlayView = ImageShadowOverlayView(overlayStyle: .base)
 	private let displayImageView: UIImageView = UIImageView(frame: .zero)
 	private let displayLabel: UILabel = UILabel(frame: .zero)
 	private var imageViewHeightConstraint: NSLayoutConstraint! // manage imageView height manually

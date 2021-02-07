@@ -12,16 +12,41 @@ import UIKit
 // as long as the view's constraints are updated correctly
 
 class ImageShadowOverlayView: UIView {
+	// enum to handle our various styles
+	enum OverlayStyle {
+		case full
+		case base
+	}
+	
+	
+	// instance vars
+	private let overlayStyle: OverlayStyle
+	
+	
 	// inits
-	override init(frame: CGRect) {
-		super.init(frame: frame)
+	init(overlayStyle: OverlayStyle) {
+		self.overlayStyle = overlayStyle
 		
-		// capture CAGradientLayer using guard & set colors
+		super.init(frame: .zero) // use autoLayout
+		
+		// capture CAGradientLayer using guard & set colors based on overlayStyle
 		guard let gradientLayer = self.layer as? CAGradientLayer else { return }
-		gradientLayer.colors = [
-			UIColor.clear.cgColor,
-			UIColor.black.cgColor,
-		]
+		
+		let colors: [CGColor] // OJO: has to be at least two colors
+		switch self.overlayStyle {
+		case .full:
+			colors = [
+				UIColor.black.withAlphaComponent(0.3).cgColor,
+				UIColor.black.withAlphaComponent(0.3).cgColor,
+			]
+		case .base:
+			colors = [
+				UIColor.black.withAlphaComponent(0.3).cgColor,
+				UIColor.black.withAlphaComponent(0.6).cgColor,
+			]
+		}
+		
+		gradientLayer.colors = colors
 	}
 	required init?(coder: NSCoder) {
 		fatalError("Crash in ImageShadowOverlayView")
