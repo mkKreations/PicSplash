@@ -12,6 +12,8 @@ class ScrollingNavigationView: UIView {
 	private let vertStackView: UIStackView = UIStackView(frame: .zero)
 	private let displayLabel: UILabel = UILabel(frame: .zero)
 	private let searchBar: UISearchBar = UISearchBar(frame: .zero)
+	private let displayImageView: UIImageView = UIImageView(frame: .zero)
+	private let gradientOverlayView: ImageShadowOverlayView = ImageShadowOverlayView(overlayStyle: .full)
 
 	
 	// inits
@@ -36,6 +38,15 @@ class ScrollingNavigationView: UIView {
 	
 	// helpers
 	private func configureSubviews() {
+		displayImageView.image = UIImage(named: "Coffee")
+		displayImageView.translatesAutoresizingMaskIntoConstraints = false
+		displayImageView.contentMode = .scaleAspectFill
+		displayImageView.clipsToBounds = true
+		addSubview(displayImageView)
+		
+		gradientOverlayView.translatesAutoresizingMaskIntoConstraints = false
+		addSubview(gradientOverlayView)
+		
 		vertStackView.translatesAutoresizingMaskIntoConstraints = false
 		vertStackView.spacing = 0.0
 		[displayLabel, searchBar].forEach { vertStackView.addArrangedSubview($0) }
@@ -59,6 +70,16 @@ class ScrollingNavigationView: UIView {
 	}
 	
 	private func constrainSubviews() {
+		displayImageView.topAnchor.constraint(equalTo: topAnchor).isActive = true
+		displayImageView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+		displayImageView.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
+		displayImageView.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
+		
+		gradientOverlayView.topAnchor.constraint(equalTo: topAnchor).isActive = true
+		gradientOverlayView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+		gradientOverlayView.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
+		gradientOverlayView.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
+
 		vertStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20.0).isActive = true
 		vertStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20.0).isActive = true
 		vertStackView.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
