@@ -10,7 +10,7 @@ import UIKit
 final class HomeViewController: UIViewController {
 	// class vars
 	private static let navMaxHeight: CGFloat = 320.0
-	private static let navMinHeight: CGFloat = 100.0
+	private static let navMinHeight: CGFloat = 70.0
 
 	
 	// instance vars
@@ -206,6 +206,29 @@ extension HomeViewController: UICollectionViewDelegate {
 		var scrollNavViewFrame: CGRect = scrollingNavView.frame
 		scrollNavViewFrame.size.height = height
 		scrollingNavView.frame = scrollNavViewFrame
+		
+		// logic to pass percentage increase/decrease values to scrollingNavView
+		
+		// nothing to do here for now
+		// if we're scaling into scrollingNavView by scrolling down
+		// when at top or when scrollView bounces at rest point
+		if height > Self.navMaxHeight {
+			// old number = Self.navMaxHeight
+			// new number = height
+//			let increase = height - Self.navMaxHeight
+//			let percentIncrease = increase / Self.navMaxHeight * 100
+//			print("So we increasing now? \(percentIncrease / 100)")
+			return
+		}
+		
+		// logic for percent decrease - primarily
+		// when scrolling down & back up
+		let desiredScrollRange: CGFloat = Self.navMaxHeight - Self.navMinHeight // represents old number
+		let absoluteHeight = abs(height - Self.navMaxHeight) // represents new number
+		let decrease = desiredScrollRange - absoluteHeight
+		let percentDecrease = decrease / desiredScrollRange
+		print("Percent Decrease? \(percentDecrease)")
+		scrollingNavView.animateSubviews(forScrollDelta: percentDecrease)
 	}
 	
 }
