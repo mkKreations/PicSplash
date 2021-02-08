@@ -7,15 +7,22 @@
 
 import UIKit
 
-final class HomeViewController: UIViewController {	
+final class HomeViewController: UIViewController {
+	// class vars
+	private static let navMaxHeight: CGFloat = 320.0
+	private static let navMinHeight: CGFloat = 100.0
+
+	
 	// instance vars
 	private lazy var collectionView: UICollectionView = {
-		UICollectionView(frame: .zero, collectionViewLayout: configureCompositionalLayout())
+		UICollectionView(frame: view.frame, collectionViewLayout: configureCompositionalLayout())
 	}()
 	private var datasource: UICollectionViewDiffableDataSource<SectionPlaceHolder, ImagePlaceholder>!
-	private let scrollingNavView: ScrollingNavigationView = ScrollingNavigationView(frame: .zero)
-	private var navHeightConstraint: NSLayoutConstraint!
-	
+	private lazy var scrollingNavView: ScrollingNavigationView = {
+		ScrollingNavigationView(frame: CGRect(origin: .zero,
+																					size: CGSize(width: view.frame.width, height: Self.navMaxHeight)))
+	}()
+		
 	
 	// MARK: view life cycle
 	
@@ -31,32 +38,20 @@ final class HomeViewController: UIViewController {
 	// MARK: subviews config
 	
 	private func configureSubviews() {
-		scrollingNavView.translatesAutoresizingMaskIntoConstraints = false
-		view.addSubview(scrollingNavView)
-		
-		collectionView.translatesAutoresizingMaskIntoConstraints = false
+		// inset content by our scrollingNavView height
+		collectionView.contentInset = UIEdgeInsets(top: Self.navMaxHeight, left: 0.0, bottom: 0.0, right: 0.0)
+		collectionView.contentInsetAdjustmentBehavior = .never // by default, behavior adjusts inset 20 pts for status bar
 		collectionView.showsVerticalScrollIndicator = false
+		collectionView.delegate = self
 		collectionView.register(HomeOrthogonalCell.self, forCellWithReuseIdentifier: HomeOrthogonalCell.reuseIdentifier)
 		collectionView.register(HomeImageCell.self, forCellWithReuseIdentifier: HomeImageCell.reuseIdentifier)
 		collectionView.register(HomeCollectionReusableView.self,
 														forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
 														withReuseIdentifier: HomeCollectionReusableView.reuseIdentifier)
 		view.addSubview(collectionView)
-		
-		constrainCollectionView()
-	}
-	
-	private func constrainCollectionView() {
-		scrollingNavView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
-		scrollingNavView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
-		scrollingNavView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
-		navHeightConstraint = scrollingNavView.heightAnchor.constraint(equalToConstant: 200.0)
-		navHeightConstraint.isActive = true
-		
-		collectionView.topAnchor.constraint(equalTo: scrollingNavView.bottomAnchor).isActive = true
-		collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
-		collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
-		collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+
+		// add after collectionView so it's on top
+		view.addSubview(scrollingNavView)
 	}
 			
 }
@@ -187,13 +182,30 @@ extension HomeViewController {
 		sampleData.forEach { sampleSection in
 			snapshot.appendItems(sampleSection.images, toSection: sampleSection)
 		}
-		
-		// applying snapshot like this - FOR INITIAL LOAD - fixes a
-		// slight compositional layout issue - a bit of a hack but
-		// works for now
-		datasource.apply(snapshot, animatingDifferences: true) {
-			self.datasource.apply(snapshot, animatingDifferences: true)
-		}
+		datasource.apply(snapshot)
 	}
 
+}
+
+
+
+// MARK: scrollview delegate methods
+
+extension HomeViewController: UICollectionViewDelegate {
+	
+	func scrollViewDidScroll(_ scrollView: UIScrollView) {
+		// offset will begin as negative from origin since
+		// we're using contentInsets on collectionView, so
+		// we'll negate it to work with positive values
+		let offset: CGFloat = -scrollView.contentOffset.y
+		
+		// set restriction on min height for scrollingNavView
+		let height: CGFloat = max(offset, Self.navMinHeight)
+		
+		// update frames
+		var scrollNavViewFrame: CGRect = scrollingNavView.frame
+		scrollNavViewFrame.size.height = height
+		scrollingNavView.frame = scrollNavViewFrame
+	}
+	
 }
