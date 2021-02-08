@@ -53,6 +53,7 @@ class HomeOrthogonalCell: UICollectionViewCell {
 		
 		configureSubviews()
 		constrainSubviews()
+		addLongPressGestureRecognizer()
 	}
 	required init?(coder: NSCoder) {
 		fatalError("Crash in HomeOrthogonalCell")
@@ -89,5 +90,31 @@ class HomeOrthogonalCell: UICollectionViewCell {
 		displayLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor).isActive = true
 		displayLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 10.0).isActive = true
 		displayLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -10.0).isActive = true
+	}
+
+	// long press gesture
+	
+	private func addLongPressGestureRecognizer() {
+		let longPress = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPressGesture))
+		longPress.minimumPressDuration = 0.08
+		longPress.delaysTouchesBegan = false
+		contentView.addGestureRecognizer(longPress)
+	}
+	
+	@objc private func handleLongPressGesture(_ sender: UILongPressGestureRecognizer) {
+		let isTouching = sender.state == .began
+		animateSelection(forIsTouching: isTouching)
+	}
+	
+	private func animateSelection(forIsTouching isTouching: Bool) {
+		UIView.animate(withDuration: 0.5,
+									 delay: 0.0,
+									 usingSpringWithDamping: 1.0,
+									 initialSpringVelocity: 5.0,
+									 options: [.allowUserInteraction],
+									 animations: {
+										self.transform = isTouching ? .init(scaleX: 0.95, y: 0.95) : .identity
+									 },
+									 completion: nil)
 	}
 }
