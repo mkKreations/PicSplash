@@ -22,6 +22,7 @@
 		2CF14ED925D3192E000F1210 /* MenuTopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF14ED825D3192E000F1210 /* MenuTopView.swift */; };
 		2CF14EDD25D31F7A000F1210 /* UIColor+extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF14EDC25D31F7A000F1210 /* UIColor+extensions.swift */; };
 		2CF14EE025D321A5000F1210 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF14EDF25D321A5000F1210 /* MenuView.swift */; };
+		2CF14EE325D3275D000F1210 /* MenuButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF14EE225D3275D000F1210 /* MenuButton.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +43,7 @@
 		2CF14ED825D3192E000F1210 /* MenuTopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuTopView.swift; sourceTree = "<group>"; };
 		2CF14EDC25D31F7A000F1210 /* UIColor+extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+extensions.swift"; sourceTree = "<group>"; };
 		2CF14EDF25D321A5000F1210 /* MenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
+		2CF14EE225D3275D000F1210 /* MenuButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuButton.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -121,6 +123,7 @@
 				2C88EFB325D07AF000150D54 /* ScrollingNavigationView.swift */,
 				2CF14ED825D3192E000F1210 /* MenuTopView.swift */,
 				2CF14EDF25D321A5000F1210 /* MenuView.swift */,
+				2CF14EE225D3275D000F1210 /* MenuButton.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -231,6 +234,7 @@
 				2CD3C2D525CF8B3500BC0507 /* HomeOrthogonalCell.swift in Sources */,
 				2CD3C2D825CF97F100BC0507 /* HomeCollectionReusableView.swift in Sources */,
 				2CD3C2BD25CF49A400BC0507 /* HomeViewController.swift in Sources */,
+				2CF14EE325D3275D000F1210 /* MenuButton.swift in Sources */,
 				2CD3C2C925CF652600BC0507 /* HomeImageCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
