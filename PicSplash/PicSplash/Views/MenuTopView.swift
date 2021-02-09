@@ -39,7 +39,7 @@ class MenuTopView: UIView {
 		stackView.distribution = .fill
 		stackView.alignment = .center
 		stackView.spacing = 8.0
-		stackView.setCustomSpacing(10.0, after: displayImageView)
+		stackView.setCustomSpacing(10.0, after: displayImageView) // keep it pretty
 		addSubview(stackView)
 		
 		displayImageView.translatesAutoresizingMaskIntoConstraints = false
