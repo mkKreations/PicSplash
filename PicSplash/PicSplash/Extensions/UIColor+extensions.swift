@@ -9,6 +9,6 @@ import UIKit
 
 extension UIColor {
 	static var picsplashBlack: UIColor {
-		UIColor(white: 0.09, alpha: 1.0)
+		UIColor(white: 0.07, alpha: 1.0)
 	}
 }
