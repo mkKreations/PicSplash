@@ -21,6 +21,7 @@
 		2CF14ED625D30EF4000F1210 /* MenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF14ED525D30EF4000F1210 /* MenuViewController.swift */; };
 		2CF14ED925D3192E000F1210 /* MenuTopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF14ED825D3192E000F1210 /* MenuTopView.swift */; };
 		2CF14EDD25D31F7A000F1210 /* UIColor+extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF14EDC25D31F7A000F1210 /* UIColor+extensions.swift */; };
+		2CF14EE025D321A5000F1210 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF14EDF25D321A5000F1210 /* MenuView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,6 +41,7 @@
 		2CF14ED525D30EF4000F1210 /* MenuViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuViewController.swift; sourceTree = "<group>"; };
 		2CF14ED825D3192E000F1210 /* MenuTopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuTopView.swift; sourceTree = "<group>"; };
 		2CF14EDC25D31F7A000F1210 /* UIColor+extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+extensions.swift"; sourceTree = "<group>"; };
+		2CF14EDF25D321A5000F1210 /* MenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,6 +120,7 @@
 				2CD3C2D725CF97F100BC0507 /* HomeCollectionReusableView.swift */,
 				2C88EFB325D07AF000150D54 /* ScrollingNavigationView.swift */,
 				2CF14ED825D3192E000F1210 /* MenuTopView.swift */,
+				2CF14EDF25D321A5000F1210 /* MenuView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -218,6 +221,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2C88EFB425D07AF000150D54 /* ScrollingNavigationView.swift in Sources */,
+				2CF14EE025D321A5000F1210 /* MenuView.swift in Sources */,
 				2CF14ED925D3192E000F1210 /* MenuTopView.swift in Sources */,
 				2CD3C29D25CF04BB00BC0507 /* AppDelegate.swift in Sources */,
 				2CF14EDD25D31F7A000F1210 /* UIColor+extensions.swift in Sources */,
