@@ -50,7 +50,7 @@ final class HomeViewController: UIViewController {
 														withReuseIdentifier: HomeCollectionReusableView.reuseIdentifier)
 		view.addSubview(collectionView)
 		
-		scrollingNavView.delegate = self
+		scrollingNavView.delegate = self // respond to button actions
 		view.addSubview(scrollingNavView) // add after collectionView so it's on top
 	}
 			

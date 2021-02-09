@@ -12,12 +12,15 @@ class MenuViewController: UIViewController {
 	
 	override func loadView() {
 		// good opportunity to remove view code from this view controller
-		view = MenuView()
+		let menuView = MenuView()
+		menuView.delegate = self // respond to button actions
+		view = menuView
 	}
 	
-	override func viewDidLoad() {
-		super.viewDidLoad()
-		
+}
+
+extension MenuViewController: MenuViewButtonsProvider {
+	func didPressDoneButton(_ button: UIButton) {
+		dismiss(animated: true, completion: nil)
 	}
-	
 }
