@@ -23,6 +23,7 @@
 		2CF14EDD25D31F7A000F1210 /* UIColor+extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF14EDC25D31F7A000F1210 /* UIColor+extensions.swift */; };
 		2CF14EE025D321A5000F1210 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF14EDF25D321A5000F1210 /* MenuView.swift */; };
 		2CF14EE325D3275D000F1210 /* MenuButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF14EE225D3275D000F1210 /* MenuButton.swift */; };
+		2CF14EE625D33151000F1210 /* UIButton+extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF14EE525D33151000F1210 /* UIButton+extensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +45,7 @@
 		2CF14EDC25D31F7A000F1210 /* UIColor+extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+extensions.swift"; sourceTree = "<group>"; };
 		2CF14EDF25D321A5000F1210 /* MenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
 		2CF14EE225D3275D000F1210 /* MenuButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuButton.swift; sourceTree = "<group>"; };
+		2CF14EE525D33151000F1210 /* UIButton+extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIButton+extensions.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -149,6 +151,7 @@
 			isa = PBXGroup;
 			children = (
 				2CF14EDC25D31F7A000F1210 /* UIColor+extensions.swift */,
+				2CF14EE525D33151000F1210 /* UIButton+extensions.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -230,6 +233,7 @@
 				2CF14EDD25D31F7A000F1210 /* UIColor+extensions.swift in Sources */,
 				2CD3C2CC25CF654900BC0507 /* ImageShadowOverlayView.swift in Sources */,
 				2CD3C2D125CF686D00BC0507 /* ImagePlaceholder.swift in Sources */,
+				2CF14EE625D33151000F1210 /* UIButton+extensions.swift in Sources */,
 				2CF14ED625D30EF4000F1210 /* MenuViewController.swift in Sources */,
 				2CD3C2D525CF8B3500BC0507 /* HomeOrthogonalCell.swift in Sources */,
 				2CD3C2D825CF97F100BC0507 /* HomeCollectionReusableView.swift in Sources */,
