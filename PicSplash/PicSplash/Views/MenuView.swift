@@ -20,6 +20,7 @@ class MenuView: UIView {
 	private let doneButton: UIButton = UIButton(type: .system)
 	private let topView: MenuTopView = MenuTopView(frame: .zero)
 	private let topStackView: UIStackView = UIStackView(frame: .zero)
+	private let topDivider: UIView = UIView(frame: .zero)
 	private let bottomStackView: UIStackView = UIStackView(frame: .zero)
 	weak var delegate: MenuViewButtonsProvider?
 
@@ -63,6 +64,10 @@ class MenuView: UIView {
 		topStackView.alignment = .leading
 		topStackView.spacing = 16.0
 		addSubview(topStackView)
+
+		topDivider.translatesAutoresizingMaskIntoConstraints = false
+		topDivider.backgroundColor = .darkGray
+		addSubview(topDivider)
 	}
 	
 	private func constrainSubviews() {
@@ -75,6 +80,11 @@ class MenuView: UIView {
 		topStackView.topAnchor.constraint(equalTo: topView.bottomAnchor, constant: 50.0).isActive = true
 		topStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16.0).isActive = true
 		topStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16.0).isActive = true
+		
+		topDivider.topAnchor.constraint(equalTo: topStackView.bottomAnchor, constant: 16.0).isActive = true
+		topDivider.heightAnchor.constraint(equalToConstant: 1.0).isActive = true
+		topDivider.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16.0).isActive = true
+		topDivider.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16.0).isActive = true
 	}
 	
 	
