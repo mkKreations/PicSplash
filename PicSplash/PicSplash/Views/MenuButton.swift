@@ -9,12 +9,6 @@ import UIKit
 
 // enum to organize our menu options
 
-enum MenuOption: String {
-	case recommend = "Recommend PicSplash"
-	case review = "Write a review"
-	case visit = "Visit picsplash.com"
-	case license = "License"
-}
 
 // just set MenuOption on button via
 // designated init and title will be
@@ -30,7 +24,10 @@ class MenuButton: UIButton {
 		self.menuOption = menuOption
 		super.init(frame: .zero)
 	
-		setTitle(self.menuOption.rawValue, for: .normal)
+		layer.borderWidth = 1.0
+		layer.borderColor = UIColor.systemYellow.cgColor
+//		titleLabel?.textAlignment = .left
+//		setTitle(self.menuOption.rawValue, for: .normal)
 		setTitleColor(.white, for: .normal)
 	}
 	required init?(coder: NSCoder) {

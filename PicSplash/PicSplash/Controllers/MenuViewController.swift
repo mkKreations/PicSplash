@@ -23,4 +23,17 @@ extension MenuViewController: MenuViewButtonsProvider {
 	func didPressDoneButton(_ button: UIButton) {
 		dismiss(animated: true, completion: nil)
 	}
+	
+	func didPressMenuButton(withMenuOption menuOption: MenuOption) {
+		switch menuOption {
+		case .recommend:
+			print("Recommend!")
+		case .review:
+			print("Review!")
+		case .visit:
+			print("Visit!")
+		case .license:
+			print("License!")
+		}
+	}
 }
