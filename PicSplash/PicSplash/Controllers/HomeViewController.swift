@@ -49,11 +49,25 @@ final class HomeViewController: UIViewController {
 														forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
 														withReuseIdentifier: HomeCollectionReusableView.reuseIdentifier)
 		view.addSubview(collectionView)
-
-		// add after collectionView so it's on top
-		view.addSubview(scrollingNavView)
+		
+		scrollingNavView.delegate = self
+		view.addSubview(scrollingNavView) // add after collectionView so it's on top
 	}
 			
+}
+
+
+	
+// MARK: scrollNavView button actions
+
+extension HomeViewController: ScrollingNavigationButtonsProvider {
+	func didPressMenuButton(_ button: UIButton) {
+		print("Did press menu button")
+	}
+	
+	func didPressLogInButton(_ button: UIButton) {
+		print("Did press log in button")
+	}
 }
 
 

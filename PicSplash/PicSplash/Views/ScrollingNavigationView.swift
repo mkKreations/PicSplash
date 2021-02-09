@@ -7,6 +7,14 @@
 
 import UIKit
 
+// delegating button press tasks
+
+protocol ScrollingNavigationButtonsProvider: AnyObject {
+	func didPressMenuButton(_ button: UIButton)
+	func didPressLogInButton(_ button: UIButton)
+}
+
+
 class ScrollingNavigationView: UIView {
 	// static vars
 	private static let buttonDimension: CGFloat = 40.0
@@ -19,8 +27,9 @@ class ScrollingNavigationView: UIView {
 	private let displayImageView: UIImageView = UIImageView(frame: .zero)
 	private let gradientOverlayView: ImageShadowOverlayView = ImageShadowOverlayView(overlayStyle: .full)
 	private let buttonsStackView: UIStackView = UIStackView(frame: .zero)
-	private let rightBarButton: UIButton = UIButton(type: .system)
-	private let leftBarButton: UIButton = UIButton(type: .system)
+	private let loginButton: UIButton = UIButton(type: .system)
+	private let menuButton: UIButton = UIButton(type: .system)
+	weak var delegate: ScrollingNavigationButtonsProvider?
 
 	
 	// inits
@@ -56,21 +65,24 @@ class ScrollingNavigationView: UIView {
 		addSubview(gradientOverlayView)
 		
 		buttonsStackView.translatesAutoresizingMaskIntoConstraints = false
-		[leftBarButton, rightBarButton].forEach { buttonsStackView.addArrangedSubview($0) }
+		[menuButton, loginButton].forEach { buttonsStackView.addArrangedSubview($0) }
 		buttonsStackView.axis = .horizontal
 		buttonsStackView.distribution = .fill
 		addSubview(buttonsStackView)
 		
-		// symbol config to set point size for SF symbol image
-		let sfSymbolConfig = UIImage.SymbolConfiguration(pointSize: 22.0)
+		// symbol config to set point size for SF symbol image for buttons
+		let menuButtonSymbolConfig = UIImage.SymbolConfiguration(pointSize: 18.0)
+		let loginButtonSymbolConfig = UIImage.SymbolConfiguration(pointSize: 22.0)
 
-		leftBarButton.translatesAutoresizingMaskIntoConstraints = false
-		leftBarButton.setImage(UIImage(systemName: "person.circle", withConfiguration: sfSymbolConfig), for: .normal)
-		leftBarButton.tintColor = .white
+		menuButton.translatesAutoresizingMaskIntoConstraints = false
+		menuButton.setImage(UIImage(systemName: "text.justify", withConfiguration: menuButtonSymbolConfig), for: .normal)
+		menuButton.tintColor = .white
+		menuButton.addTarget(self, action: #selector(menuButtonPressed), for: .touchUpInside)
 
-		rightBarButton.translatesAutoresizingMaskIntoConstraints = false
-		rightBarButton.setImage(UIImage(systemName: "rectangle.stack", withConfiguration: sfSymbolConfig), for: .normal)
-		rightBarButton.tintColor = .white
+		loginButton.translatesAutoresizingMaskIntoConstraints = false
+		loginButton.setImage(UIImage(systemName: "person.circle", withConfiguration: loginButtonSymbolConfig), for: .normal)
+		loginButton.tintColor = .white
+		loginButton.addTarget(self, action: #selector(loginButtonPressed), for: .touchUpInside)
 
 		vertStackView.translatesAutoresizingMaskIntoConstraints = false
 		vertStackView.spacing = 0.0
@@ -110,9 +122,9 @@ class ScrollingNavigationView: UIView {
 		buttonsStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20.0).isActive = true
 		buttonsStackView.heightAnchor.constraint(equalToConstant: Self.buttonDimension).isActive = true
 		
-		leftBarButton.widthAnchor.constraint(equalTo: buttonsStackView.heightAnchor).isActive = true
+		menuButton.widthAnchor.constraint(equalTo: buttonsStackView.heightAnchor).isActive = true
 
-		rightBarButton.widthAnchor.constraint(equalTo: leftBarButton.widthAnchor).isActive = true
+		loginButton.widthAnchor.constraint(equalTo: menuButton.widthAnchor).isActive = true
 
 		vertStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20.0).isActive = true
 		vertStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20.0).isActive = true
@@ -128,5 +140,15 @@ class ScrollingNavigationView: UIView {
 		bottomStackViewConstraint.priority = UILayoutPriority(999)
 		bottomStackViewConstraint.isActive = true
 	}
-		
+	
+	
+	// MARK: buttons actions
+	@objc private func menuButtonPressed(_ sender: UIButton) {
+		delegate?.didPressMenuButton(sender)
+	}
+
+	@objc private func loginButtonPressed(_ sender: UIButton) {
+		delegate?.didPressLogInButton(sender)
+	}
+
 }
