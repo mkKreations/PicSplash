@@ -20,6 +20,7 @@
 		2CD3C2D825CF97F100BC0507 /* HomeCollectionReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CD3C2D725CF97F100BC0507 /* HomeCollectionReusableView.swift */; };
 		2CF14ED625D30EF4000F1210 /* MenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF14ED525D30EF4000F1210 /* MenuViewController.swift */; };
 		2CF14ED925D3192E000F1210 /* MenuTopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF14ED825D3192E000F1210 /* MenuTopView.swift */; };
+		2CF14EDD25D31F7A000F1210 /* UIColor+extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF14EDC25D31F7A000F1210 /* UIColor+extensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +39,7 @@
 		2CD3C2D725CF97F100BC0507 /* HomeCollectionReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeCollectionReusableView.swift; sourceTree = "<group>"; };
 		2CF14ED525D30EF4000F1210 /* MenuViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuViewController.swift; sourceTree = "<group>"; };
 		2CF14ED825D3192E000F1210 /* MenuTopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuTopView.swift; sourceTree = "<group>"; };
+		2CF14EDC25D31F7A000F1210 /* UIColor+extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+extensions.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,6 +72,7 @@
 		2CD3C29B25CF04BB00BC0507 /* PicSplash */ = {
 			isa = PBXGroup;
 			children = (
+				2CF14EDB25D31F65000F1210 /* Extensions */,
 				2CD3C2BB25CF49A400BC0507 /* Controllers */,
 				2CD3C2CE25CF682E00BC0507 /* Models */,
 				2CD3C2C625CF652600BC0507 /* Views */,
@@ -134,6 +137,14 @@
 				2CD3C2D025CF686D00BC0507 /* ImagePlaceholder.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		2CF14EDB25D31F65000F1210 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				2CF14EDC25D31F7A000F1210 /* UIColor+extensions.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -209,6 +220,7 @@
 				2C88EFB425D07AF000150D54 /* ScrollingNavigationView.swift in Sources */,
 				2CF14ED925D3192E000F1210 /* MenuTopView.swift in Sources */,
 				2CD3C29D25CF04BB00BC0507 /* AppDelegate.swift in Sources */,
+				2CF14EDD25D31F7A000F1210 /* UIColor+extensions.swift in Sources */,
 				2CD3C2CC25CF654900BC0507 /* ImageShadowOverlayView.swift in Sources */,
 				2CD3C2D125CF686D00BC0507 /* ImagePlaceholder.swift in Sources */,
 				2CF14ED625D30EF4000F1210 /* MenuViewController.swift in Sources */,
