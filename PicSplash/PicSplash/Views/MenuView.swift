@@ -22,6 +22,7 @@ class MenuView: UIView {
 	private let topStackView: UIStackView = UIStackView(frame: .zero)
 	private let topDivider: UIView = UIView(frame: .zero)
 	private let bottomStackView: UIStackView = UIStackView(frame: .zero)
+	private let bottomDivider: UIView = UIView(frame: .zero)
 	weak var delegate: MenuViewButtonsProvider?
 
 	
@@ -68,6 +69,24 @@ class MenuView: UIView {
 		topDivider.translatesAutoresizingMaskIntoConstraints = false
 		topDivider.backgroundColor = .darkGray
 		addSubview(topDivider)
+		
+		bottomStackView.translatesAutoresizingMaskIntoConstraints = false
+		// instantiate bottom buttons
+		let bottomButtons: [UIButton] = [MenuOption.visit, MenuOption.license].map { menuOption in
+			let button = UIButton.createButton(forMenuOption: menuOption)
+			button.addTarget(self, action: #selector(menuButtonPressed), for: .touchUpInside)
+			return button
+		}
+		bottomButtons.forEach { bottomStackView.addArrangedSubview($0) } // add buttons to bottomStackView
+		bottomStackView.axis = .vertical
+		bottomStackView.distribution = .fill
+		bottomStackView.alignment = .leading
+		bottomStackView.spacing = 16.0
+		addSubview(bottomStackView)
+		
+		bottomDivider.translatesAutoresizingMaskIntoConstraints = false
+		bottomDivider.backgroundColor = .darkGray
+		addSubview(bottomDivider)
 	}
 	
 	private func constrainSubviews() {
@@ -85,6 +104,15 @@ class MenuView: UIView {
 		topDivider.heightAnchor.constraint(equalToConstant: 1.0).isActive = true
 		topDivider.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16.0).isActive = true
 		topDivider.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16.0).isActive = true
+		
+		bottomStackView.topAnchor.constraint(equalTo: topDivider.bottomAnchor, constant: 16.0).isActive = true
+		bottomStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16.0).isActive = true
+		bottomStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16.0).isActive = true
+		
+		bottomDivider.topAnchor.constraint(equalTo: bottomStackView.bottomAnchor, constant: 16.0).isActive = true
+		bottomDivider.heightAnchor.constraint(equalToConstant: 1.0).isActive = true
+		bottomDivider.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16.0).isActive = true
+		bottomDivider.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16.0).isActive = true
 	}
 	
 	
