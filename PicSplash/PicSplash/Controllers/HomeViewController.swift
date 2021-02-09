@@ -62,7 +62,8 @@ final class HomeViewController: UIViewController {
 
 extension HomeViewController: ScrollingNavigationButtonsProvider {
 	func didPressMenuButton(_ button: UIButton) {
-		print("Did press menu button")
+		// present fresh instance of menu VC modally via sheet
+		present(MenuViewController(), animated: true, completion: nil)
 	}
 	
 	func didPressLogInButton(_ button: UIButton) {
