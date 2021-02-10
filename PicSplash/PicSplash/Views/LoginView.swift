@@ -11,6 +11,9 @@ import UIKit
 
 protocol LoginViewButtonActionsProvider: AnyObject {
 	func didPressCancelButton(_ sender: UIButton)
+	func didPressLoginButton(_ sender: UIButton)
+	func didPressForgotPasswordButton(_ sender: UIButton)
+	func didPressNoAccountJoinButton(_ sender: UIButton)
 }
 
 
@@ -89,12 +92,14 @@ class LoginView: UIView {
 		bottomContainerView.addSubview(bottomStackView)
 				
 		loginButton.backgroundColor = .white
+		loginButton.addTarget(self, action: #selector(loginButtonPressed), for: .touchUpInside)
 		loginButton.setTitle("Log In", for: .normal)
 		loginButton.setTitleColor(.picSplashBlack, for: .normal)
 		loginButton.titleLabel?.font = UIFont.systemFont(ofSize: 16.0, weight: .semibold)
 		loginButton.layer.cornerRadius = 4.0
 		loginButton.layer.masksToBounds = true
 		
+		forgotPasswordButton.addTarget(self, action: #selector(forgotPasswordPressed), for: .touchUpInside)
 		forgotPasswordButton.setTitle("Forgot your password?", for: .normal)
 		forgotPasswordButton.setTitleColor(.white, for: .normal)
 		forgotPasswordButton.titleLabel?.font = UIFont.systemFont(ofSize: 12.0, weight: .semibold)
@@ -111,6 +116,7 @@ class LoginView: UIView {
 		attributedTitle.append(NSAttributedString(string: "Don't have an account?", attributes: noAccountAttrs))
 		attributedTitle.append(NSAttributedString(string: " Join", attributes: joinAttrs))
 		noAccountJoinButton.setAttributedTitle(attributedTitle, for: .normal)
+		noAccountJoinButton.addTarget(self, action: #selector(noAccountJoinPressed), for: .touchUpInside)
 	}
 	
 	private func constrainSubviews() {
@@ -157,6 +163,18 @@ class LoginView: UIView {
 	// button actions
 	@objc private func cancelButtonPressed(_ sender: UIButton) {
 		delegate?.didPressCancelButton(sender)
+	}
+	
+	@objc private func loginButtonPressed(_ sender: UIButton) {
+		delegate?.didPressLoginButton(sender)
+	}
+	
+	@objc private func forgotPasswordPressed(_ sender: UIButton) {
+		delegate?.didPressForgotPasswordButton(sender)
+	}
+	
+	@objc private func noAccountJoinPressed(_ sender: UIButton) {
+		delegate?.didPressNoAccountJoinButton(sender)
 	}
 	
 }

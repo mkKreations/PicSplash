@@ -90,6 +90,18 @@ extension HomeViewController: LoginViewButtonActionsProvider {
 		dismissLoginView()
 	}
 	
+	func didPressLoginButton(_ sender: UIButton) {
+		print("LOGIN")
+	}
+	
+	func didPressForgotPasswordButton(_ sender: UIButton) {
+		print("FORGOT PASSWORD")
+	}
+	
+	func didPressNoAccountJoinButton(_ sender: UIButton) {
+		print("NO ACCOUNT - JOIN")
+	}
+	
 	private func layoutLoginViewForInitialAppearance() {
 		// capture bottom constraint
 		loginViewBottomConstraint = view.bottomAnchor.constraint(equalTo: loginView.bottomAnchor, constant: 0.0)
