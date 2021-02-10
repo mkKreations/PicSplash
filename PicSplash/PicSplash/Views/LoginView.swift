@@ -22,8 +22,6 @@ class LoginView: UIView {
 	private let topTintViewDivider: UIView = UIView(frame: .zero)
 	private let bottomContainerView: UIView = UIView(frame: .zero)
 	private let bottomStackView: UIStackView = UIStackView(frame: .zero)
-	private let topTextView: UIView = UIView(frame: .zero)
-	private let bottomTextView: UIView = UIView(frame: .zero)
 	private let loginButton: UIButton = UIButton(type: .system)
 	private let forgotPasswordButton: UIButton = UIButton(type: .system)
 	private let noAccountJoinButton: UIButton = UIButton(type: .system)
@@ -52,6 +50,7 @@ class LoginView: UIView {
 	
 	// helpers
 	private func configureSubviews() {
+		// topTintView and its subviews
 		topTintView.translatesAutoresizingMaskIntoConstraints = false
 		topTintView.backgroundColor = .darkGray
 		addSubview(topTintView)
@@ -73,25 +72,27 @@ class LoginView: UIView {
 		topTintViewDivider.backgroundColor = .lightGray
 		addSubview(topTintViewDivider)
 		
+		// bottomContainerView
 		bottomContainerView.translatesAutoresizingMaskIntoConstraints = false
 		bottomContainerView.backgroundColor = .picsplashBlack
 		addSubview(bottomContainerView)
 		
+		// instantiate textFields
+		let textFieldStates: [LoginTextFieldState] = [.email, .password]
+		let textFields: [LoginTextField] = textFieldStates.map { state in
+			let textField = LoginTextField(textFieldState: state)
+			return textField
+		}
+		
+		// bottomStackView and its subviews
 		bottomStackView.translatesAutoresizingMaskIntoConstraints = false
-		[topTextView, bottomTextView, loginButton, forgotPasswordButton, noAccountJoinButton].forEach { bottomStackView.addArrangedSubview($0) }
-		bottomStackView.alignment = .center
+		textFields.forEach { bottomStackView.addArrangedSubview($0) }
+		[loginButton, forgotPasswordButton, noAccountJoinButton].forEach { bottomStackView.addArrangedSubview($0) }
 		bottomStackView.axis = .vertical
 		bottomStackView.distribution = .fill
 		bottomStackView.spacing = 20.0
 		bottomContainerView.addSubview(bottomStackView)
-		
-		topTextView.translatesAutoresizingMaskIntoConstraints = false
-		topTextView.backgroundColor = .lightGray
-		
-		bottomTextView.translatesAutoresizingMaskIntoConstraints = false
-		bottomTextView.backgroundColor = .lightGray
-		
-		loginButton.translatesAutoresizingMaskIntoConstraints = false
+				
 		loginButton.backgroundColor = .white
 		loginButton.setTitle("Log In", for: .normal)
 		loginButton.setTitleColor(.picsplashBlack, for: .normal)
@@ -99,7 +100,6 @@ class LoginView: UIView {
 		loginButton.layer.cornerRadius = 4.0
 		loginButton.layer.masksToBounds = true
 		
-		forgotPasswordButton.translatesAutoresizingMaskIntoConstraints = false
 		forgotPasswordButton.setTitle("Forgot your password?", for: .normal)
 		forgotPasswordButton.setTitleColor(.white, for: .normal)
 		forgotPasswordButton.titleLabel?.font = UIFont.systemFont(ofSize: 12.0, weight: .semibold)
@@ -144,23 +144,14 @@ class LoginView: UIView {
 		bottomContainerView.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
 		bottomContainerView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
 		
+		// bottomContainerView subviews
 		let bottomContainerViewSubviewConstraints = [
 			bottomStackView.topAnchor.constraint(equalTo: bottomContainerView.topAnchor, constant: 40.0),
 			bottomStackView.leadingAnchor.constraint(equalTo: bottomContainerView.leadingAnchor, constant: 16.0),
 			bottomStackView.trailingAnchor.constraint(equalTo: bottomContainerView.trailingAnchor, constant: -16.0),
-			bottomStackView.bottomAnchor.constraint(equalTo: bottomContainerView.bottomAnchor, constant: -40.0),
-			
-			topTextView.heightAnchor.constraint(equalToConstant: 30.0),
-			topTextView.leadingAnchor.constraint(equalTo: bottomStackView.leadingAnchor),
-			topTextView.trailingAnchor.constraint(equalTo: bottomStackView.trailingAnchor),
-
-			bottomTextView.heightAnchor.constraint(equalToConstant: 30.0),
-			bottomTextView.leadingAnchor.constraint(equalTo: bottomStackView.leadingAnchor),
-			bottomTextView.trailingAnchor.constraint(equalTo: bottomStackView.trailingAnchor),
+			bottomStackView.bottomAnchor.constraint(equalTo: bottomContainerView.bottomAnchor, constant: -30.0),
 
 			loginButton.heightAnchor.constraint(equalToConstant: 40.0),
-			loginButton.leadingAnchor.constraint(equalTo: bottomStackView.leadingAnchor),
-			loginButton.trailingAnchor.constraint(equalTo: bottomStackView.trailingAnchor),
 			
 			forgotPasswordButton.heightAnchor.constraint(equalToConstant: 30.0),
 		]
