@@ -11,6 +11,7 @@ final class HomeViewController: UIViewController {
 	// class vars
 	private static let navMaxHeight: CGFloat = 320.0
 	private static let navMinHeight: CGFloat = 70.0
+	private static let navSnapToTopBuffer: CGFloat = 150.0
 
 	
 	// instance vars
@@ -35,6 +36,9 @@ final class HomeViewController: UIViewController {
 		configureSubviews()
 		configureDatasource()
 		applySnapshot()
+		
+		// TODO: remove this to unsilence constraint breaks from estimated cell heights
+		UserDefaults.standard.set(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
 	}
 	
 	override func viewDidAppear(_ animated: Bool) {
@@ -51,6 +55,7 @@ final class HomeViewController: UIViewController {
 		// inset content by our scrollingNavView height
 		collectionView.contentInset = UIEdgeInsets(top: Self.navMaxHeight, left: 0.0, bottom: 0.0, right: 0.0)
 		collectionView.contentInsetAdjustmentBehavior = .never // by default, behavior adjusts inset 20 pts for status bar
+		collectionView.scrollsToTop = true // ensure value is true
 		collectionView.showsVerticalScrollIndicator = false
 		collectionView.delegate = self
 		collectionView.register(HomeOrthogonalCell.self, forCellWithReuseIdentifier: HomeOrthogonalCell.reuseIdentifier)
@@ -339,14 +344,7 @@ extension HomeViewController: UICollectionViewDelegate {
 		// nothing to do here for now
 		// if we're scaling into scrollingNavView by scrolling down
 		// when at top or when scrollView bounces at rest point
-		if height > Self.navMaxHeight {
-			// old number = Self.navMaxHeight
-			// new number = height
-//			let increase = height - Self.navMaxHeight
-//			let percentIncrease = increase / Self.navMaxHeight * 100
-//			print("So we increasing now? \(percentIncrease / 100)")
-			return
-		}
+		if height > Self.navMaxHeight { return }
 		
 		// logic for percent decrease - primarily
 		// when scrolling down & back up
@@ -354,8 +352,38 @@ extension HomeViewController: UICollectionViewDelegate {
 		let absoluteHeight = abs(height - Self.navMaxHeight) // represents new number
 		let decrease = desiredScrollRange - absoluteHeight
 		let percentDecrease = decrease / desiredScrollRange
-		print("Percent Decrease? \(percentDecrease)")
 		scrollingNavView.animateSubviews(forScrollDelta: percentDecrease)
+	}
+		
+	func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+		// accurately determine when scrollView has finished scrolling
+		if !decelerate {
+			trackDecelerationForScrollToTop(scrollView)
+		}
+	}
+	
+	// accurately determine when scrollView has finished scrolling
+	func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+		trackDecelerationForScrollToTop(scrollView)
+	}
+	
+	private func trackDecelerationForScrollToTop(_ scrollView: UIScrollView) {
+		let offset = -scrollView.contentOffset.y
+		
+		if offset < Self.navSnapToTopBuffer && offset > Self.navMinHeight {
+			snapScrollViewContentToTop(scrollView)
+		}
+	}
+	
+	private func snapScrollViewContentToTop(_ scrollView: UIScrollView) {
+		UIView.animate(withDuration: 0.3,
+									 delay: 0.0,
+									 options: .curveEaseInOut,
+									 animations: {
+										// update contentOffset of collectionView
+										scrollView.contentOffset = CGPoint(x: 0.0, y: -Self.navMinHeight)
+										self.view.layoutIfNeeded() // force update view
+									 }, completion: nil)
 	}
 	
 }
