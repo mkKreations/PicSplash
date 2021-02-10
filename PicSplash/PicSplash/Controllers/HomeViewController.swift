@@ -22,6 +22,7 @@ final class HomeViewController: UIViewController {
 		ScrollingNavigationView(frame: CGRect(origin: .zero,
 																					size: CGSize(width: view.frame.width, height: Self.navMaxHeight)))
 	}()
+	private let loginFadeView: UIView = UIView(frame: .zero)
 	private let loginView: LoginView = LoginView(frame: .zero)
 	private var loginViewBottomConstraint: NSLayoutConstraint?
 		
@@ -61,6 +62,14 @@ final class HomeViewController: UIViewController {
 		
 		scrollingNavView.delegate = self // respond to button actions
 		view.addSubview(scrollingNavView) // add after collectionView so it's on top
+		
+		// using frames for this view
+		// configure loginFadeView but
+		// don't add it to view yet
+		loginFadeView.backgroundColor = UIColor.picsplashBlack.withAlphaComponent(0.7)
+		loginFadeView.frame = view.frame
+		loginFadeView.center = view.center
+		loginFadeView.alpha = 0.0
 		
 		loginView.translatesAutoresizingMaskIntoConstraints = false
 		loginView.delegate = self // respond to button actions
@@ -109,8 +118,15 @@ extension HomeViewController: LoginViewButtonActionsProvider {
 		
 		loginViewBottomConstraint?.constant = viewMidYConstant
 
+		// add loginFadeView to view subviews
+		// should already be removed from dismissLoginView
+		if !view.subviews.contains(loginFadeView) {
+			view.insertSubview(loginFadeView, belowSubview: loginView)
+		}
+
 		UIView.animate(withDuration: 0.6,
 									 delay: 0.0, options: .curveEaseInOut, animations: {
+										self.loginFadeView.alpha = 1.0
 										self.view.layoutIfNeeded()
 									 }, completion: nil)
 	}
@@ -125,9 +141,14 @@ extension HomeViewController: LoginViewButtonActionsProvider {
 		loginViewBottomConstraint?.constant = dismissYConstant
 
 		UIView.animate(withDuration: 0.6,
-									 delay: 0.0, options: .curveEaseInOut, animations: {
-										self.view.layoutIfNeeded()
-									 }, completion: nil)
+									 delay: 0.0, options: .curveEaseInOut) {
+			self.loginFadeView.alpha = 0.0
+			self.view.layoutIfNeeded()
+		} completion: { complete in
+			if complete {
+				self.loginFadeView.removeFromSuperview() // remove loginFadeView
+			}
+		}
 	}
 
 }
