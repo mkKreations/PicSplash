@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		2C88EFB425D07AF000150D54 /* ScrollingNavigationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C88EFB325D07AF000150D54 /* ScrollingNavigationView.swift */; };
+		2CAE645725D37788009A31F6 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAE645625D37788009A31F6 /* LoginView.swift */; };
 		2CD3C29D25CF04BB00BC0507 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CD3C29C25CF04BB00BC0507 /* AppDelegate.swift */; };
 		2CD3C2A425CF04BB00BC0507 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2CD3C2A225CF04BB00BC0507 /* Main.storyboard */; };
 		2CD3C2A625CF04BE00BC0507 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2CD3C2A525CF04BE00BC0507 /* Assets.xcassets */; };
@@ -27,6 +28,7 @@
 
 /* Begin PBXFileReference section */
 		2C88EFB325D07AF000150D54 /* ScrollingNavigationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingNavigationView.swift; sourceTree = "<group>"; };
+		2CAE645625D37788009A31F6 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		2CD3C29925CF04BB00BC0507 /* PicSplash.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PicSplash.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2CD3C29C25CF04BB00BC0507 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		2CD3C2A325CF04BB00BC0507 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -123,6 +125,7 @@
 				2C88EFB325D07AF000150D54 /* ScrollingNavigationView.swift */,
 				2CF14ED825D3192E000F1210 /* MenuTopView.swift */,
 				2CF14EDF25D321A5000F1210 /* MenuView.swift */,
+				2CAE645625D37788009A31F6 /* LoginView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -231,6 +234,7 @@
 				2CD3C2CC25CF654900BC0507 /* ImageShadowOverlayView.swift in Sources */,
 				2CD3C2D125CF686D00BC0507 /* ImagePlaceholder.swift in Sources */,
 				2CF14EE625D33151000F1210 /* UIButton+extensions.swift in Sources */,
+				2CAE645725D37788009A31F6 /* LoginView.swift in Sources */,
 				2CF14ED625D30EF4000F1210 /* MenuViewController.swift in Sources */,
 				2CD3C2D525CF8B3500BC0507 /* HomeOrthogonalCell.swift in Sources */,
 				2CD3C2D825CF97F100BC0507 /* HomeCollectionReusableView.swift in Sources */,
