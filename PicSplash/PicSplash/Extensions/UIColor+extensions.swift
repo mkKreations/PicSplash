@@ -11,4 +11,8 @@ extension UIColor {
 	static var picsplashBlack: UIColor {
 		UIColor(white: 0.07, alpha: 1.0)
 	}
+	
+	static var picSplashLightBlack: UIColor {
+		UIColor(white: 0.14, alpha: 1.0)
+	}
 }
