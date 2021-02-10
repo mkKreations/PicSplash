@@ -30,7 +30,7 @@ class MenuView: UIView {
 	override init(frame: CGRect) {
 		super.init(frame: frame)
 		
-		backgroundColor = .picsplashBlack
+		backgroundColor = .picSplashBlack
 		
 		configureSubviews()
 		constrainSubviews()

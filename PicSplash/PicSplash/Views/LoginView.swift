@@ -71,7 +71,7 @@ class LoginView: UIView {
 		
 		// bottomContainerView
 		bottomContainerView.translatesAutoresizingMaskIntoConstraints = false
-		bottomContainerView.backgroundColor = .picsplashBlack
+		bottomContainerView.backgroundColor = .picSplashBlack
 		addSubview(bottomContainerView)
 		
 		// instantiate textFields
@@ -93,7 +93,7 @@ class LoginView: UIView {
 				
 		loginButton.backgroundColor = .white
 		loginButton.setTitle("Log In", for: .normal)
-		loginButton.setTitleColor(.picsplashBlack, for: .normal)
+		loginButton.setTitleColor(.picSplashBlack, for: .normal)
 		loginButton.titleLabel?.font = UIFont.systemFont(ofSize: 16.0, weight: .semibold)
 		loginButton.layer.cornerRadius = 4.0
 		loginButton.layer.masksToBounds = true

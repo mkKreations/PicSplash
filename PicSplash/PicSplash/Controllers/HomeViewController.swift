@@ -66,7 +66,7 @@ final class HomeViewController: UIViewController {
 		// using frames for this view
 		// configure loginFadeView but
 		// don't add it to view yet
-		loginFadeView.backgroundColor = UIColor.picsplashBlack.withAlphaComponent(0.7)
+		loginFadeView.backgroundColor = UIColor.picSplashBlack.withAlphaComponent(0.7)
 		loginFadeView.frame = view.frame
 		loginFadeView.center = view.center
 		loginFadeView.alpha = 0.0
@@ -124,7 +124,7 @@ extension HomeViewController: LoginViewButtonActionsProvider {
 			view.insertSubview(loginFadeView, belowSubview: loginView)
 		}
 
-		UIView.animate(withDuration: 0.6,
+		UIView.animate(withDuration: 0.3,
 									 delay: 0.0, options: .curveEaseOut, animations: {
 										self.loginFadeView.alpha = 1.0
 										self.view.layoutIfNeeded()
@@ -140,7 +140,7 @@ extension HomeViewController: LoginViewButtonActionsProvider {
 		
 		loginViewBottomConstraint?.constant = dismissYConstant
 
-		UIView.animate(withDuration: 0.6,
+		UIView.animate(withDuration: 0.3,
 									 delay: 0.0, options: .curveEaseOut) {
 			self.loginFadeView.alpha = 0.0
 			self.view.layoutIfNeeded()
