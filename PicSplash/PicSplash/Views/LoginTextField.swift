@@ -8,15 +8,36 @@
 import UIKit
 
 // enum to represent different textField states
+
 enum LoginTextFieldState: String {
 	case email = "Email"
 	case password = "Password"
 }
 
+
+// subclassing UITextField to reposition its
+// rightView's property bounds manually
+
+fileprivate class RightImageTextField: UITextField {
+	override init(frame: CGRect) {
+		super.init(frame: frame)
+	}
+	required init?(coder: NSCoder) {
+		fatalError("Crash in RightImageTextField")
+	}
+	
+	override func rightViewRect(forBounds bounds: CGRect) -> CGRect {
+		return CGRect(x: bounds.size.width - 30.0, y: -2.0, width: 26.0, height: 24.0)
+	}
+}
+
+
+// actual class we'll be working with
+
 class LoginTextField: UIView {
 	// internal vars
 	private let stackView: UIStackView = UIStackView(frame: .zero)
-	private let textField: UITextField = UITextField(frame: .zero)
+	private let textField: RightImageTextField = RightImageTextField(frame: .zero)
 	private let divider: UIView = UIView(frame: .zero)
 	let textFieldState: LoginTextFieldState
 	
@@ -46,6 +67,13 @@ class LoginTextField: UIView {
 		
 		textField.placeholder = textFieldState.rawValue
 		textField.font = UIFont.systemFont(ofSize: 16.0)
+		
+		if textFieldState == .password { // add lock icon
+			textField.rightViewMode = .always
+			let lockImageView = UIImageView(image: UIImage(systemName: "lock.circle"))
+			lockImageView.tintColor = .lightGray
+			textField.rightView = lockImageView
+		}
 		
 		divider.translatesAutoresizingMaskIntoConstraints = false
 		divider.backgroundColor = .darkGray

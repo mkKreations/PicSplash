@@ -76,10 +76,7 @@ class LoginView: UIView {
 		
 		// instantiate textFields
 		let textFieldStates: [LoginTextFieldState] = [.email, .password]
-		let textFields: [LoginTextField] = textFieldStates.map { state in
-			let textField = LoginTextField(textFieldState: state)
-			return textField
-		}
+		let textFields: [LoginTextField] = textFieldStates.map { LoginTextField(textFieldState: $0) }
 		
 		// bottomStackView and its subviews
 		bottomStackView.translatesAutoresizingMaskIntoConstraints = false
