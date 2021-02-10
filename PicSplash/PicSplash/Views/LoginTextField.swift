@@ -41,13 +41,14 @@ class LoginTextField: UIView {
 		[textField, divider].forEach { stackView.addArrangedSubview($0) }
 		stackView.axis = .vertical
 		stackView.distribution = .fill
+		stackView.spacing = 10.0
 		addSubview(stackView)
 		
-		textField.backgroundColor = .systemYellow
 		textField.placeholder = textFieldState.rawValue
+		textField.font = UIFont.systemFont(ofSize: 16.0)
 		
 		divider.translatesAutoresizingMaskIntoConstraints = false
-		divider.backgroundColor = .systemGreen
+		divider.backgroundColor = .darkGray
 	}
 	
 	private func constrainSubviews() {

@@ -34,9 +34,6 @@ class LoginView: UIView {
 		
 		backgroundColor = .systemYellow
 				
-//		layer.borderWidth = 1.0
-//		layer.borderColor = UIColor.red.cgColor
-
 		layer.cornerRadius = 10.0
 		layer.masksToBounds = true
 
@@ -52,7 +49,7 @@ class LoginView: UIView {
 	private func configureSubviews() {
 		// topTintView and its subviews
 		topTintView.translatesAutoresizingMaskIntoConstraints = false
-		topTintView.backgroundColor = .darkGray
+		topTintView.backgroundColor = .picSplashLightBlack
 		addSubview(topTintView)
 		
 		loginLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -69,7 +66,7 @@ class LoginView: UIView {
 		topTintView.addSubview(cancelButton)
 		
 		topTintViewDivider.translatesAutoresizingMaskIntoConstraints = false
-		topTintViewDivider.backgroundColor = .lightGray
+		topTintViewDivider.backgroundColor = UIColor.darkGray.withAlphaComponent(0.3)
 		addSubview(topTintViewDivider)
 		
 		// bottomContainerView
@@ -90,7 +87,8 @@ class LoginView: UIView {
 		[loginButton, forgotPasswordButton, noAccountJoinButton].forEach { bottomStackView.addArrangedSubview($0) }
 		bottomStackView.axis = .vertical
 		bottomStackView.distribution = .fill
-		bottomStackView.spacing = 20.0
+		bottomStackView.spacing = 24.0
+		bottomStackView.setCustomSpacing(36.0, after: textFields.first!) // we know we'll have it
 		bottomContainerView.addSubview(bottomStackView)
 				
 		loginButton.backgroundColor = .white
@@ -119,7 +117,7 @@ class LoginView: UIView {
 	}
 	
 	private func constrainSubviews() {
-		topTintView.heightAnchor.constraint(equalToConstant: 40.0).isActive = true
+		topTintView.heightAnchor.constraint(equalToConstant: 48.0).isActive = true
 		topTintView.topAnchor.constraint(equalTo: topAnchor).isActive = true
 		topTintView.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
 		topTintView.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
@@ -146,7 +144,7 @@ class LoginView: UIView {
 		
 		// bottomContainerView subviews
 		let bottomContainerViewSubviewConstraints = [
-			bottomStackView.topAnchor.constraint(equalTo: bottomContainerView.topAnchor, constant: 40.0),
+			bottomStackView.topAnchor.constraint(equalTo: bottomContainerView.topAnchor, constant: 36.0),
 			bottomStackView.leadingAnchor.constraint(equalTo: bottomContainerView.leadingAnchor, constant: 16.0),
 			bottomStackView.trailingAnchor.constraint(equalTo: bottomContainerView.trailingAnchor, constant: -16.0),
 			bottomStackView.bottomAnchor.constraint(equalTo: bottomContainerView.bottomAnchor, constant: -30.0),
