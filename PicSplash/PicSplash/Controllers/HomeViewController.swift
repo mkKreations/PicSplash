@@ -22,6 +22,8 @@ final class HomeViewController: UIViewController {
 		ScrollingNavigationView(frame: CGRect(origin: .zero,
 																					size: CGSize(width: view.frame.width, height: Self.navMaxHeight)))
 	}()
+	private let loginView: LoginView = LoginView(frame: .zero)
+	private var loginViewBottomConstraint: NSLayoutConstraint?
 		
 	
 	// MARK: view life cycle
@@ -34,6 +36,13 @@ final class HomeViewController: UIViewController {
 		applySnapshot()
 	}
 	
+	override func viewDidAppear(_ animated: Bool) {
+		super.viewDidAppear(animated)
+		
+		// we know our loginView will have size by now
+		adjustLoginViewPositionForAppearance()
+	}
+		
 	
 	// MARK: subviews config
 	
@@ -52,8 +61,22 @@ final class HomeViewController: UIViewController {
 		
 		scrollingNavView.delegate = self // respond to button actions
 		view.addSubview(scrollingNavView) // add after collectionView so it's on top
+		
+		loginView.translatesAutoresizingMaskIntoConstraints = false
+		view.addSubview(loginView) // this view on top of all
+		
+		layoutLoginViewForInitialAppearance()
 	}
-			
+	
+	private func layoutLoginViewForInitialAppearance() {
+		// capture bottom constraint
+		loginViewBottomConstraint = view.bottomAnchor.constraint(equalTo: loginView.bottomAnchor, constant: 0.0)
+		loginViewBottomConstraint?.isActive = true
+		
+		loginView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 6.0).isActive = true
+		loginView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -6.0).isActive = true
+	}
+	
 }
 
 
@@ -61,13 +84,42 @@ final class HomeViewController: UIViewController {
 // MARK: scrollNavView button actions
 
 extension HomeViewController: ScrollingNavigationButtonsProvider {
+	// delegate methods
+	
 	func didPressMenuButton(_ button: UIButton) {
 		// present fresh instance of menu VC modally via sheet
 		present(MenuViewController(), animated: true, completion: nil)
 	}
 	
 	func didPressLogInButton(_ button: UIButton) {
-		print("Did press log in button")
+		animateLoginViewAppearance()
+	}
+	
+	
+	// loginView appearance/dismissal/animations
+	
+	// call this method when you know the loginView has size
+	// if you lay out and constrain in viewDidLoad then your
+	// view will have size by viewDidAppear and you can adjust
+	// constraints without it affecting the visuals of the UI
+	private func adjustLoginViewPositionForAppearance() {
+		if loginViewBottomConstraint?.constant != -loginView.frame.size.height {
+			loginViewBottomConstraint?.constant = -loginView.frame.size.height
+		}
+	}
+
+	private func animateLoginViewAppearance() {
+		let viewMidYConstant = (view.bounds.size.height / 2.0) - (loginView.bounds.size.height / 2.0)
+		
+		// ensure view isn't already in position
+		// should never happen but never know
+		guard loginViewBottomConstraint?.constant != viewMidYConstant else { return }
+		
+		loginViewBottomConstraint?.constant = viewMidYConstant
+
+		UIView.animate(withDuration: 0.6) {
+			self.view.layoutIfNeeded()
+		}
 	}
 }
 
