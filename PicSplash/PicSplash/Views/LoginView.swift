@@ -7,6 +7,13 @@
 
 import UIKit
 
+// delegation to manage button actions
+
+protocol LoginViewButtonActionsProvider: AnyObject {
+	func didPressCancelButton(_ sender: UIButton)
+}
+
+
 class LoginView: UIView {
 	// internal vars
 	private let topTintView: UIView = UIView(frame: .zero)
@@ -20,6 +27,7 @@ class LoginView: UIView {
 	private let loginButton: UIButton = UIButton(type: .system)
 	private let forgotPasswordButton: UIButton = UIButton(type: .system)
 	private let noAccountJoinButton: UIButton = UIButton(type: .system)
+	weak var delegate: LoginViewButtonActionsProvider?
 	
 	
 	// inits
@@ -58,6 +66,7 @@ class LoginView: UIView {
 		cancelButton.setTitle("Cancel", for: .normal)
 		cancelButton.tintColor = .white
 		cancelButton.titleLabel?.font = UIFont.systemFont(ofSize: 16.0)
+		cancelButton.addTarget(self, action: #selector(cancelButtonPressed), for: .touchUpInside)
 		topTintView.addSubview(cancelButton)
 		
 		topTintViewDivider.translatesAutoresizingMaskIntoConstraints = false
@@ -157,4 +166,11 @@ class LoginView: UIView {
 		]
 		NSLayoutConstraint.activate(bottomContainerViewSubviewConstraints)
 	}
+	
+	
+	// button actions
+	@objc private func cancelButtonPressed(_ sender: UIButton) {
+		delegate?.didPressCancelButton(sender)
+	}
+	
 }
