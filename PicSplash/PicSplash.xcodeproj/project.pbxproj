@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2C0B794025D447FE007D18D3 /* LoginTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C0B793F25D447FE007D18D3 /* LoginTextField.swift */; };
+		2C88EFB425D07AF000150D54 /* ScrollingNavigationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C88EFB325D07AF000150D54 /* ScrollingNavigationView.swift */; };
+		2CAE645725D37788009A31F6 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAE645625D37788009A31F6 /* LoginView.swift */; };
 		2CD3C29D25CF04BB00BC0507 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CD3C29C25CF04BB00BC0507 /* AppDelegate.swift */; };
 		2CD3C2A425CF04BB00BC0507 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2CD3C2A225CF04BB00BC0507 /* Main.storyboard */; };
 		2CD3C2A625CF04BE00BC0507 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2CD3C2A525CF04BE00BC0507 /* Assets.xcassets */; };
@@ -17,9 +20,17 @@
 		2CD3C2D125CF686D00BC0507 /* ImagePlaceholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CD3C2D025CF686D00BC0507 /* ImagePlaceholder.swift */; };
 		2CD3C2D525CF8B3500BC0507 /* HomeOrthogonalCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CD3C2D425CF8B3500BC0507 /* HomeOrthogonalCell.swift */; };
 		2CD3C2D825CF97F100BC0507 /* HomeCollectionReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CD3C2D725CF97F100BC0507 /* HomeCollectionReusableView.swift */; };
+		2CF14ED625D30EF4000F1210 /* MenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF14ED525D30EF4000F1210 /* MenuViewController.swift */; };
+		2CF14ED925D3192E000F1210 /* MenuTopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF14ED825D3192E000F1210 /* MenuTopView.swift */; };
+		2CF14EDD25D31F7A000F1210 /* UIColor+extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF14EDC25D31F7A000F1210 /* UIColor+extensions.swift */; };
+		2CF14EE025D321A5000F1210 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF14EDF25D321A5000F1210 /* MenuView.swift */; };
+		2CF14EE625D33151000F1210 /* UIButton+extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF14EE525D33151000F1210 /* UIButton+extensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		2C0B793F25D447FE007D18D3 /* LoginTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginTextField.swift; sourceTree = "<group>"; };
+		2C88EFB325D07AF000150D54 /* ScrollingNavigationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingNavigationView.swift; sourceTree = "<group>"; };
+		2CAE645625D37788009A31F6 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		2CD3C29925CF04BB00BC0507 /* PicSplash.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PicSplash.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2CD3C29C25CF04BB00BC0507 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		2CD3C2A325CF04BB00BC0507 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -32,6 +43,11 @@
 		2CD3C2D025CF686D00BC0507 /* ImagePlaceholder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePlaceholder.swift; sourceTree = "<group>"; };
 		2CD3C2D425CF8B3500BC0507 /* HomeOrthogonalCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeOrthogonalCell.swift; sourceTree = "<group>"; };
 		2CD3C2D725CF97F100BC0507 /* HomeCollectionReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeCollectionReusableView.swift; sourceTree = "<group>"; };
+		2CF14ED525D30EF4000F1210 /* MenuViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuViewController.swift; sourceTree = "<group>"; };
+		2CF14ED825D3192E000F1210 /* MenuTopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuTopView.swift; sourceTree = "<group>"; };
+		2CF14EDC25D31F7A000F1210 /* UIColor+extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+extensions.swift"; sourceTree = "<group>"; };
+		2CF14EDF25D321A5000F1210 /* MenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
+		2CF14EE525D33151000F1210 /* UIButton+extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIButton+extensions.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,6 +80,7 @@
 		2CD3C29B25CF04BB00BC0507 /* PicSplash */ = {
 			isa = PBXGroup;
 			children = (
+				2CF14EDB25D31F65000F1210 /* Extensions */,
 				2CD3C2BB25CF49A400BC0507 /* Controllers */,
 				2CD3C2CE25CF682E00BC0507 /* Models */,
 				2CD3C2C625CF652600BC0507 /* Views */,
@@ -96,6 +113,7 @@
 			isa = PBXGroup;
 			children = (
 				2CD3C2BC25CF49A400BC0507 /* HomeViewController.swift */,
+				2CF14ED525D30EF4000F1210 /* MenuViewController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -106,6 +124,11 @@
 				2CD3C2C725CF652600BC0507 /* Cells */,
 				2CD3C2CB25CF654900BC0507 /* ImageShadowOverlayView.swift */,
 				2CD3C2D725CF97F100BC0507 /* HomeCollectionReusableView.swift */,
+				2C88EFB325D07AF000150D54 /* ScrollingNavigationView.swift */,
+				2CF14ED825D3192E000F1210 /* MenuTopView.swift */,
+				2CF14EDF25D321A5000F1210 /* MenuView.swift */,
+				2CAE645625D37788009A31F6 /* LoginView.swift */,
+				2C0B793F25D447FE007D18D3 /* LoginTextField.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -125,6 +148,15 @@
 				2CD3C2D025CF686D00BC0507 /* ImagePlaceholder.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		2CF14EDB25D31F65000F1210 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				2CF14EDC25D31F7A000F1210 /* UIColor+extensions.swift */,
+				2CF14EE525D33151000F1210 /* UIButton+extensions.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -197,9 +229,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2C88EFB425D07AF000150D54 /* ScrollingNavigationView.swift in Sources */,
+				2CF14EE025D321A5000F1210 /* MenuView.swift in Sources */,
+				2CF14ED925D3192E000F1210 /* MenuTopView.swift in Sources */,
 				2CD3C29D25CF04BB00BC0507 /* AppDelegate.swift in Sources */,
+				2CF14EDD25D31F7A000F1210 /* UIColor+extensions.swift in Sources */,
 				2CD3C2CC25CF654900BC0507 /* ImageShadowOverlayView.swift in Sources */,
 				2CD3C2D125CF686D00BC0507 /* ImagePlaceholder.swift in Sources */,
+				2CF14EE625D33151000F1210 /* UIButton+extensions.swift in Sources */,
+				2CAE645725D37788009A31F6 /* LoginView.swift in Sources */,
+				2C0B794025D447FE007D18D3 /* LoginTextField.swift in Sources */,
+				2CF14ED625D30EF4000F1210 /* MenuViewController.swift in Sources */,
 				2CD3C2D525CF8B3500BC0507 /* HomeOrthogonalCell.swift in Sources */,
 				2CD3C2D825CF97F100BC0507 /* HomeCollectionReusableView.swift in Sources */,
 				2CD3C2BD25CF49A400BC0507 /* HomeViewController.swift in Sources */,
