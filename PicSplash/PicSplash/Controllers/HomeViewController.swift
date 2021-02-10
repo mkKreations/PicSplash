@@ -125,7 +125,7 @@ extension HomeViewController: LoginViewButtonActionsProvider {
 		}
 
 		UIView.animate(withDuration: 0.6,
-									 delay: 0.0, options: .curveEaseInOut, animations: {
+									 delay: 0.0, options: .curveEaseOut, animations: {
 										self.loginFadeView.alpha = 1.0
 										self.view.layoutIfNeeded()
 									 }, completion: nil)
@@ -141,7 +141,7 @@ extension HomeViewController: LoginViewButtonActionsProvider {
 		loginViewBottomConstraint?.constant = dismissYConstant
 
 		UIView.animate(withDuration: 0.6,
-									 delay: 0.0, options: .curveEaseInOut) {
+									 delay: 0.0, options: .curveEaseOut) {
 			self.loginFadeView.alpha = 0.0
 			self.view.layoutIfNeeded()
 		} completion: { complete in
