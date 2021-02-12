@@ -94,7 +94,10 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 					let detailCloseButtonSnapshot = detailViewController.closeButton.snapshotView(afterScreenUpdates: true),
 					let detailTitleLabelSnapshot = detailViewController.titleLabel.snapshotView(afterScreenUpdates: true),
 					let detailShareButtonSnapshot = detailViewController.shareButton.snapshotView(afterScreenUpdates: true),
-					let detailInfoButtonSnapshot = detailViewController.infoButton.snapshotView(afterScreenUpdates: true) else {
+					let detailInfoButtonSnapshot = detailViewController.infoButton.snapshotView(afterScreenUpdates: true),
+					let detailLikeButtonSnapshot = detailViewController.likeButton.snapshotView(afterScreenUpdates: true),
+					let detailAddButtonSnapshot = detailViewController.addButton.snapshotView(afterScreenUpdates: true),
+					let detailDownloadButtonSnapshot = detailViewController.downloadButton.snapshotView(afterScreenUpdates: true) else {
 			// report to UIKit that transition did not complete as intended
 			transitionContext.completeTransition(false)
 			return
@@ -149,6 +152,9 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 		 detailTitleLabelSnapshot,
 		 detailShareButtonSnapshot,
 		 detailInfoButtonSnapshot,
+		 detailLikeButtonSnapshot,
+		 detailAddButtonSnapshot,
+		 detailDownloadButtonSnapshot,
 		 scrollingNavViewSnapshot].forEach { containerView.addSubview($0) }
 
 		// get various views' bounds from view controllers within windows coordinate space
@@ -157,6 +163,9 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 		let detailVCTitleLabelRect = detailViewController.titleLabel.convert(detailViewController.titleLabel.bounds, to: window)
 		let detailVCShareButtonRect = detailViewController.shareButton.convert(detailViewController.shareButton.bounds, to: window)
 		let detailVCInfoButtonRect = detailViewController.infoButton.convert(detailViewController.infoButton.bounds, to: window)
+		let detailVCLikeButtonRect = detailViewController.likeButton.convert(detailViewController.likeButton.bounds, to: window)
+		let detailVCAddButtonRect = detailViewController.addButton.convert(detailViewController.addButton.bounds, to: window)
+		let detailVCDownloadButtonRect = detailViewController.downloadButton.convert(detailViewController.downloadButton.bounds, to: window)
 		let homeVCscrollingNavRect = homeViewController.scrollingNavView.convert(homeViewController.scrollingNavView.bounds, to: window)
 		
 		// set starting frames on snapshots based on PresentationType
@@ -193,6 +202,15 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 		// set frame (always the same) and alpha on detailInfoButtonSnapshot
 		detailInfoButtonSnapshot.frame = detailVCInfoButtonRect
 		detailInfoButtonSnapshot.alpha = isPresenting ? 0.0 : 1.0
+		
+		// set initial frames and alphas on DetailActionButton snapshots
+		detailLikeButtonSnapshot.frame = detailVCLikeButtonRect // set frame
+		detailAddButtonSnapshot.frame = detailVCAddButtonRect // set frame
+		detailDownloadButtonSnapshot.frame = detailVCDownloadButtonRect // set frame
+		
+		detailLikeButtonSnapshot.alpha = isPresenting ? 0.0 : 1.0 // set alpha
+		detailAddButtonSnapshot.alpha = isPresenting ? 0.0 : 1.0 // set alpha
+		detailDownloadButtonSnapshot.alpha = isPresenting ? 0.0 : 1.0 // set alpha
 		
 		// use keyframes for max animation control
 		// i'm honestly not good at determining these
@@ -233,6 +251,11 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 			UIView.addKeyframe(withRelativeStartTime: isPresenting ? 0.4 : 0.0, relativeDuration: isPresenting ? 1.0 : 0.4) {
 				// set detailInfoButtonSnapshot alpha based on PresentationType
 				detailInfoButtonSnapshot.alpha = isPresenting ? 1.0 : 0.0
+				
+				// set DetailActionButton snapshot alphas based on PresentationType
+				detailLikeButtonSnapshot.alpha = isPresenting ? 1.0 : 0.0
+				detailAddButtonSnapshot.alpha = isPresenting ? 1.0 : 0.0
+				detailDownloadButtonSnapshot.alpha = isPresenting ? 1.0 : 0.0
 			}
 			
 		} completion: { _ in
@@ -248,6 +271,9 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 			detailTitleLabelSnapshot.removeFromSuperview()
 			detailShareButtonSnapshot.removeFromSuperview()
 			detailInfoButtonSnapshot.removeFromSuperview()
+			detailLikeButtonSnapshot.removeFromSuperview()
+			detailAddButtonSnapshot.removeFromSuperview()
+			detailDownloadButtonSnapshot.removeFromSuperview()
 
 			// show toView
 			toView.alpha = 1.0
