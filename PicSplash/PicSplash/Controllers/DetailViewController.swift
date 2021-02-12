@@ -20,6 +20,10 @@ class DetailViewController: UIViewController {
 	let titleLabel: UILabel = UILabel(frame: .zero)
 	let shareButton: UIButton = UIButton(type: .system)
 	let infoButton: UIButton = UIButton(type: .custom)
+	let likeButton: DetailActionButton = DetailActionButton(detailAction: .like)
+	let addButton: DetailActionButton = DetailActionButton(detailAction: .add)
+	let downloadButton: DetailActionButton = DetailActionButton(detailAction: .download)
+	private let actionButtonsStackView: UIStackView = UIStackView(frame: .zero)
 	private let navStackView: UIStackView = UIStackView(frame: .zero)
 	private var navStackViewTopConstraint: NSLayoutConstraint?
 	weak var delegate: DetailButtonActionsProvider?
@@ -86,6 +90,15 @@ class DetailViewController: UIViewController {
 		infoButton.setBackgroundImage(UIImage(systemName: "info.circle"), for: .normal)
 		infoButton.tintColor = .white
 		view.addSubview(infoButton)
+		
+		actionButtonsStackView.translatesAutoresizingMaskIntoConstraints = false
+		[likeButton, addButton, downloadButton].forEach {
+			$0.delegate = self
+			actionButtonsStackView.addArrangedSubview($0)
+		}
+		actionButtonsStackView.axis = .vertical
+		actionButtonsStackView.spacing = 16.0
+		view.addSubview(actionButtonsStackView)
 	}
 	
 	private func constrainSubviews() {
@@ -118,9 +131,12 @@ class DetailViewController: UIViewController {
 		shareButton.widthAnchor.constraint(equalToConstant: 22.0).isActive = true
 		
 		infoButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16.0).isActive = true
-		infoButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -30.0).isActive = true
+		infoButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -50.0).isActive = true
 		infoButton.heightAnchor.constraint(equalToConstant: 22.0).isActive = true
 		infoButton.widthAnchor.constraint(equalToConstant: 22.0).isActive = true
+		
+		actionButtonsStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16.0).isActive = true
+		actionButtonsStackView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -50.0).isActive = true
 	}
 	
 	@objc private func closeButtonPressed(_ sender: UIButton) {
@@ -133,4 +149,15 @@ class DetailViewController: UIViewController {
 		delegate?.didPressShareButton(sender)
 	}
 	
+}
+
+
+
+// MARK: DetailActionButtonsProvider conformance
+
+extension DetailViewController: DetailActionButtonsProvider {
+	func didPressDetailActionButton(_ detailAction: DetailAction) {
+		// TODO: implement
+		print(detailAction)
+	}
 }
