@@ -73,8 +73,6 @@ class DetailActionButton: UIView {
 		
 		overlayButton.translatesAutoresizingMaskIntoConstraints = false
 		overlayButton.layer.cornerRadius = Self.buttonDimension / 2.0
-//		overlayButton.layer.borderWidth = 1.0
-//		overlayButton.layer.borderColor = UIColor.blue.cgColor
 		overlayButton.addTarget(self, action: #selector(overlayButtonPressed), for: .touchUpInside)
 		addSubview(overlayButton)
 	}
@@ -93,8 +91,24 @@ class DetailActionButton: UIView {
 	}
 		
 	@objc private func overlayButtonPressed(_ sender: UIButton) {
-		print(detailAction)
-		delegate?.didPressDetailActionButton(detailAction)
+		let animationDuration: TimeInterval = 0.04
+		
+		// scale
+		UIView.animate(withDuration: animationDuration,
+									 animations: {
+										self.transform = CGAffineTransform(scaleX: 1.2, y: 1.2)
+									 },
+									 completion: { _ in
+										
+										// return back to size
+										UIView.animate(withDuration: animationDuration) {
+											self.transform = CGAffineTransform.identity
+										} completion: { _ in
+											// pass action
+											self.delegate?.didPressDetailActionButton(self.detailAction)
+										}
+										
+									 })
 	}
 	
 }
