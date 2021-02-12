@@ -90,7 +90,10 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 					let cellImageViewSnapshot = selectedCell.displayImageView.snapshotView(afterScreenUpdates: true),
 					let cellDisplayLabelSnapshot = selectedCell.displayLabel.snapshotView(afterScreenUpdates: true),
 					var cellGradientOverlaySnapshot = selectedCell.gradientOverlayView.snapshotView(afterScreenUpdates: true),
-					let scrollingNavViewSnapshot = homeViewController.scrollingNavView.snapshotView(afterScreenUpdates: true) else {
+					let scrollingNavViewSnapshot = homeViewController.scrollingNavView.snapshotView(afterScreenUpdates: true),
+					let detailCloseButtonSnapshot = detailViewController.closeButton.snapshotView(afterScreenUpdates: true),
+					let detailTitleLabelSnapshot = detailViewController.titleLabel.snapshotView(afterScreenUpdates: true),
+					let detailShareButtonSnapshot = detailViewController.shareButton.snapshotView(afterScreenUpdates: true) else {
 			// report to UIKit that transition did not complete as intended
 			transitionContext.completeTransition(false)
 			return
@@ -141,10 +144,16 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 		 selectedCellImageViewSnapshot,
 		 cellGradientOverlaySnapshot,
 		 cellDisplayLabelSnapshot,
+		 detailCloseButtonSnapshot,
+		 detailTitleLabelSnapshot,
+		 detailShareButtonSnapshot,
 		 scrollingNavViewSnapshot].forEach { containerView.addSubview($0) }
 
 		// get various views' bounds from view controllers within windows coordinate space
 		let detailVCImageViewRect = detailViewController.detailImageView.convert(detailViewController.detailImageView.bounds, to: window)
+		let detailVCCloseButtonRect = detailViewController.closeButton.convert(detailViewController.closeButton.bounds, to: window)
+		let detailVCTitleLabelRect = detailViewController.titleLabel.convert(detailViewController.titleLabel.bounds, to: window)
+		let detailVCShareButtonRect = detailViewController.shareButton.convert(detailViewController.shareButton.bounds, to: window)
 		let homeVCscrollingNavRect = homeViewController.scrollingNavView.convert(homeViewController.scrollingNavView.bounds, to: window)
 		
 		// set starting frames on snapshots based on PresentationType
@@ -153,13 +162,30 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 		// set starting alpha on cellGradientOverlaySnapshot
 		cellGradientOverlaySnapshot.alpha = isPresenting ? 1.0 : 0.0
 		
-		// set frame (always the same) and alpha on scrollingNavViewSnapshot
-		scrollingNavViewSnapshot.frame = homeVCscrollingNavRect
-		scrollingNavViewSnapshot.alpha = isPresenting ? 1.0 : 0.0
-		
 		// set frame (always the same) and alpha on cellDisplayLabelSnapshot
 		cellDisplayLabelSnapshot.frame = cellDisplayLabelRect
 		cellDisplayLabelSnapshot.alpha = isPresenting ? 1.0 : 0.0
+		
+		// set frame (always the same) and alpha on scrollingNavViewSnapshot
+		scrollingNavViewSnapshot.frame = homeVCscrollingNavRect
+		scrollingNavViewSnapshot.alpha = isPresenting ? 1.0 : 0.0
+
+		// set frame and alpha on subviews of "navigation bar" DetailVC
+		var detailVCCloseButtonModifiedRect = detailVCCloseButtonRect // mutable rect
+		var detailVCTitleLabelModifiedRect = detailVCTitleLabelRect // mutable rect
+		var detailVCShareButtonModifiedRect = detailVCShareButtonRect // mutable rect
+		
+		detailVCCloseButtonModifiedRect.origin.y = -detailVCCloseButtonModifiedRect.height // put right above view
+		detailVCTitleLabelModifiedRect.origin.y = -detailVCTitleLabelModifiedRect.height // put right above view
+		detailVCShareButtonModifiedRect.origin.y = -detailVCShareButtonModifiedRect.height // put right above view
+		
+		detailCloseButtonSnapshot.frame = isPresenting ? detailVCCloseButtonModifiedRect : detailVCCloseButtonRect // set frame
+		detailTitleLabelSnapshot.frame = isPresenting ? detailVCTitleLabelModifiedRect : detailVCTitleLabelRect // set frame
+		detailShareButtonSnapshot.frame = isPresenting ? detailVCShareButtonModifiedRect : detailVCShareButtonRect // set frame
+		
+		detailCloseButtonSnapshot.alpha = isPresenting ? 0.0 : 1.0 // set alpha
+		detailTitleLabelSnapshot.alpha = isPresenting ? 0.0 : 1.0 // set alpha
+		detailShareButtonSnapshot.alpha = isPresenting ? 0.0 : 1.0 // set alpha
 		
 		// use keyframes for max animation control
 		UIView.animateKeyframes(withDuration: Self.duration,
@@ -175,6 +201,16 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 
 				// set fadeView alpha based on PresentationType
 				fadeView.alpha = isPresenting ? 1.0 : 0.0
+				
+				// set detail "navigation view" subviews' frames
+				detailCloseButtonSnapshot.frame = isPresenting ? detailVCCloseButtonRect : detailVCCloseButtonModifiedRect
+				detailTitleLabelSnapshot.frame = isPresenting ? detailVCTitleLabelRect : detailVCTitleLabelModifiedRect
+				detailShareButtonSnapshot.frame = isPresenting ? detailVCShareButtonRect : detailVCShareButtonModifiedRect
+				
+				// set detail "navigation view" subviews' alphas
+				detailCloseButtonSnapshot.alpha = isPresenting ? 1.0 : 0.0
+				detailTitleLabelSnapshot.alpha = isPresenting ? 1.0 : 0.0
+				detailShareButtonSnapshot.alpha = isPresenting ? 1.0 : 0.0
 			}
 			
 			// slightly modified duration
@@ -192,7 +228,10 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 			scrollingNavViewSnapshot.removeFromSuperview()
 			cellDisplayLabelSnapshot.removeFromSuperview()
 			cellGradientOverlaySnapshot.removeFromSuperview()
-			
+			detailCloseButtonSnapshot.removeFromSuperview()
+			detailTitleLabelSnapshot.removeFromSuperview()
+			detailShareButtonSnapshot.removeFromSuperview()
+
 			// show toView
 			toView.alpha = 1.0
 			

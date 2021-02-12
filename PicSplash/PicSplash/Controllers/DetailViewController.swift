@@ -16,9 +16,9 @@ class DetailViewController: UIViewController {
 	// internal vars
 	let detailImageView: UIImageView = UIImageView(frame: .zero) // expose to public for view controller transition
 	private var imagePlaceholder: ImagePlaceholder
-	private let closeButton: UIButton = UIButton(type: .system)
-	private let titleLabel: UILabel = UILabel(frame: .zero)
-	private let shareButton: UIButton = UIButton(type: .system)
+	let closeButton: UIButton = UIButton(type: .system)
+	let titleLabel: UILabel = UILabel(frame: .zero)
+	let shareButton: UIButton = UIButton(type: .system)
 	private let navStackView: UIStackView = UIStackView(frame: .zero)
 	private var navStackViewTopConstraint: NSLayoutConstraint?
 	weak var delegate: DetailButtonActionsProvider?
