@@ -14,7 +14,7 @@ protocol DetailButtonActionsProvider: AnyObject {
 
 class DetailViewController: UIViewController {
 	// internal vars
-	private let detailImageView: UIImageView = UIImageView(frame: .zero)
+	let detailImageView: UIImageView = UIImageView(frame: .zero) // expose to public for view controller transition
 	private var imagePlaceholder: ImagePlaceholder
 	private let closeButton: UIButton = UIButton(type: .system)
 	private let titleLabel: UILabel = UILabel(frame: .zero)

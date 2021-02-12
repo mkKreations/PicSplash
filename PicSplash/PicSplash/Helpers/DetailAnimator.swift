@@ -13,7 +13,7 @@ import UIKit
 class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 	// class vars
 	
-	private static let duration: TimeInterval = 0.25
+	private static let duration: TimeInterval = 1.25
 	
 	
 	// instance vars
@@ -21,7 +21,7 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 	private let presentationType: PresentationType
 	private let homeViewController: HomeViewController
 	private let detailViewController: DetailViewController
-	private let selectedCellImageSnapshot: UIView
+	private var selectedCellImageViewSnapshot: UIView
 	private let cellImageViewRect: CGRect
 	
 	
@@ -31,7 +31,7 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 		case present
 		case dismiss
 		
-		func isPresenting() -> Bool {
+		var isPresenting: Bool {
 			self == .present
 		}
 	}
@@ -52,7 +52,7 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 		self.presentationType = presentationType
 		self.homeViewController = homeViewController
 		self.detailViewController = detailViewController
-		self.selectedCellImageSnapshot = selectedImageViewSnapshot
+		self.selectedCellImageViewSnapshot = selectedImageViewSnapshot
 		
 		guard let window = homeViewController.view.window ?? detailViewController.view.window,
 					let selectedCell = homeViewController.selectedCell else { return nil }
@@ -69,7 +69,64 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 	}
 	
 	func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
-		// TODO: implement
+		// get containerView from context for easy reference
+		let containerView = transitionContext.containerView
+		
+		guard let toView = detailViewController.view else {
+			// report to UIKit that transition did not complete as intended
+			transitionContext.completeTransition(false)
+			return
+		}
+		
+		containerView.addSubview(toView) // add toView to containerView first
+		
+		// unpack all necessary vars
+		guard let selectedCell = homeViewController.selectedCell,
+					let window = homeViewController.view.window ?? detailViewController.view.window,
+					let cellImageSnapshot = selectedCell.displayImageView.snapshotView(afterScreenUpdates: true) else {
+			// report to UIKit that transition did not complete as intended
+			transitionContext.completeTransition(false)
+			return
+		}
+		
+		// capture isPresenting for easy reference
+		let isPresenting = presentationType.isPresenting
+		
+		if isPresenting {
+			// this is a workaround to the issue that at the moment of taking
+			// the selectedCellImageViewSnapshot snapshot, the view is not yet
+			// updated so we take the snapshot again. I couldn’t find the proper
+			// way to overcome this issue.
+			selectedCellImageViewSnapshot = cellImageSnapshot
+		}
+		
+		// add snapshots to containerView
+		[selectedCellImageViewSnapshot].forEach { containerView.addSubview($0) }
+		
+		// get DetailVC image bounds in windows coordinate space
+		let detailVCImageViewRect = detailViewController.detailImageView.convert(detailViewController.detailImageView.bounds, to: window)
+		
+		// set starting frames on snapshots based on PresentationType
+		[selectedCellImageViewSnapshot].forEach { $0.frame = isPresenting ? cellImageViewRect : detailVCImageViewRect }
+		
+		// use keyframes for max animation control
+		UIView.animateKeyframes(withDuration: Self.duration,
+														delay: 0.0, options: .calculationModeCubic) {
+			
+			UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 1.0) {
+				// set end frames on snapshots based on PresentationType
+				self.selectedCellImageViewSnapshot.frame = isPresenting ? detailVCImageViewRect : self.cellImageViewRect
+			}
+			
+		} completion: { _ in
+			// perform clean up in here
+			
+			// remove cellImageSnapshot
+			self.selectedCellImageViewSnapshot.removeFromSuperview()
+			
+			// notify context that we completed successfully
+			transitionContext.completeTransition(true)
+		}
 	}
 	
 }
