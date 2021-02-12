@@ -23,6 +23,7 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 	private let detailViewController: DetailViewController
 	private var selectedCellImageViewSnapshot: UIView
 	private let cellImageViewRect: CGRect
+	private let cellDisplayLabelRect: CGRect
 	
 	
 	// nested enum to see if which transition we're in
@@ -57,8 +58,9 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 		guard let window = homeViewController.view.window ?? detailViewController.view.window,
 					let selectedCell = homeViewController.selectedCell else { return nil }
 		
-		// getting the frame of the imageView of the cell relative to the windows frame
+		// getting the frame of the imageView & displayLabel of the cell relative to the windows frame
 		self.cellImageViewRect = selectedCell.displayImageView.convert(selectedCell.displayImageView.bounds, to: window)
+		self.cellDisplayLabelRect = selectedCell.displayLabel.convert(selectedCell.displayLabel.bounds, to: window)
 	}
 
 	
@@ -83,7 +85,8 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 		// unpack all necessary vars
 		guard let selectedCell = homeViewController.selectedCell,
 					let window = homeViewController.view.window ?? detailViewController.view.window,
-					let cellImageSnapshot = selectedCell.displayImageView.snapshotView(afterScreenUpdates: true),
+					let cellImageViewSnapshot = selectedCell.displayImageView.snapshotView(afterScreenUpdates: true),
+					let cellDisplayLabelSnapshot = selectedCell.displayLabel.snapshotView(afterScreenUpdates: true),
 					let scrollingNavViewSnapshot = homeViewController.scrollingNavView.snapshotView(afterScreenUpdates: true) else {
 			// report to UIKit that transition did not complete as intended
 			transitionContext.completeTransition(false)
@@ -103,7 +106,7 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 			// the selectedCellImageViewSnapshot snapshot, the view is not yet
 			// updated so we take the snapshot again. I couldn’t find the proper
 			// way to overcome this issue.
-			selectedCellImageViewSnapshot = cellImageSnapshot
+			selectedCellImageViewSnapshot = cellImageViewSnapshot
 			
 			// backgroundView doesn't do much in this case
 			// its just a containerView for fadeView
@@ -124,13 +127,16 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 		// because we always want selectedCellImageViewSnapshot
 		// to appear that it's under it although it's really not
 		// in the view hierarchy of HomeViewController :)
-		[backgroundView, selectedCellImageViewSnapshot, scrollingNavViewSnapshot].forEach { containerView.addSubview($0) }
+		[backgroundView, selectedCellImageViewSnapshot, cellDisplayLabelSnapshot, scrollingNavViewSnapshot].forEach { containerView.addSubview($0) }
 
 		// get DetailVC imageView bounds in windows coordinate space
 		let detailVCImageViewRect = detailViewController.detailImageView.convert(detailViewController.detailImageView.bounds, to: window)
 		
 		// get homeVC scrollingNav bounds in windows coordinates space
 		let homeVCscrollingNavRect = homeViewController.scrollingNavView.convert(homeViewController.scrollingNavView.bounds, to: window)
+		
+		// get cellDisplayLabel bounds in windows coordinate space
+		let cellDisplayLabelRect = selectedCell.displayLabel.convert(selectedCell.displayLabel.bounds, to: window)
 		
 		// set starting frames on snapshots based on PresentationType
 		[selectedCellImageViewSnapshot].forEach { $0.frame = isPresenting ? cellImageViewRect : detailVCImageViewRect }
@@ -141,6 +147,10 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 		// set starting alpha on scrollingNavViewSnapshot based on PresentationType
 		scrollingNavViewSnapshot.alpha = isPresenting ? 1.0 : 0.0
 		
+		// set frame (always the same) and alpha on cellDisplayLabelSnapshot
+		cellDisplayLabelSnapshot.frame = cellDisplayLabelRect
+		cellDisplayLabelSnapshot.alpha = isPresenting ? 1.0 : 0.0
+		
 		// use keyframes for max animation control
 		UIView.animateKeyframes(withDuration: Self.duration,
 														delay: 0.0, options: .calculationModeCubic) {
@@ -148,23 +158,25 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 			UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 1.0) {
 				// set end frames on snapshots based on PresentationType
 				self.selectedCellImageViewSnapshot.frame = isPresenting ? detailVCImageViewRect : self.cellImageViewRect
-				scrollingNavViewSnapshot.alpha = isPresenting ? 0.0 : 1.0
 
 				// set fadeView alpha based on PresentationType
 				fadeView.alpha = isPresenting ? 1.0 : 0.0
 			}
 			
+			// slightly modified duration
+			UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: isPresenting ? 1.0 : 0.7) {
+				cellDisplayLabelSnapshot.alpha = isPresenting ? 0.0 : 1.0
+				scrollingNavViewSnapshot.alpha = isPresenting ? 0.0 : 1.0
+			}
+			
 		} completion: { _ in
 			// perform clean up in here
 			
-			// remove cellImageSnapshot
+			// remove views from containerView
 			self.selectedCellImageViewSnapshot.removeFromSuperview()
-			
-			// remove backgroundView
 			backgroundView.removeFromSuperview()
-			
-			// remove scrollingNavViewSnapshot
 			scrollingNavViewSnapshot.removeFromSuperview()
+			cellDisplayLabelSnapshot.removeFromSuperview()
 			
 			// show toView
 			toView.alpha = 1.0
