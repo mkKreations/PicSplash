@@ -19,6 +19,7 @@ class DetailViewController: UIViewController {
 	let closeButton: UIButton = UIButton(type: .system)
 	let titleLabel: UILabel = UILabel(frame: .zero)
 	let shareButton: UIButton = UIButton(type: .system)
+	let infoButton: UIButton = UIButton(type: .custom)
 	private let navStackView: UIStackView = UIStackView(frame: .zero)
 	private var navStackViewTopConstraint: NSLayoutConstraint?
 	weak var delegate: DetailButtonActionsProvider?
@@ -80,6 +81,11 @@ class DetailViewController: UIViewController {
 		titleLabel.numberOfLines = 1
 		titleLabel.textAlignment = .center
 		titleLabel.text = "\(imagePlaceholder.height)"
+		
+		infoButton.translatesAutoresizingMaskIntoConstraints = false
+		infoButton.setBackgroundImage(UIImage(systemName: "info.circle"), for: .normal)
+		infoButton.tintColor = .white
+		view.addSubview(infoButton)
 	}
 	
 	private func constrainSubviews() {
@@ -94,11 +100,11 @@ class DetailViewController: UIViewController {
 		imageHeightConstraint.isActive = true
 		
 		// if imageView is too tall - respect top & bottom constraints
-		let imageTopConstraint = detailImageView.topAnchor.constraint(greaterThanOrEqualTo: view.topAnchor, constant: 40.0)
+		let imageTopConstraint = detailImageView.topAnchor.constraint(greaterThanOrEqualTo: view.topAnchor, constant: 24.0)
 		imageTopConstraint.priority = UILayoutPriority(999)
 		imageTopConstraint.isActive = true
 
-		let imageBottomConstraint = view.bottomAnchor.constraint(greaterThanOrEqualTo: detailImageView.bottomAnchor, constant: 40.0)
+		let imageBottomConstraint = view.bottomAnchor.constraint(greaterThanOrEqualTo: detailImageView.bottomAnchor, constant: 24.0)
 		imageBottomConstraint.priority = UILayoutPriority(999)
 		imageBottomConstraint.isActive = true
 		
@@ -110,6 +116,11 @@ class DetailViewController: UIViewController {
 		closeButton.widthAnchor.constraint(equalToConstant: 20.0).isActive = true
 
 		shareButton.widthAnchor.constraint(equalToConstant: 22.0).isActive = true
+		
+		infoButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16.0).isActive = true
+		infoButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -30.0).isActive = true
+		infoButton.heightAnchor.constraint(equalToConstant: 22.0).isActive = true
+		infoButton.widthAnchor.constraint(equalToConstant: 22.0).isActive = true
 	}
 	
 	@objc private func closeButtonPressed(_ sender: UIButton) {
