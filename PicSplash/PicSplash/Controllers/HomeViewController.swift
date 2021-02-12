@@ -26,6 +26,8 @@ final class HomeViewController: UIViewController {
 	private let loginFadeView: UIView = UIView(frame: .zero)
 	private let loginView: LoginView = LoginView(frame: .zero)
 	private var loginViewBottomConstraint: NSLayoutConstraint?
+	var selectedCell: HomeImageCell? // view controller transition
+	var selectedCellImageSnapshot: UIView? // view controller transition
 		
 	
 	// MARK: view life cycle
@@ -332,6 +334,9 @@ extension HomeViewController: UICollectionViewDelegate {
 		if selectedSectionPlaceholder.type == .orthogonal { return }
 		
 		let selectedImagePlaceholder = selectedSectionPlaceholder.images[indexPath.row]
+		// capture vars for view controller transition
+		selectedCell = collectionView.cellForItem(at: indexPath) as? HomeImageCell
+		selectedCellImageSnapshot = selectedCell?.displayImageView.snapshotView(afterScreenUpdates: false)
 		presentDetailViewController(withImagePlaceholder: selectedImagePlaceholder)
 	}
 	
@@ -353,11 +358,29 @@ extension HomeViewController: UIViewControllerTransitioningDelegate {
 	func animationController(forPresented presented: UIViewController,
 													 presenting: UIViewController,
 													 source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-		return nil // using default animation transition for now
+		
+		// use default animation if we don't receive parameters
+		guard let homeViewController = presenting as? HomeViewController,
+					let detailViewController = presented as? DetailViewController,
+					let selectedCellImageSnapshot = selectedCellImageSnapshot else { return nil }
+		
+		let detailAnimator = DetailAnimator(presentationType: .present,
+																				homeViewController: homeViewController,
+																				detailViewController: detailViewController,
+																				selectedImageViewSnapshot: selectedCellImageSnapshot)
+		return detailAnimator
 	}
 	
 	func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-		return nil // using default animation transition for now
+		// use default animation if we don't receive parameters
+		guard let detailViewController = dismissed as? DetailViewController,
+					let selectedCellImageSnapshot = selectedCellImageSnapshot else { return nil }
+		
+		let detailAnimator = DetailAnimator(presentationType: .dismiss,
+																				homeViewController: self,
+																				detailViewController: detailViewController,
+																				selectedImageViewSnapshot: selectedCellImageSnapshot)
+		return detailAnimator
 	}
 	
 }
