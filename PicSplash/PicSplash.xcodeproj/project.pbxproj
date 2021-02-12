@@ -12,6 +12,7 @@
 		2CAE645725D37788009A31F6 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAE645625D37788009A31F6 /* LoginView.swift */; };
 		2CAF5EEC25D5EA31000322B9 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAF5EEB25D5EA31000322B9 /* DetailViewController.swift */; };
 		2CAF5EF025D60095000322B9 /* DetailAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAF5EEF25D60095000322B9 /* DetailAnimator.swift */; };
+		2CAF5EF325D6D55A000322B9 /* DetailActionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAF5EF225D6D55A000322B9 /* DetailActionButton.swift */; };
 		2CD3C29D25CF04BB00BC0507 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CD3C29C25CF04BB00BC0507 /* AppDelegate.swift */; };
 		2CD3C2A425CF04BB00BC0507 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2CD3C2A225CF04BB00BC0507 /* Main.storyboard */; };
 		2CD3C2A625CF04BE00BC0507 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2CD3C2A525CF04BE00BC0507 /* Assets.xcassets */; };
@@ -35,6 +36,7 @@
 		2CAE645625D37788009A31F6 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		2CAF5EEB25D5EA31000322B9 /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
 		2CAF5EEF25D60095000322B9 /* DetailAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailAnimator.swift; sourceTree = "<group>"; };
+		2CAF5EF225D6D55A000322B9 /* DetailActionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailActionButton.swift; sourceTree = "<group>"; };
 		2CD3C29925CF04BB00BC0507 /* PicSplash.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PicSplash.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2CD3C29C25CF04BB00BC0507 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		2CD3C2A325CF04BB00BC0507 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -143,6 +145,7 @@
 				2CF14EDF25D321A5000F1210 /* MenuView.swift */,
 				2CAE645625D37788009A31F6 /* LoginView.swift */,
 				2C0B793F25D447FE007D18D3 /* LoginTextField.swift */,
+				2CAF5EF225D6D55A000322B9 /* DetailActionButton.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -255,6 +258,7 @@
 				2CF14EE625D33151000F1210 /* UIButton+extensions.swift in Sources */,
 				2CAE645725D37788009A31F6 /* LoginView.swift in Sources */,
 				2C0B794025D447FE007D18D3 /* LoginTextField.swift in Sources */,
+				2CAF5EF325D6D55A000322B9 /* DetailActionButton.swift in Sources */,
 				2CF14ED625D30EF4000F1210 /* MenuViewController.swift in Sources */,
 				2CD3C2D525CF8B3500BC0507 /* HomeOrthogonalCell.swift in Sources */,
 				2CD3C2D825CF97F100BC0507 /* HomeCollectionReusableView.swift in Sources */,
