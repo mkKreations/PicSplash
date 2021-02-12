@@ -337,11 +337,29 @@ extension HomeViewController: UICollectionViewDelegate {
 	
 	private func presentDetailViewController(withImagePlaceholder imagePlaceholder: ImagePlaceholder) {
 		let detailVC = DetailViewController(imagePlaceholder: imagePlaceholder)
-//		detailVC.transitioningDelegate = self
+		detailVC.transitioningDelegate = self
 		detailVC.modalPresentationStyle = .fullScreen
 		present(detailVC, animated: true, completion: nil)
 	}
 		
+}
+
+
+
+// MARK: transitionDelegate conformance for DetailViewController
+
+extension HomeViewController: UIViewControllerTransitioningDelegate {
+	
+	func animationController(forPresented presented: UIViewController,
+													 presenting: UIViewController,
+													 source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+		return nil // using default animation transition for now
+	}
+	
+	func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+		return nil // using default animation transition for now
+	}
+	
 }
 
 
