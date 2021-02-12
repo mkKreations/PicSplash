@@ -15,6 +15,7 @@ protocol DetailButtonActionsProvider: AnyObject {
 class DetailViewController: UIViewController {
 	// class vars
 	static private let tapFadeAnimationDuration: TimeInterval = 0.5
+	static private let navStackViewTopMargin: CGFloat = 30.0
 	
 	// internal vars
 	let detailImageView: UIImageView = UIImageView(frame: .zero) // expose to public for view controller transition
@@ -75,9 +76,13 @@ class DetailViewController: UIViewController {
 		// disable view interactions for animation duration
 		view.isUserInteractionEnabled = false
 
-		// set initial states
+		// set initial states - alphas
 		infoButton.alpha = subviewsShowing ? 1.0 : 0.0
 		actionButtonsStackView.alpha = subviewsShowing ? 1.0 : 0.0
+		navStackView.alpha = subviewsShowing ? 1.0 : 0.0
+		
+		// set initial states - constraints
+		navStackViewTopConstraint?.constant = subviewsShowing ? -navStackView.frame.height : Self.navStackViewTopMargin
 		
 		// animate to end states
 		UIView.animate(withDuration: Self.tapFadeAnimationDuration,
@@ -86,6 +91,10 @@ class DetailViewController: UIViewController {
 			// set end states - alphas
 			self.infoButton.alpha = self.subviewsShowing ? 0.0 : 1.0
 			self.actionButtonsStackView.alpha = self.subviewsShowing ? 0.0 : 1.0
+			self.navStackView.alpha = self.subviewsShowing ? 0.0 : 1.0
+						
+			// set end states - constraints
+			self.view.layoutIfNeeded()
 		} completion: { _ in
 			// flip subviewsShowing
 			self.subviewsShowing = !self.subviewsShowing
@@ -93,6 +102,7 @@ class DetailViewController: UIViewController {
 			// set any properties based on if subviews are showing
 			self.infoButton.isUserInteractionEnabled = self.subviewsShowing
 			self.actionButtonsStackView.isUserInteractionEnabled = self.subviewsShowing
+			self.navStackView.isUserInteractionEnabled = self.subviewsShowing
 			
 			// enable view interactions once animation
 			// and setting of values is completed
@@ -172,7 +182,7 @@ class DetailViewController: UIViewController {
 		
 		navStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16.0).isActive = true
 		navStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16.0).isActive = true
-		navStackViewTopConstraint = navStackView.topAnchor.constraint(equalTo: view.topAnchor, constant: 30.0)
+		navStackViewTopConstraint = navStackView.topAnchor.constraint(equalTo: view.topAnchor, constant: Self.navStackViewTopMargin)
 		navStackViewTopConstraint?.isActive = true
 		
 		closeButton.widthAnchor.constraint(equalToConstant: 20.0).isActive = true
