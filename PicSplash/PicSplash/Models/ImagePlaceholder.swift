@@ -24,7 +24,7 @@ struct ImagePlaceholder {
 	let id = UUID()
 	// MARK: placeholder data
 	let height: Int = Int.random(in: 50...500)
-	lazy var placeholderColor: UIColor = {
+	let placeholderColor: UIColor = {
 		let colors: [UIColor] = [
 			.red,
 			.gray,
