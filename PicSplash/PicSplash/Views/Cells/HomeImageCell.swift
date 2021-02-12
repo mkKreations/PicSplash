@@ -10,11 +10,12 @@ import UIKit
 class HomeImageCell: UICollectionViewCell {
 	// class vars
 	static let reuseIdentifier: String = UUID().uuidString
+	static let imageShadowOverlayStyle: ImageShadowOverlayView.OverlayStyle = .base
 	
 	
-	// instance vars
-	private let gradientOverlayView: ImageShadowOverlayView = ImageShadowOverlayView(overlayStyle: .base)
-	let displayImageView: UIImageView = UIImageView(frame: .zero) // expose to public for view controller transition
+	// instance vars - exposed to public for view controller transition
+	let gradientOverlayView: ImageShadowOverlayView = ImageShadowOverlayView(overlayStyle: HomeImageCell.imageShadowOverlayStyle)
+	let displayImageView: UIImageView = UIImageView(frame: .zero)
 	let displayLabel: UILabel = UILabel(frame: .zero)
 	private var imageViewHeightConstraint: NSLayoutConstraint! // manage imageView height manually
 	

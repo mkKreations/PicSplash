@@ -24,6 +24,7 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 	private var selectedCellImageViewSnapshot: UIView
 	private let cellImageViewRect: CGRect
 	private let cellDisplayLabelRect: CGRect
+	private let cellGradientOverlayRect: CGRect
 	
 	
 	// nested enum to see if which transition we're in
@@ -61,6 +62,7 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 		// getting the frame of the imageView & displayLabel of the cell relative to the windows frame
 		self.cellImageViewRect = selectedCell.displayImageView.convert(selectedCell.displayImageView.bounds, to: window)
 		self.cellDisplayLabelRect = selectedCell.displayLabel.convert(selectedCell.displayLabel.bounds, to: window)
+		self.cellGradientOverlayRect = selectedCell.gradientOverlayView.convert(selectedCell.gradientOverlayView.bounds, to: window)
 	}
 
 	
@@ -87,6 +89,7 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 					let window = homeViewController.view.window ?? detailViewController.view.window,
 					let cellImageViewSnapshot = selectedCell.displayImageView.snapshotView(afterScreenUpdates: true),
 					let cellDisplayLabelSnapshot = selectedCell.displayLabel.snapshotView(afterScreenUpdates: true),
+					var cellGradientOverlaySnapshot = selectedCell.gradientOverlayView.snapshotView(afterScreenUpdates: true),
 					let scrollingNavViewSnapshot = homeViewController.scrollingNavView.snapshotView(afterScreenUpdates: true) else {
 			// report to UIKit that transition did not complete as intended
 			transitionContext.completeTransition(false)
@@ -117,6 +120,13 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 			// we don't ever expect to get nil in this case
 			backgroundView = homeViewController.view.snapshotView(afterScreenUpdates: true) ?? fadeView
 			backgroundView.addSubview(fadeView)
+			
+			// a bit of another workaround because when dismissing, the
+			// cellGradientOverlaySnapshot doesn't render the gradient
+			// from the underlying CAGradientLayer from our custom subclass
+			// :( so instead we instantiate a fresh instance of our subclass
+			// easy solution without having to modify any pre-existing views
+			cellGradientOverlaySnapshot = ImageShadowOverlayView(overlayStyle: HomeImageCell.imageShadowOverlayStyle)
 		}
 		
 		// hide otherwise it'll overlap the animation
@@ -127,15 +137,21 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 		// because we always want selectedCellImageViewSnapshot
 		// to appear that it's under it although it's really not
 		// in the view hierarchy of HomeViewController :)
-		[backgroundView, selectedCellImageViewSnapshot, cellDisplayLabelSnapshot, scrollingNavViewSnapshot].forEach { containerView.addSubview($0) }
+		[backgroundView,
+		 selectedCellImageViewSnapshot,
+		 cellGradientOverlaySnapshot,
+		 cellDisplayLabelSnapshot,
+		 scrollingNavViewSnapshot].forEach { containerView.addSubview($0) }
 
-		// get various views' bounds in windows coordinate space
+		// get various views' bounds from view controllers within windows coordinate space
 		let detailVCImageViewRect = detailViewController.detailImageView.convert(detailViewController.detailImageView.bounds, to: window)
 		let homeVCscrollingNavRect = homeViewController.scrollingNavView.convert(homeViewController.scrollingNavView.bounds, to: window)
-		let cellDisplayLabelRect = selectedCell.displayLabel.convert(selectedCell.displayLabel.bounds, to: window)
 		
 		// set starting frames on snapshots based on PresentationType
-		[selectedCellImageViewSnapshot].forEach { $0.frame = isPresenting ? cellImageViewRect : detailVCImageViewRect }
+		[selectedCellImageViewSnapshot, cellGradientOverlaySnapshot].forEach { $0.frame = isPresenting ? cellImageViewRect : detailVCImageViewRect }
+		
+		// set starting alpha on cellGradientOverlaySnapshot
+		cellGradientOverlaySnapshot.alpha = isPresenting ? 1.0 : 0.0
 		
 		// set frame (always the same) and alpha on scrollingNavViewSnapshot
 		scrollingNavViewSnapshot.frame = homeVCscrollingNavRect
@@ -152,6 +168,10 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 			UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 1.0) {
 				// set end frames on snapshots based on PresentationType
 				self.selectedCellImageViewSnapshot.frame = isPresenting ? detailVCImageViewRect : self.cellImageViewRect
+				cellGradientOverlaySnapshot.frame = isPresenting ? detailVCImageViewRect : self.cellImageViewRect
+				
+				// set end alpha of cellGradientOverlaySnapshot based on PresentationType
+				cellGradientOverlaySnapshot.alpha = isPresenting ? 0.0 : 1.0
 
 				// set fadeView alpha based on PresentationType
 				fadeView.alpha = isPresenting ? 1.0 : 0.0
@@ -171,6 +191,7 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 			backgroundView.removeFromSuperview()
 			scrollingNavViewSnapshot.removeFromSuperview()
 			cellDisplayLabelSnapshot.removeFromSuperview()
+			cellGradientOverlaySnapshot.removeFromSuperview()
 			
 			// show toView
 			toView.alpha = 1.0
