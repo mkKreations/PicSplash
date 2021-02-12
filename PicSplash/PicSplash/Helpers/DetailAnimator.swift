@@ -83,7 +83,8 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 		// unpack all necessary vars
 		guard let selectedCell = homeViewController.selectedCell,
 					let window = homeViewController.view.window ?? detailViewController.view.window,
-					let cellImageSnapshot = selectedCell.displayImageView.snapshotView(afterScreenUpdates: true) else {
+					let cellImageSnapshot = selectedCell.displayImageView.snapshotView(afterScreenUpdates: true),
+					let scrollingNavViewSnapshot = homeViewController.scrollingNavView.snapshotView(afterScreenUpdates: true) else {
 			// report to UIKit that transition did not complete as intended
 			transitionContext.completeTransition(false)
 			return
@@ -118,14 +119,27 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 		// hide otherwise it'll overlap the animation
 		toView.alpha = 0.0
 		
-		// add snapshots to containerView
-		[backgroundView, selectedCellImageViewSnapshot].forEach { containerView.addSubview($0) }
-		
-		// get DetailVC image bounds in windows coordinate space
+		// add snapshots/views to containerView
+		// we're putting scrollingNavViewSnapshot on top
+		// because we always want selectedCellImageViewSnapshot
+		// to appear that it's under it although it's really not
+		// in the view hierarchy of HomeViewController :)
+		[backgroundView, selectedCellImageViewSnapshot, scrollingNavViewSnapshot].forEach { containerView.addSubview($0) }
+
+		// get DetailVC imageView bounds in windows coordinate space
 		let detailVCImageViewRect = detailViewController.detailImageView.convert(detailViewController.detailImageView.bounds, to: window)
+		
+		// get homeVC scrollingNav bounds in windows coordinates space
+		let homeVCscrollingNavRect = homeViewController.scrollingNavView.convert(homeViewController.scrollingNavView.bounds, to: window)
 		
 		// set starting frames on snapshots based on PresentationType
 		[selectedCellImageViewSnapshot].forEach { $0.frame = isPresenting ? cellImageViewRect : detailVCImageViewRect }
+		
+		// set frame on scrollingNavViewSnapshot - it's always the same
+		scrollingNavViewSnapshot.frame = homeVCscrollingNavRect
+		
+		// set starting alpha on scrollingNavViewSnapshot based on PresentationType
+		scrollingNavViewSnapshot.alpha = isPresenting ? 1.0 : 0.0
 		
 		// use keyframes for max animation control
 		UIView.animateKeyframes(withDuration: Self.duration,
@@ -134,7 +148,8 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 			UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 1.0) {
 				// set end frames on snapshots based on PresentationType
 				self.selectedCellImageViewSnapshot.frame = isPresenting ? detailVCImageViewRect : self.cellImageViewRect
-				
+				scrollingNavViewSnapshot.alpha = isPresenting ? 0.0 : 1.0
+
 				// set fadeView alpha based on PresentationType
 				fadeView.alpha = isPresenting ? 1.0 : 0.0
 			}
@@ -147,6 +162,9 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 			
 			// remove backgroundView
 			backgroundView.removeFromSuperview()
+			
+			// remove scrollingNavViewSnapshot
+			scrollingNavViewSnapshot.removeFromSuperview()
 			
 			// show toView
 			toView.alpha = 1.0

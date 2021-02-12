@@ -19,7 +19,7 @@ final class HomeViewController: UIViewController {
 		UICollectionView(frame: view.frame, collectionViewLayout: configureCompositionalLayout())
 	}()
 	private var datasource: UICollectionViewDiffableDataSource<SectionPlaceHolder, ImagePlaceholder>!
-	private lazy var scrollingNavView: ScrollingNavigationView = {
+	lazy var scrollingNavView: ScrollingNavigationView = { // expose to public for view controller transition
 		ScrollingNavigationView(frame: CGRect(origin: .zero,
 																					size: CGSize(width: view.frame.width, height: Self.navMaxHeight)))
 	}()
