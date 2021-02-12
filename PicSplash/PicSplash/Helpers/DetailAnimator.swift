@@ -129,22 +129,16 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 		// in the view hierarchy of HomeViewController :)
 		[backgroundView, selectedCellImageViewSnapshot, cellDisplayLabelSnapshot, scrollingNavViewSnapshot].forEach { containerView.addSubview($0) }
 
-		// get DetailVC imageView bounds in windows coordinate space
+		// get various views' bounds in windows coordinate space
 		let detailVCImageViewRect = detailViewController.detailImageView.convert(detailViewController.detailImageView.bounds, to: window)
-		
-		// get homeVC scrollingNav bounds in windows coordinates space
 		let homeVCscrollingNavRect = homeViewController.scrollingNavView.convert(homeViewController.scrollingNavView.bounds, to: window)
-		
-		// get cellDisplayLabel bounds in windows coordinate space
 		let cellDisplayLabelRect = selectedCell.displayLabel.convert(selectedCell.displayLabel.bounds, to: window)
 		
 		// set starting frames on snapshots based on PresentationType
 		[selectedCellImageViewSnapshot].forEach { $0.frame = isPresenting ? cellImageViewRect : detailVCImageViewRect }
 		
-		// set frame on scrollingNavViewSnapshot - it's always the same
+		// set frame (always the same) and alpha on scrollingNavViewSnapshot
 		scrollingNavViewSnapshot.frame = homeVCscrollingNavRect
-		
-		// set starting alpha on scrollingNavViewSnapshot based on PresentationType
 		scrollingNavViewSnapshot.alpha = isPresenting ? 1.0 : 0.0
 		
 		// set frame (always the same) and alpha on cellDisplayLabelSnapshot
