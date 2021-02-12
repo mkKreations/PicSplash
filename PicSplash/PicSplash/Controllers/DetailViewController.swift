@@ -84,17 +84,25 @@ class DetailViewController: UIViewController {
 		// set initial states - constraints
 		navStackViewTopConstraint?.constant = subviewsShowing ? -navStackView.frame.height : Self.navStackViewTopMargin
 		
-		// animate to end states
-		UIView.animate(withDuration: Self.tapFadeAnimationDuration,
-									 delay: 0.0,
-									 options: .curveEaseInOut) {
-			// set end states - alphas
-			self.infoButton.alpha = self.subviewsShowing ? 0.0 : 1.0
-			self.actionButtonsStackView.alpha = self.subviewsShowing ? 0.0 : 1.0
-			self.navStackView.alpha = self.subviewsShowing ? 0.0 : 1.0
-						
-			// set end states - constraints
-			self.view.layoutIfNeeded()
+		// add key frame animations
+		UIView.animateKeyframes(withDuration: Self.tapFadeAnimationDuration,
+														delay: 0.0, options: .calculationModeCubic) {
+			
+			UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 1.0) {
+				// set end states - alphas
+				self.infoButton.alpha = self.subviewsShowing ? 0.0 : 1.0
+				self.actionButtonsStackView.alpha = self.subviewsShowing ? 0.0 : 1.0
+
+				// set end states - constraints
+				self.view.layoutIfNeeded()
+			}
+			
+			UIView.addKeyframe(withRelativeStartTime: self.subviewsShowing ? 0.0 : 0.2,
+												 relativeDuration: self.subviewsShowing ? 0.6 : 1.0) {
+				// set end states - alphas
+				self.navStackView.alpha = self.subviewsShowing ? 0.0 : 1.0
+			}
+			
 		} completion: { _ in
 			// flip subviewsShowing
 			self.subviewsShowing = !self.subviewsShowing
@@ -108,6 +116,7 @@ class DetailViewController: UIViewController {
 			// and setting of values is completed
 			self.view.isUserInteractionEnabled = true
 		}
+		
 	}
 	
 	
