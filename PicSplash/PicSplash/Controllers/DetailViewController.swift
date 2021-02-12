@@ -13,6 +13,9 @@ protocol DetailButtonActionsProvider: AnyObject {
 }
 
 class DetailViewController: UIViewController {
+	// class vars
+	static private let tapFadeAnimationDuration: TimeInterval = 0.5
+	
 	// internal vars
 	let detailImageView: UIImageView = UIImageView(frame: .zero) // expose to public for view controller transition
 	private var imagePlaceholder: ImagePlaceholder
@@ -27,6 +30,7 @@ class DetailViewController: UIViewController {
 	private let navStackView: UIStackView = UIStackView(frame: .zero)
 	private var navStackViewTopConstraint: NSLayoutConstraint?
 	weak var delegate: DetailButtonActionsProvider?
+	private var subviewsShowing: Bool = true // always true by default
 	
 	
 	// MARK: inits
@@ -48,12 +52,54 @@ class DetailViewController: UIViewController {
 		
 		view.backgroundColor = .picSplashBlack
 		
+		// add tap gesture
+		let tapGest = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+		tapGest.numberOfTapsRequired = 1
+		view.addGestureRecognizer(tapGest)
+		
 		configureSubviews()
 		constrainSubviews()
 	}
 	
 	
-	// MARK: helpers
+	
+	// MARK: tap gest/animation
+	
+	@objc private func handleTap(_ tapGesture: UITapGestureRecognizer) {
+		if tapGesture.state == .ended {
+			animateSubviewsToShowHideImage()
+		}
+	}
+	
+	private func animateSubviewsToShowHideImage() {
+		// disable view interactions for animation duration
+		view.isUserInteractionEnabled = false
+
+		// set initial states
+		infoButton.alpha = subviewsShowing ? 1.0 : 0.0
+		
+		// animate to end states
+		UIView.animate(withDuration: Self.tapFadeAnimationDuration,
+									 delay: 0.0,
+									 options: .curveEaseInOut) {
+			// set end states
+			self.infoButton.alpha = self.subviewsShowing ? 0.0 : 1.0
+		} completion: { _ in
+			// flip subviewsShowing
+			self.subviewsShowing = !self.subviewsShowing
+			
+			// reset any properties
+			self.infoButton.isUserInteractionEnabled = self.subviewsShowing
+			
+			// enable view interactions once animation
+			// and setting of values is completed
+			self.view.isUserInteractionEnabled = true
+		}
+	}
+	
+	
+	
+	// MARK: view/subview stuff
 	
 	private func configureSubviews() {
 		detailImageView.translatesAutoresizingMaskIntoConstraints = false
@@ -138,6 +184,10 @@ class DetailViewController: UIViewController {
 		actionButtonsStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16.0).isActive = true
 		actionButtonsStackView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -50.0).isActive = true
 	}
+	
+	
+	
+	// MARK: button actions
 	
 	@objc private func closeButtonPressed(_ sender: UIButton) {
 		dismiss(animated: true) {
