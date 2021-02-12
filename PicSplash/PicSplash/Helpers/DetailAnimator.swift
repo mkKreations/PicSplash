@@ -13,7 +13,7 @@ import UIKit
 class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 	// class vars
 	
-	private static let duration: TimeInterval = 1.25
+	private static let duration: TimeInterval = 0.25
 	
 	
 	// instance vars
@@ -92,16 +92,34 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 		// capture isPresenting for easy reference
 		let isPresenting = presentationType.isPresenting
 		
+		// setup backgroundView/fadeView
+		let backgroundView: UIView // this view will represent HomeViewController.view
+		let fadeView: UIView = UIView(frame: containerView.bounds) // this view will represent DetailViewController.view
+		fadeView.backgroundColor = detailViewController.view.backgroundColor
+		
 		if isPresenting {
 			// this is a workaround to the issue that at the moment of taking
 			// the selectedCellImageViewSnapshot snapshot, the view is not yet
 			// updated so we take the snapshot again. I couldn’t find the proper
 			// way to overcome this issue.
 			selectedCellImageViewSnapshot = cellImageSnapshot
+			
+			// backgroundView doesn't do much in this case
+			// its just a containerView for fadeView
+			backgroundView = UIView(frame: containerView.bounds)
+			backgroundView.addSubview(fadeView)
+			fadeView.alpha = 0.0
+		} else {
+			// we don't ever expect to get nil in this case
+			backgroundView = homeViewController.view.snapshotView(afterScreenUpdates: true) ?? fadeView
+			backgroundView.addSubview(fadeView)
 		}
 		
+		// hide otherwise it'll overlap the animation
+		toView.alpha = 0.0
+		
 		// add snapshots to containerView
-		[selectedCellImageViewSnapshot].forEach { containerView.addSubview($0) }
+		[backgroundView, selectedCellImageViewSnapshot].forEach { containerView.addSubview($0) }
 		
 		// get DetailVC image bounds in windows coordinate space
 		let detailVCImageViewRect = detailViewController.detailImageView.convert(detailViewController.detailImageView.bounds, to: window)
@@ -116,6 +134,9 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 			UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 1.0) {
 				// set end frames on snapshots based on PresentationType
 				self.selectedCellImageViewSnapshot.frame = isPresenting ? detailVCImageViewRect : self.cellImageViewRect
+				
+				// set fadeView alpha based on PresentationType
+				fadeView.alpha = isPresenting ? 1.0 : 0.0
 			}
 			
 		} completion: { _ in
@@ -123,6 +144,12 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 			
 			// remove cellImageSnapshot
 			self.selectedCellImageViewSnapshot.removeFromSuperview()
+			
+			// remove backgroundView
+			backgroundView.removeFromSuperview()
+			
+			// show toView
+			toView.alpha = 1.0
 			
 			// notify context that we completed successfully
 			transitionContext.completeTransition(true)
