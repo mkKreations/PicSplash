@@ -7,6 +7,11 @@
 
 import UIKit
 
+protocol DetailButtonActionsProvider: AnyObject {
+	func didPressCloseButton(_ sender: UIButton)
+	func didPressShareButton(_ sender: UIButton)
+}
+
 class DetailViewController: UIViewController {
 	// internal vars
 	private let detailImageView: UIImageView = UIImageView(frame: .zero)
@@ -16,6 +21,7 @@ class DetailViewController: UIViewController {
 	private let shareButton: UIButton = UIButton(type: .system)
 	private let navStackView: UIStackView = UIStackView(frame: .zero)
 	private var navStackViewTopConstraint: NSLayoutConstraint?
+	weak var delegate: DetailButtonActionsProvider?
 	
 	
 	// MARK: inits
@@ -60,11 +66,13 @@ class DetailViewController: UIViewController {
 		closeButton.translatesAutoresizingMaskIntoConstraints = false
 		closeButton.setBackgroundImage(UIImage(systemName: "xmark"), for: .normal)
 		closeButton.tintColor = .white
+		closeButton.addTarget(self, action: #selector(closeButtonPressed), for: .touchUpInside)
 		closeButton.setContentHuggingPriority(.required, for: .horizontal)
 
 		shareButton.translatesAutoresizingMaskIntoConstraints = false
 		shareButton.setBackgroundImage(UIImage(systemName: "square.and.arrow.up"), for: .normal)
 		shareButton.tintColor = .white
+		shareButton.addTarget(self, action: #selector(shareButtonPressed), for: .touchUpInside)
 		shareButton.setContentHuggingPriority(.required, for: .horizontal)
 
 		titleLabel.font = UIFont.systemFont(ofSize: 18.0, weight: .bold)
@@ -102,6 +110,16 @@ class DetailViewController: UIViewController {
 		closeButton.widthAnchor.constraint(equalToConstant: 20.0).isActive = true
 
 		shareButton.widthAnchor.constraint(equalToConstant: 22.0).isActive = true
+	}
+	
+	@objc private func closeButtonPressed(_ sender: UIButton) {
+		dismiss(animated: true) {
+			self.delegate?.didPressCloseButton(sender)
+		}
+	}
+	
+	@objc private func shareButtonPressed(_ sender: UIButton) {
+		delegate?.didPressShareButton(sender)
 	}
 	
 }

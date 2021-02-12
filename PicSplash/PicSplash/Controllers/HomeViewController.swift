@@ -321,9 +321,51 @@ extension HomeViewController {
 
 
 
-// MARK: scrollview delegate methods
+// MARK: collectionView delegate & relevant methods
 
 extension HomeViewController: UICollectionViewDelegate {
+	
+	func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+		let selectedSectionPlaceholder = sampleData[indexPath.section]
+		
+		// nothing to do for orthogonal cells for now
+		if selectedSectionPlaceholder.type == .orthogonal { return }
+		
+		let selectedImagePlaceholder = selectedSectionPlaceholder.images[indexPath.row]
+		presentDetailViewController(withImagePlaceholder: selectedImagePlaceholder)
+	}
+	
+	private func presentDetailViewController(withImagePlaceholder imagePlaceholder: ImagePlaceholder) {
+		let detailVC = DetailViewController(imagePlaceholder: imagePlaceholder)
+//		detailVC.transitioningDelegate = self
+		detailVC.modalPresentationStyle = .fullScreen
+		present(detailVC, animated: true, completion: nil)
+	}
+		
+}
+
+
+
+// MARK: detailVC delegate - button actions
+
+extension HomeViewController: DetailButtonActionsProvider {
+	
+	func didPressCloseButton(_ sender: UIButton) {
+		// detailVC closes itself but we still receive action
+		print("CLOSE")
+	}
+	
+	func didPressShareButton(_ sender: UIButton) {
+		print("SHARE")
+	}
+	
+}
+
+
+
+// MARK: scrollview delegate & relevant methods
+
+extension HomeViewController {
 	
 	func scrollViewDidScroll(_ scrollView: UIScrollView) {
 		// offset will begin as negative from origin since
