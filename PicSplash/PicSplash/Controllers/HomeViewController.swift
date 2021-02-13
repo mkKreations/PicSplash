@@ -513,8 +513,10 @@ extension HomeViewController {
 		}
 	}
 	
-	private func snapScrollViewContentToTop(_ scrollView: UIScrollView) {
-		UIView.animate(withDuration: 0.3,
+	// allow passing of duration so we can
+	// time this animation with other ones
+	private func snapScrollViewContentToTop(_ scrollView: UIScrollView, withDuration duration: TimeInterval = 0.03) {
+		UIView.animate(withDuration: duration,
 									 delay: 0.0,
 									 options: .curveEaseInOut,
 									 animations: {
@@ -541,8 +543,9 @@ extension HomeViewController {
 			let keyboardHeight = keyboardHeightNSValue.cgRectValue.height
 			
 			animateLoginView(forKeyboardHeight: keyboardHeight)
+		} else {
+			snapScrollViewContentToTop(collectionView)
 		}
-		print("keyboard will show!")
 	}
 	
 	@objc func keyboardWillHide(notification: NSNotification) {
