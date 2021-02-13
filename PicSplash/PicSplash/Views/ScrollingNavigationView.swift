@@ -36,7 +36,7 @@ class ScrollingNavigationView: UIView {
 	override init(frame: CGRect) {
 		super.init(frame: frame)
 		
-		backgroundColor = .systemYellow
+		backgroundColor = .picSplashLightBlack
 		
 		configureSubviews()
 		constrainSubviews()
@@ -50,6 +50,11 @@ class ScrollingNavigationView: UIView {
 	func animateSubviews(forScrollDelta scrollDelta: CGFloat) {
 		displayLabel.alpha = scrollDelta
 		buttonsStackView.alpha = scrollDelta
+		displayImageView.alpha = scrollDelta
+	}
+	
+	func setShowsCancelButton(shows: Bool, animated: Bool) {
+		searchBar.setShowsCancelButton(shows, animated: animated)
 	}
 	
 	

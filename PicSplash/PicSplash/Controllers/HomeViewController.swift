@@ -549,10 +549,12 @@ extension HomeViewController {
 		} else {
 			snapScrollViewContentToTop(collectionView, withDuration: 0.03)
 		}
+		
+		scrollingNavView.setShowsCancelButton(shows: true, animated: true)
 	}
 	
 	@objc func keyboardWillHide(notification: NSNotification) {
-		print("keyboard will hide!")
+		scrollingNavView.setShowsCancelButton(shows: false, animated: true)
 	}
 	
 }
