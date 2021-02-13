@@ -174,6 +174,21 @@ extension HomeViewController: LoginViewButtonActionsProvider {
 		}
 	}
 	
+	private func animateLoginView(forKeyboardHeight keyboardHeight: CGFloat) {
+		let viewMidYConstant = (view.bounds.size.height / 2.0) - (loginView.bounds.size.height / 2.0)
+		
+		// make sure loginView is located where we set it at in animateLoginViewAppearance()
+		guard loginViewBottomConstraint?.constant == viewMidYConstant else { return }
+		
+		// subtracting a bit from keyboardHeight so there's a bit of overlap
+		loginViewBottomConstraint?.constant = keyboardHeight - 20.0
+		
+		UIView.animate(withDuration: 0.3,
+									 delay: 0.0, options: .curveEaseInOut, animations: {
+										self.view.layoutIfNeeded()
+									 }, completion: nil)
+	}
+	
 	private func dismissLoginView() {
 		let dismissYConstant = -loginView.frame.size.height
 		
@@ -503,6 +518,15 @@ extension HomeViewController {
 extension HomeViewController {
 	
 	@objc func keyboardWillShow(notification: NSNotification) {
+		if isShowingLoginView {
+			// unpack keyboard height
+			guard let userInfoDict = notification.userInfo,
+						let keyboardHeightNSValue = userInfoDict[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else { return }
+			
+			let keyboardHeight = keyboardHeightNSValue.cgRectValue.height
+			
+			animateLoginView(forKeyboardHeight: keyboardHeight)
+		}
 		print("keyboard will show!")
 	}
 	
