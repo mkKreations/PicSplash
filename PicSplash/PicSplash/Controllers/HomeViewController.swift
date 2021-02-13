@@ -29,6 +29,7 @@ final class HomeViewController: UIViewController {
 	var selectedCell: HomeImageCell? // view controller transition
 	var selectedCellImageSnapshot: UIView? // view controller transition
 	private var isShowingLoginView: Bool = false
+	private var isObservingKeyboard: Bool = false
 		
 	
 	// MARK: view life cycle
@@ -48,14 +49,17 @@ final class HomeViewController: UIViewController {
 		super.viewWillAppear(animated)
 		
 		// add ourselves as keyboard notification observer
-		NotificationCenter.default.addObserver(self,
-																					 selector: #selector(keyboardWillShow(notification:)),
-																					 name: UIResponder.keyboardWillShowNotification,
-																					 object: nil)
-		NotificationCenter.default.addObserver(self,
-																					 selector: #selector(keyboardWillHide(notification:)),
-																					 name: UIResponder.keyboardWillHideNotification,
-																					 object: nil)
+		if !isObservingKeyboard {
+			NotificationCenter.default.addObserver(self,
+																						 selector: #selector(keyboardWillShow(notification:)),
+																						 name: UIResponder.keyboardWillShowNotification,
+																						 object: nil)
+			NotificationCenter.default.addObserver(self,
+																						 selector: #selector(keyboardWillHide(notification:)),
+																						 name: UIResponder.keyboardWillHideNotification,
+																						 object: nil)
+			isObservingKeyboard = true
+		}
 	}
 	
 	override func viewDidAppear(_ animated: Bool) {
@@ -69,7 +73,10 @@ final class HomeViewController: UIViewController {
 		super.viewWillDisappear(animated)
 		
 		// remove ourselves as observer
-		NotificationCenter.default.removeObserver(self)
+		if isObservingKeyboard {
+			NotificationCenter.default.removeObserver(self)
+			isObservingKeyboard = false
+		}
 	}
 			
 	
