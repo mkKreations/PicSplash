@@ -19,13 +19,15 @@ final class HomeViewController: UIViewController {
 		UICollectionView(frame: view.frame, collectionViewLayout: configureCompositionalLayout())
 	}()
 	private var datasource: UICollectionViewDiffableDataSource<SectionPlaceHolder, ImagePlaceholder>!
-	private lazy var scrollingNavView: ScrollingNavigationView = {
+	lazy var scrollingNavView: ScrollingNavigationView = { // expose to public for view controller transition
 		ScrollingNavigationView(frame: CGRect(origin: .zero,
 																					size: CGSize(width: view.frame.width, height: Self.navMaxHeight)))
 	}()
 	private let loginFadeView: UIView = UIView(frame: .zero)
 	private let loginView: LoginView = LoginView(frame: .zero)
 	private var loginViewBottomConstraint: NSLayoutConstraint?
+	var selectedCell: HomeImageCell? // view controller transition
+	var selectedCellImageSnapshot: UIView? // view controller transition
 		
 	
 	// MARK: view life cycle
@@ -321,9 +323,90 @@ extension HomeViewController {
 
 
 
-// MARK: scrollview delegate methods
+// MARK: collectionView delegate & relevant methods
 
 extension HomeViewController: UICollectionViewDelegate {
+	
+	func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+		let selectedSectionPlaceholder = sampleData[indexPath.section]
+		
+		// nothing to do for orthogonal cells for now
+		if selectedSectionPlaceholder.type == .orthogonal { return }
+		
+		let selectedImagePlaceholder = selectedSectionPlaceholder.images[indexPath.row]
+		// capture vars for view controller transition
+		selectedCell = collectionView.cellForItem(at: indexPath) as? HomeImageCell
+		selectedCellImageSnapshot = selectedCell?.displayImageView.snapshotView(afterScreenUpdates: false)
+		presentDetailViewController(withImagePlaceholder: selectedImagePlaceholder)
+	}
+	
+	private func presentDetailViewController(withImagePlaceholder imagePlaceholder: ImagePlaceholder) {
+		let detailVC = DetailViewController(imagePlaceholder: imagePlaceholder)
+		detailVC.transitioningDelegate = self
+		detailVC.modalPresentationStyle = .fullScreen
+		present(detailVC, animated: true, completion: nil)
+	}
+		
+}
+
+
+
+// MARK: transitionDelegate conformance for DetailViewController
+
+extension HomeViewController: UIViewControllerTransitioningDelegate {
+	
+	func animationController(forPresented presented: UIViewController,
+													 presenting: UIViewController,
+													 source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+		
+		// use default animation if we don't receive parameters
+		guard let homeViewController = presenting as? HomeViewController,
+					let detailViewController = presented as? DetailViewController,
+					let selectedCellImageSnapshot = selectedCellImageSnapshot else { return nil }
+		
+		let detailAnimator = DetailAnimator(presentationType: .present,
+																				homeViewController: homeViewController,
+																				detailViewController: detailViewController,
+																				selectedImageViewSnapshot: selectedCellImageSnapshot)
+		return detailAnimator
+	}
+	
+	func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+		// use default animation if we don't receive parameters
+		guard let detailViewController = dismissed as? DetailViewController,
+					let selectedCellImageSnapshot = selectedCellImageSnapshot else { return nil }
+		
+		let detailAnimator = DetailAnimator(presentationType: .dismiss,
+																				homeViewController: self,
+																				detailViewController: detailViewController,
+																				selectedImageViewSnapshot: selectedCellImageSnapshot)
+		return detailAnimator
+	}
+	
+}
+
+
+
+// MARK: detailVC delegate - button actions
+
+extension HomeViewController: DetailButtonActionsProvider {
+	
+	func didPressCloseButton(_ sender: UIButton) {
+		// detailVC closes itself but we still receive action
+		print("CLOSE")
+	}
+	
+	func didPressShareButton(_ sender: UIButton) {
+		print("SHARE")
+	}
+	
+}
+
+
+
+// MARK: scrollview delegate & relevant methods
+
+extension HomeViewController {
 	
 	func scrollViewDidScroll(_ scrollView: UIScrollView) {
 		// offset will begin as negative from origin since
