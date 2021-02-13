@@ -30,6 +30,9 @@ final class HomeViewController: UIViewController {
 	var selectedCellImageSnapshot: UIView? // view controller transition
 	private var isShowingLoginView: Bool = false
 	private var isObservingKeyboard: Bool = false
+	lazy var trendingCollectionView: UICollectionView = {
+		UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+	}()
 		
 	
 	// MARK: view life cycle
