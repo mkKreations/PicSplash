@@ -554,7 +554,12 @@ extension HomeViewController {
 			
 			animateLoginView(forKeyboardHeight: keyboardHeight)
 		} else {
-			snapScrollViewContentToTop(collectionView, withDuration: 0.03)
+			let offset = -collectionView.contentOffset.y
+			
+			// only snap if within the money zone $$
+			if offset <= Self.navMaxHeight && offset > Self.navMinHeight {
+				snapScrollViewContentToTop(collectionView, withDuration: 0.03)
+			}
 		}
 		
 		scrollingNavView.setShowsCancelButton(shows: true, animated: true)
