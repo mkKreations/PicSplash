@@ -469,6 +469,9 @@ extension HomeViewController {
 		// we'll negate it to work with positive values
 		let offset: CGFloat = -scrollView.contentOffset.y
 		
+		
+		// logic to handle setting of scrollingNavView frame
+		
 		// set restriction on min height for scrollingNavView
 		let height: CGFloat = max(offset, Self.navMinHeight)
 		
@@ -477,20 +480,20 @@ extension HomeViewController {
 		scrollNavViewFrame.size.height = height
 		scrollingNavView.frame = scrollNavViewFrame
 		
-		// logic to pass percentage increase/decrease values to scrollingNavView
 		
-		// nothing to do here for now
-		// if we're scaling into scrollingNavView by scrolling down
-		// when at top or when scrollView bounces at rest point
-		if height > Self.navMaxHeight { return }
+		// logic to handle setting alphas on scrollingNavView subviews
 		
-		// logic for percent decrease - primarily
-		// when scrolling down & back up
-		let desiredScrollRange: CGFloat = Self.navMaxHeight - Self.navMinHeight // represents old number
-		let absoluteHeight = abs(height - Self.navMaxHeight) // represents new number
-		let decrease = desiredScrollRange - absoluteHeight
-		let percentDecrease = decrease / desiredScrollRange
-		scrollingNavView.animateSubviews(forScrollDelta: percentDecrease)
+		if offset < Self.navMaxHeight && offset > Self.navMinHeight {
+			let desiredScrollRange: CGFloat = Self.navMaxHeight - Self.navMinHeight // represents old number
+			let absoluteHeight = abs(height - Self.navMaxHeight) // represents new number
+			let difference = desiredScrollRange - absoluteHeight
+			let percentDifference = difference / desiredScrollRange
+			scrollingNavView.animateSubviews(forScrollDelta: percentDifference)
+		} else if offset <= Self.navMinHeight {
+			scrollingNavView.animateSubviews(forScrollDelta: 0.0)
+		} else if offset >= Self.navMaxHeight {
+			scrollingNavView.animateSubviews(forScrollDelta: 1.0)
+		}
 	}
 		
 	func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
