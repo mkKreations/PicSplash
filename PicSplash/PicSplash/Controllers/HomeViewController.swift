@@ -65,13 +65,13 @@ final class HomeViewController: UIViewController {
 		adjustLoginViewPositionForAppearance()
 	}
 	
-	override func viewDidDisappear(_ animated: Bool) {
-		super.viewDidDisappear(animated)
+	override func viewWillDisappear(_ animated: Bool) {
+		super.viewWillDisappear(animated)
 		
 		// remove ourselves as observer
 		NotificationCenter.default.removeObserver(self)
 	}
-		
+			
 	
 	// MARK: subviews config
 	
@@ -115,7 +115,15 @@ final class HomeViewController: UIViewController {
 
 extension HomeViewController: LoginViewButtonActionsProvider {
 	
-	func didPressCancelButton(_ sender: UIButton) {
+	func didPressCancelButton(_ sender: UIButton, withFirstResponder firstResponder: UIView?) {
+		// passing first responder through so view controller
+		// can time dismissing of first responder with login
+		// view dismiss - but as of now, we're just dismissing
+		// them at same time
+		if isShowingLoginView, let firstResponder = firstResponder {
+			firstResponder.endEditing(true) // dismiss keyboard
+		}
+		
 		dismissLoginView()
 	}
 	

@@ -42,6 +42,15 @@ class LoginTextField: UIView {
 	let textFieldState: LoginTextFieldState
 	
 	
+	// computed vars
+	var isCurrentFirstResponder: Bool {
+		// RightImageTextField is fileprivate so
+		// we can't expose textField so we create
+		// our own var to do the task
+		textField.isFirstResponder
+	}
+	
+	
 	// inits
 	init(textFieldState: LoginTextFieldState) {
 		self.textFieldState = textFieldState
@@ -67,6 +76,7 @@ class LoginTextField: UIView {
 		
 		textField.placeholder = textFieldState.rawValue
 		textField.font = UIFont.systemFont(ofSize: 16.0)
+		textField.returnKeyType = textFieldState == .email ? .next : .done
 		
 		if textFieldState == .password { // add lock icon
 			textField.rightViewMode = .always
