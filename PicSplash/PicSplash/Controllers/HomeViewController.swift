@@ -28,6 +28,7 @@ final class HomeViewController: UIViewController {
 	private var loginViewBottomConstraint: NSLayoutConstraint?
 	var selectedCell: HomeImageCell? // view controller transition
 	var selectedCellImageSnapshot: UIView? // view controller transition
+	private var isShowingLoginView: Bool = false
 		
 	
 	// MARK: view life cycle
@@ -144,10 +145,12 @@ extension HomeViewController: LoginViewButtonActionsProvider {
 		}
 
 		UIView.animate(withDuration: 0.3,
-									 delay: 0.0, options: .curveEaseOut, animations: {
-										self.loginFadeView.alpha = 1.0
-										self.view.layoutIfNeeded()
-									 }, completion: nil)
+									 delay: 0.0, options: .curveEaseOut) {
+			self.loginFadeView.alpha = 1.0
+			self.view.layoutIfNeeded()
+		} completion: { complete in
+			self.isShowingLoginView = true
+		}
 	}
 	
 	private func dismissLoginView() {
@@ -166,6 +169,7 @@ extension HomeViewController: LoginViewButtonActionsProvider {
 		} completion: { complete in
 			if complete {
 				self.loginFadeView.removeFromSuperview() // remove loginFadeView
+				self.isShowingLoginView = false
 			}
 		}
 	}
