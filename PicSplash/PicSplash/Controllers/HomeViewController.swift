@@ -229,10 +229,9 @@ extension HomeViewController: LoginViewButtonActionsProvider {
 
 
 	
-// MARK: scrollNavView button actions
+// MARK: scrollNavView button actions/delegate methods
 
 extension HomeViewController: ScrollingNavigationButtonsProvider {
-	// delegate methods
 	
 	func didPressMenuButton(_ button: UIButton) {
 		// present fresh instance of menu VC modally via sheet
@@ -241,6 +240,14 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 	
 	func didPressLogInButton(_ button: UIButton) {
 		animateLoginViewAppearance()
+	}
+	
+	// pass first responder so view controller
+	// can time dismissing of first responder
+	// with any other animations - but we're
+	// not doing much here
+	func didPressSearchCancelButton(withFirstResponder firstResponder: UIView) {
+		firstResponder.endEditing(true) // resign first responder
 	}
 	
 }

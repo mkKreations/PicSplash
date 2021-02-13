@@ -12,6 +12,7 @@ import UIKit
 protocol ScrollingNavigationButtonsProvider: AnyObject {
 	func didPressMenuButton(_ button: UIButton)
 	func didPressLogInButton(_ button: UIButton)
+	func didPressSearchCancelButton(withFirstResponder firstResponder: UIView)
 }
 
 
@@ -107,7 +108,9 @@ class ScrollingNavigationView: UIView {
 		// to also set placeholder text color
 		searchBar.searchTextField.attributedPlaceholder = NSAttributedString(string: "Search Photos",
 																																				 attributes: [NSAttributedString.Key.foregroundColor : UIColor.white])
+		searchBar.delegate = self // respond to search events
 		searchBar.searchBarStyle = .minimal
+		searchBar.tintColor = .white // set Cancel button tint color
 		searchBar.searchTextField.leftView?.tintColor = .white // set magnifying glass tintColor
 	}
 	
@@ -156,4 +159,10 @@ class ScrollingNavigationView: UIView {
 		delegate?.didPressLogInButton(sender)
 	}
 
+}
+
+extension ScrollingNavigationView: UISearchBarDelegate {
+	func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+		delegate?.didPressSearchCancelButton(withFirstResponder: searchBar)
+	}
 }
