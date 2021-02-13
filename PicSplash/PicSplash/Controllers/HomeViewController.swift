@@ -512,7 +512,7 @@ extension HomeViewController {
 		let offset = -scrollView.contentOffset.y
 		
 		if offset < Self.navSnapToTopBuffer && offset > Self.navMinHeight {
-			snapScrollViewContentToTop(scrollView)
+			snapScrollViewContentToTop(scrollView, withDuration: 0.3)
 		}
 	}
 	
@@ -547,7 +547,7 @@ extension HomeViewController {
 			
 			animateLoginView(forKeyboardHeight: keyboardHeight)
 		} else {
-			snapScrollViewContentToTop(collectionView)
+			snapScrollViewContentToTop(collectionView, withDuration: 0.03)
 		}
 	}
 	
