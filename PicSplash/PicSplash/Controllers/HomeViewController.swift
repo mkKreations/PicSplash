@@ -44,11 +44,32 @@ final class HomeViewController: UIViewController {
 		UserDefaults.standard.set(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
 	}
 	
+	override func viewWillAppear(_ animated: Bool) {
+		super.viewWillAppear(animated)
+		
+		// add ourselves as keyboard notification observer
+		NotificationCenter.default.addObserver(self,
+																					 selector: #selector(keyboardWillShow(notification:)),
+																					 name: UIResponder.keyboardWillShowNotification,
+																					 object: nil)
+		NotificationCenter.default.addObserver(self,
+																					 selector: #selector(keyboardWillHide(notification:)),
+																					 name: UIResponder.keyboardWillHideNotification,
+																					 object: nil)
+	}
+	
 	override func viewDidAppear(_ animated: Bool) {
 		super.viewDidAppear(animated)
 		
 		// we know our loginView will have size by now
 		adjustLoginViewPositionForAppearance()
+	}
+	
+	override func viewDidDisappear(_ animated: Bool) {
+		super.viewDidDisappear(animated)
+		
+		// remove ourselves as observer
+		NotificationCenter.default.removeObserver(self)
 	}
 		
 	
@@ -471,6 +492,22 @@ extension HomeViewController {
 										scrollView.contentOffset = CGPoint(x: 0.0, y: -Self.navMinHeight)
 										self.view.layoutIfNeeded() // force update view
 									 }, completion: nil)
+	}
+	
+}
+
+
+
+// MARK: keyboard observer methods
+
+extension HomeViewController {
+	
+	@objc func keyboardWillShow(notification: NSNotification) {
+		print("keyboard will show!")
+	}
+	
+	@objc func keyboardWillHide(notification: NSNotification) {
+		print("keyboard will hide!")
 	}
 	
 }
