@@ -10,7 +10,7 @@ import UIKit
 final class HomeViewController: UIViewController {
 	// class vars
 	private static let navMaxHeight: CGFloat = 320.0
-	private static let navMinHeight: CGFloat = 70.0
+	static let navMinHeight: CGFloat = 70.0
 	private static let navSnapToTopBuffer: CGFloat = 150.0
 
 	
@@ -33,6 +33,7 @@ final class HomeViewController: UIViewController {
 	lazy var trendingCollectionView: UICollectionView = {
 		UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
 	}()
+	var trendingDatasource: UICollectionViewDiffableDataSource<TrendingSection, Trending>?
 		
 	
 	// MARK: view life cycle
