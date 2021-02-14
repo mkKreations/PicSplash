@@ -89,10 +89,33 @@ var orthogonalPics = [
 	ImagePlaceholder(),
 	ImagePlaceholder(),
 ]
+var searchResultsPics = [
+	ImagePlaceholder(),
+	ImagePlaceholder(),
+	ImagePlaceholder(),
+	ImagePlaceholder(),
+	ImagePlaceholder(),
+	ImagePlaceholder(),
+	ImagePlaceholder(),
+	ImagePlaceholder(),
+	ImagePlaceholder(),
+	ImagePlaceholder(),
+	ImagePlaceholder(),
+	ImagePlaceholder(),
+	ImagePlaceholder(),
+	ImagePlaceholder(),
+	ImagePlaceholder(),
+	ImagePlaceholder(),
+]
 
 
 // TODO: Delete later
 let sampleData = [
 	SectionPlaceHolder(title: "Explore", type: .orthogonal, images: orthogonalPics),
 	SectionPlaceHolder(title: "New", type: .main, images: samplePics),
+]
+
+// this data will have a unique type when real data comes in
+let searchResultsSampleData = [
+	SectionPlaceHolder(title: "", type: .main, images: searchResultsPics),
 ]

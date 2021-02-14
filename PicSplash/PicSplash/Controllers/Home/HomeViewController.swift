@@ -37,6 +37,9 @@ final class HomeViewController: UIViewController {
 	let loadingView: UIView = UIView(frame: .zero)
 	let loadingActivityActivator: UIActivityIndicatorView = UIActivityIndicatorView(style: .large)
 	var isShowingLoadingView: Bool = false
+	let searchResultsCollectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+	var searchResultsDatasource: UICollectionViewDiffableDataSource<SectionPlaceHolder, ImagePlaceholder>?
+	var isShowingSearchResults: Bool = false
 		
 	
 	// MARK: view life cycle
@@ -50,13 +53,11 @@ final class HomeViewController: UIViewController {
 		configureDatasource()
 		applySnapshot()
 		
-		// we are adding trendingCollectionView to view
-		// within this method and fully configuring it
+		// we are adding & fully configuring
+		// each view as a subview to view
 		configureTrendingCollectionView()
-		
-		// we are adding loadingView & its indicator to view
-		// within this method and fully configuring them
 		configureLoadingViewAndIndicator()
+		configureSearchResultsCollectionView()
 		
 		// TODO: remove this to unsilence constraint breaks from estimated cell heights
 		UserDefaults.standard.set(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
@@ -279,9 +280,19 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 	func didSearch(withTerm term: String, andFirstResponder firstResponder: UIView) {
 		firstResponder.resignFirstResponder()
 		
-		if isShowingTrending {
-			animateLoadingView(forAppearance: true, withDuration: Self.trendingAnimationDuration)
+		// do any loading here before presenting the searchResultsCollectionView
+		
+//		animateLoadingView(forAppearance: true, withDuration: Self.trendingAnimationDuration)
+				
+		animateSearchResultsCollectionView(forAppearance: true,
+																			 withDuration: Self.trendingAnimationDuration) { [weak self] in
+			guard let self = self else { return }
+			
+			if self.isShowingLoadingView {
+				self.animateLoadingView(forAppearance: false) // dismiss loading view
+			}
 		}
+		
 		print("term: \(term)")
 	}
 	
@@ -301,6 +312,11 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 		if isShowingLoadingView {
 			animateLoadingView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
 		}
+		
+		// dismiss searchResults if showing
+		if isShowingSearchResults {
+			animateSearchResultsCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
+		}
 	}
 	
 	// when user clicks "x" within search bar and there is no first responder
@@ -308,6 +324,11 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 		// dismiss loading view if showing
 		if isShowingLoadingView {
 			animateLoadingView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
+		}
+		
+		// dismiss searchResults if showing
+		if isShowingSearchResults {
+			animateSearchResultsCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
 		}
 	}
 	
@@ -353,7 +374,7 @@ extension HomeViewController {
 		return section
 	}
 	
-	private func sectionLayoutForHomeImageCell() -> NSCollectionLayoutSection {
+	func sectionLayoutForHomeImageCell() -> NSCollectionLayoutSection {
 		let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
 																					heightDimension: .estimated(100.0))
 		let item = NSCollectionLayoutItem(layoutSize: itemSize)

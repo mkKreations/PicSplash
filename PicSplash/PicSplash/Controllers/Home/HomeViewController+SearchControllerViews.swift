@@ -109,7 +109,6 @@ extension HomeViewController {
 		UIView.animate(withDuration: duration,
 									 delay: 0.0, options: .curveEaseInOut) {
 			self.trendingCollectionView.alpha = willAppear ? 1.0 : 0.0
-			self.view.layoutIfNeeded()
 		} completion: { _ in
 			// enable/disable userInteraction
 			self.trendingCollectionView.isUserInteractionEnabled = willAppear
@@ -176,7 +175,70 @@ extension HomeViewController {
 	}
 	
 	
+	
 	// MARK: SearchResults
 	
+	func configureSearchResultsCollectionView() {
+		// use pre-existing cell & compositionalLayout section
+		searchResultsCollectionView.collectionViewLayout = UICollectionViewCompositionalLayout(section: sectionLayoutForHomeImageCell())
+		searchResultsCollectionView.translatesAutoresizingMaskIntoConstraints = false
+		searchResultsCollectionView.register(HomeImageCell.self, forCellWithReuseIdentifier: HomeImageCell.reuseIdentifier)
+		searchResultsCollectionView.alpha = 0.0
+		searchResultsCollectionView.isUserInteractionEnabled = false
+		view.addSubview(searchResultsCollectionView)
+		
+		constrainSearchResultsCollectionView()
+		configureSearchResultsDatasource()
+		applySearchResultsSnapshot()
+	}
+	
+	private func constrainSearchResultsCollectionView() {
+		searchResultsCollectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+		searchResultsCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+		searchResultsCollectionView.topAnchor.constraint(equalTo: view.topAnchor, constant: Self.navMinHeight).isActive = true
+		searchResultsCollectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+	}
+	
+	private func configureSearchResultsDatasource() {
+		searchResultsDatasource = UICollectionViewDiffableDataSource(collectionView: searchResultsCollectionView, cellProvider: {
+			(collectionView, indexPath, _) -> UICollectionViewCell? in
+			
+			guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeImageCell.reuseIdentifier,
+																													for: indexPath) as? HomeImageCell else { return nil }
+			
+			let section = searchResultsSampleData[indexPath.section]
+			
+			cell.displayText = String(section.images[indexPath.row].height)
+			cell.displayBackgroundColor = section.images[indexPath.row].placeholderColor
+			
+			return cell
+		})
+	}
+	
+	private func applySearchResultsSnapshot() {
+		var searchResultsSnapshot = NSDiffableDataSourceSnapshot<SectionPlaceHolder, ImagePlaceholder>()
+		searchResultsSnapshot.appendSections(searchResultsSampleData)
+		searchResultsSampleData.forEach { searchResultsSnapshot.appendItems($0.images, toSection: $0) }
+		searchResultsDatasource?.apply(searchResultsSnapshot)
+	}
+	
+	func animateSearchResultsCollectionView(forAppearance willAppear: Bool,
+																					withDuration duration: TimeInterval = 0.03,
+																					withCompletion completion: (() -> Void)? = nil) {
+		UIView.animate(withDuration: duration,
+									 delay: 0.0, options: .curveEaseInOut) {
+			self.searchResultsCollectionView.alpha = willAppear ? 1.0 : 0.0
+		} completion: { _ in
+			// enable/disable userInteraction
+			self.searchResultsCollectionView.isUserInteractionEnabled = willAppear
+						
+			// manage state
+			self.isShowingSearchResults = willAppear
+			
+			// apparently closures are escaping by nature
+			// if they are declared as an optional :O
+			completion?()
+		}
+	}
 	
 }
