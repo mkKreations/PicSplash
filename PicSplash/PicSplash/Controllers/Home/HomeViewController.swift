@@ -12,6 +12,7 @@ final class HomeViewController: UIViewController {
 	private static let navMaxHeight: CGFloat = 320.0
 	static let navMinHeight: CGFloat = 70.0
 	private static let navSnapToTopBuffer: CGFloat = 150.0
+	static let trendingAnimationDuration: TimeInterval = 0.4
 
 	
 	// instance vars
@@ -30,10 +31,10 @@ final class HomeViewController: UIViewController {
 	var selectedCellImageSnapshot: UIView? // view controller transition
 	private var isShowingLoginView: Bool = false
 	private var isObservingKeyboard: Bool = false
-	lazy var trendingCollectionView: UICollectionView = {
-		UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
-	}()
+	let trendingCollectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+	var trendingCollectionViewTopConstraint: NSLayoutConstraint?
 	var trendingDatasource: UICollectionViewDiffableDataSource<TrendingSection, Trending>?
+	var isShowingTrending: Bool = false
 		
 	
 	// MARK: view life cycle
@@ -44,6 +45,10 @@ final class HomeViewController: UIViewController {
 		configureSubviews()
 		configureDatasource()
 		applySnapshot()
+		
+		// we are adding trendingCollectionView to view
+		// within this method and fully configuring it
+		configureTrendingCollectionView()
 		
 		// TODO: remove this to unsilence constraint breaks from estimated cell heights
 		UserDefaults.standard.set(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
@@ -202,6 +207,10 @@ extension HomeViewController: LoginViewButtonActionsProvider {
 		// subtracting a bit from keyboardHeight so there's a bit of overlap
 		loginViewBottomConstraint?.constant = keyboardHeight - 20.0
 		
+		// duration doesn't matter here because any animations that occur during
+		// keyboard appearance last for the same duration as the keyboard appearing
+		// even if I try to modify the duration - check the keyboard notification
+		// method notes
 		UIView.animate(withDuration: 0.3,
 									 delay: 0.0, options: .curveEaseInOut, animations: {
 										self.view.layoutIfNeeded()
@@ -246,12 +255,29 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 		animateLoginViewAppearance()
 	}
 	
+	// we begin our search flow here by showing our trendingCollectionView
+	func didBeginEditingSearchBar(_ searchBar: UISearchBar) {
+		let offset = -collectionView.contentOffset.y
+		
+		// only snap if within the money zone $$
+		if offset <= Self.navMaxHeight && offset > Self.navMinHeight {
+			snapScrollViewContentToTop(collectionView, withDuration: Self.trendingAnimationDuration)
+		}
+		
+		animateTrendingCollectionView(forAppearance: true, withDuration: Self.trendingAnimationDuration)
+	}
+	
 	// pass first responder so view controller
 	// can time dismissing of first responder
 	// with any other animations - but we're
 	// not doing much here
 	func didPressSearchCancelButton(withFirstResponder firstResponder: UIView) {
 		firstResponder.endEditing(true) // resign first responder
+		
+		// dismiss trending collectionView if showing
+		if isShowingTrending {
+			animateTrendingCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
+		}
 	}
 	
 }
@@ -546,7 +572,27 @@ extension HomeViewController {
 
 // MARK: keyboard observer methods
 
+// currently we only expect to see the keyboard in 2 cases
+// 1 - When user clicks on search bar in scrollingNavView
+// 2 - When user clicks in textField within LoginView
+
 extension HomeViewController {
+	
+	// OJO!!
+	
+	// DO NOT call any animation code within these keyboard notification
+	// methods unless you're fine with the keyboard animation duration
+	// overriding any of your custom animations... this happens by defaut,
+	// as these keyboard methods are called within an animation block called
+	// by the system, so in order to override this, just call your code in
+	// the code that triggers these methods.. for example
+	
+	// if pressing a cancel button dismisses the keyboard, call the animation
+	// code in the cancel button action code, not in keyboardWillHide(notification:) method
+	
+	// in order to prevent our animations from being overriden, we keep any
+	// code within these methods to a minimum and handle as much outside of
+	// these methods as possible
 	
 	@objc func keyboardWillShow(notification: NSNotification) {
 		if isShowingLoginView {
@@ -557,13 +603,6 @@ extension HomeViewController {
 			let keyboardHeight = keyboardHeightNSValue.cgRectValue.height
 			
 			animateLoginView(forKeyboardHeight: keyboardHeight)
-		} else {
-			let offset = -collectionView.contentOffset.y
-			
-			// only snap if within the money zone $$
-			if offset <= Self.navMaxHeight && offset > Self.navMinHeight {
-				snapScrollViewContentToTop(collectionView, withDuration: 0.03)
-			}
 		}
 		
 		scrollingNavView.setShowsCancelButton(shows: true, animated: true)

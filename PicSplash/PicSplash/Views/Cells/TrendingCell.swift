@@ -38,7 +38,7 @@ class TrendingCell: UICollectionViewCell {
 		displayLabel.translatesAutoresizingMaskIntoConstraints = false
 		displayLabel.numberOfLines = 1
 		displayLabel.textColor = .white
-		displayLabel.font = UIFont.preferredFont(forTextStyle: .title1)
+		displayLabel.font = UIFont.preferredFont(forTextStyle: .title2)
 		contentView.addSubview(displayLabel)
 		
 		divider.translatesAutoresizingMaskIntoConstraints = false
