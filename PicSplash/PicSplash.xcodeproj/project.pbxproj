@@ -15,6 +15,7 @@
 		2C1F918E25D9ABBF00BCCD87 /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C1F918D25D9ABBF00BCCD87 /* Photo.swift */; };
 		2C1F919125D9BF9800BCCD87 /* BlurHashDecode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C1F919025D9BF9800BCCD87 /* BlurHashDecode.swift */; };
 		2C1F919425D9C2CB00BCCD87 /* PhotoSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C1F919325D9C2CB00BCCD87 /* PhotoSection.swift */; };
+		2C1F919725D9C3A800BCCD87 /* HomeImageProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C1F919625D9C3A800BCCD87 /* HomeImageProtocol.swift */; };
 		2C69E85F25D8D964008502D8 /* TrendingReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C69E85E25D8D964008502D8 /* TrendingReusableView.swift */; };
 		2C88EFB425D07AF000150D54 /* ScrollingNavigationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C88EFB325D07AF000150D54 /* ScrollingNavigationView.swift */; };
 		2CAE2F6825D88F8E00DCC243 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAE2F6725D88F8E00DCC243 /* HomeViewController.swift */; };
@@ -50,6 +51,7 @@
 		2C1F918D25D9ABBF00BCCD87 /* Photo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
 		2C1F919025D9BF9800BCCD87 /* BlurHashDecode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlurHashDecode.swift; sourceTree = "<group>"; };
 		2C1F919325D9C2CB00BCCD87 /* PhotoSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoSection.swift; sourceTree = "<group>"; };
+		2C1F919625D9C3A800BCCD87 /* HomeImageProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeImageProtocol.swift; sourceTree = "<group>"; };
 		2C69E85E25D8D964008502D8 /* TrendingReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendingReusableView.swift; sourceTree = "<group>"; };
 		2C88EFB325D07AF000150D54 /* ScrollingNavigationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingNavigationView.swift; sourceTree = "<group>"; };
 		2CAE2F6725D88F8E00DCC243 /* HomeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
@@ -114,6 +116,7 @@
 				2C1F917A25D9762100BCCD87 /* AsyncOperation.swift */,
 				2C1F918A25D9945C00BCCD87 /* Secrets.swift */,
 				2C1F919025D9BF9800BCCD87 /* BlurHashDecode.swift */,
+				2C1F919625D9C3A800BCCD87 /* HomeImageProtocol.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -301,6 +304,7 @@
 				2C1F918E25D9ABBF00BCCD87 /* Photo.swift in Sources */,
 				2CD3C29D25CF04BB00BC0507 /* AppDelegate.swift in Sources */,
 				2CAF5EF025D60095000322B9 /* DetailAnimator.swift in Sources */,
+				2C1F919725D9C3A800BCCD87 /* HomeImageProtocol.swift in Sources */,
 				2CAE2F6825D88F8E00DCC243 /* HomeViewController.swift in Sources */,
 				2CF14EDD25D31F7A000F1210 /* UIColor+extensions.swift in Sources */,
 				2CD3C2CC25CF654900BC0507 /* ImageShadowOverlayView.swift in Sources */,

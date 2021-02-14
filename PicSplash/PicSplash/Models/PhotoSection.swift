@@ -7,8 +7,14 @@
 
 import Foundation
 
+enum PhotoSectionType {
+	case explore
+	case new
+}
+
 struct PhotoSection {
 	let id: UUID = UUID() // unique ID to help distinguish value type instances
 	let title: String
-//	let items: 
+	let type: PhotoSectionType
+	let items: [HomeImageProtocol]
 }
