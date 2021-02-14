@@ -156,6 +156,13 @@ extension HomeViewController {
 			loadingActivityActivator.startAnimating()
 		}
 		
+		// manage state
+		
+		// we're managing the state a bit differently with loadingView
+		// compared to trendingView & searchResultsCollectionView in that
+		// we're setting state prior to animation as opposed to after anim
+		self.isShowingLoadingView = willAppear
+		
 		UIView.animate(withDuration: duration,
 									 delay: 0.0, options: .curveEaseInOut) {
 			self.loadingView.alpha = willAppear ? 1.0 : 0.0
@@ -168,9 +175,6 @@ extension HomeViewController {
 			if !willAppear {				
 				self.loadingActivityActivator.stopAnimating()
 			}
-						
-			// manage state
-			self.isShowingLoadingView = willAppear
 		}
 	}
 	

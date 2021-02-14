@@ -61,6 +61,29 @@ final class HomeViewController: UIViewController {
 		
 		// TODO: remove this to unsilence constraint breaks from estimated cell heights
 		UserDefaults.standard.set(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
+		
+		// logic will be refactored shortly
+		if !isShowingLoadingView {
+			animateLoadingView(forAppearance: true, withDuration: Self.trendingAnimationDuration)
+		}
+		
+		NetworkingManager.shared.dowloadHomeImagesListData { data, error in
+			DispatchQueue.main.async {
+				// print error & return
+				if let error = error {
+					print(error)
+					return
+				}
+				
+				// unpack data
+				guard let _ = data else { return }
+				
+				// successful so dismiss loading
+				if self.isShowingLoadingView {
+					self.animateLoadingView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
+				}
+			}
+		}
 	}
 	
 	override func viewWillAppear(_ animated: Bool) {
