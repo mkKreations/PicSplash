@@ -441,9 +441,9 @@ extension HomeViewController {
 			
 			guard let self = self else { return nil }
 			
-			let currentSectionType = self.networkManager.homeImagesSections[indexPath.section].type
+			let currentSection = self.networkManager.homeImagesSections[indexPath.section]
 
-			switch currentSectionType {
+			switch currentSection.type {
 			case .explore:
 				guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeOrthogonalCell.reuseIdentifier,
 																														for: indexPath) as? HomeOrthogonalCell else { return nil }
@@ -456,6 +456,10 @@ extension HomeViewController {
 				guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeImageCell.reuseIdentifier,
 																														for: indexPath) as? HomeImageCell else { return nil }
 				
+				let photo = currentSection.items[indexPath.row]
+//				cell.displayImage = UIImage(blurHash: photo.blurString, size: CGSize(width: self.view.bounds.width, height: .infinity))
+				guard let image = UIImage(blurHash: photo.blurString, size: CGSize(width: self.view.bounds.width, height: 64.0)) else { return nil }
+				cell.displayImage = image
 				cell.layer.borderWidth = 1.0
 				cell.layer.borderColor = UIColor.systemGreen.cgColor
 				
