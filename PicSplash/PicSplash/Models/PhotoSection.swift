@@ -16,5 +16,16 @@ struct PhotoSection {
 	let id: UUID = UUID() // unique ID to help distinguish value type instances
 	let title: String
 	let type: PhotoSectionType
-	let items: [HomeImageProtocol]
+//	var items: [HomeImageProtocol]
+	var items: [Photo]
+}
+
+extension PhotoSection: Hashable {
+	static func == (lhs: PhotoSection, rhs: PhotoSection) -> Bool {
+		lhs.id == rhs.id
+	}
+	
+	func hash(into hasher: inout Hasher) {
+		hasher.combine(id)
+	}
 }

@@ -35,17 +35,20 @@ class NetworkingManager {
 	
 	// MARK: instance vars
 	
-	private(set) var homeImagePhotos: [Photo] = []
 	private let imageDownloadQueue: OperationQueue = {
 		let operationQueue = OperationQueue()
 		operationQueue.qualityOfService = .userInteractive
 		return operationQueue
 	}()
+	private(set) var homeImagesSections: [PhotoSection] = [
+		PhotoSection(title: "Explore", type: .explore, items: []),
+		PhotoSection(title: "New", type: .new, items: []),
+	]
 	
 	
 	// MARK: network requests
 	
-	func dowloadHomeImagesListData(withCompletion completion: @escaping ([Photo]?, NetworkingError?) -> ()) {
+	func dowloadHomeImagesListData(withCompletion completion: @escaping ([PhotoSection]?, NetworkingError?) -> ()) {
 		// construct urlString
 		var requestUrlString: String = Self.baseUrlString
 		requestUrlString.append(Self.homeImagesListPath)
@@ -68,7 +71,7 @@ class NetworkingManager {
 	private func processHomeImagesListData(data: Data?,
 																				 urlResponse response: URLResponse?,
 																				 error: Error?,
-																				 andCompletion completion: @escaping ([Photo]?, NetworkingError?) -> ()) {
+																				 andCompletion completion: @escaping ([PhotoSection]?, NetworkingError?) -> ()) {
 		if let error = error {
 			completion(nil, .serverError(error))
 			return
@@ -88,6 +91,10 @@ class NetworkingManager {
 			return
 		}
 		
+		// get the section we want to modify
+		guard var photoExploreSection = homeImagesSections.filter({ $0.type == .explore }).first else { return }
+		guard var photoNewSection = homeImagesSections.filter({ $0.type == .new }).first else { return }
+
 		jsonList.forEach { item in
 			guard let blurHashString: String = item["blur_hash"] as? String,
 						let userDict: [String: Any] = item["user"] as? [String: Any],
@@ -96,11 +103,22 @@ class NetworkingManager {
 						let imageUrl: String = urlsDict["small"]
 			else { return }
 			
-			self.homeImagePhotos.append(Photo(imageUrl: imageUrl,
-																				author: userName,
-																				blurString: blurHashString))
+			photoExploreSection.items.append(Photo(imageUrl: imageUrl,
+																						 author: userName,
+																						 blurString: blurHashString))
+			photoNewSection.items.append(Photo(imageUrl: imageUrl,
+																				 author: userName,
+																				 blurString: blurHashString))
 		}
 		print("JSON DATA: \(jsonList)")
-		completion(self.homeImagePhotos, nil)
+		
+		// reset data on our property
+		homeImagesSections[0] = photoExploreSection
+		homeImagesSections[1] = photoNewSection
+		
+		print("HOME IMAGE SECTION 0: \(photoExploreSection)")
+		print("HOME IMAGE SECTION 1: \(photoNewSection)")
+
+		completion(homeImagesSections, nil)
 	}
 }

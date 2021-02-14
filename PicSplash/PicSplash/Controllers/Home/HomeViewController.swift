@@ -19,7 +19,7 @@ final class HomeViewController: UIViewController {
 	private lazy var collectionView: UICollectionView = {
 		UICollectionView(frame: view.frame, collectionViewLayout: configureCompositionalLayout())
 	}()
-	private var datasource: UICollectionViewDiffableDataSource<SectionPlaceHolder, ImagePlaceholder>!
+	private var datasource: UICollectionViewDiffableDataSource<PhotoSection, Photo>!
 	lazy var scrollingNavView: ScrollingNavigationView = { // expose to public for view controller transition
 		ScrollingNavigationView(frame: CGRect(origin: .zero,
 																					size: CGSize(width: view.frame.width, height: Self.navMaxHeight)))
@@ -41,6 +41,7 @@ final class HomeViewController: UIViewController {
 	let searchResultsCollectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
 	var searchResultsDatasource: UICollectionViewDiffableDataSource<SectionPlaceHolder, ImagePlaceholder>?
 	var isShowingSearchResults: Bool = false
+	let networkManager: NetworkingManager = NetworkingManager.shared
 		
 	
 	// MARK: view life cycle
@@ -77,9 +78,11 @@ final class HomeViewController: UIViewController {
 				}
 				
 				// unpack data
-				guard let photos = data else { return }
-				
-				print("PHOTOS with count :\(photos.count): \(photos)")
+				guard let _ = data else { return }
+
+				// apply snapshot as the data
+				// has been updated within NetworkManager
+				self.applySnapshot()
 				
 				// successful so dismiss loading
 				if self.isShowingLoadingView {
@@ -368,14 +371,14 @@ extension HomeViewController {
 	
 	private func configureCompositionalLayout() -> UICollectionViewCompositionalLayout {
 		let layout = UICollectionViewCompositionalLayout { sectionIndex, _ -> NSCollectionLayoutSection? in
-			let currentSectionType = sampleData[sectionIndex].type
-			
+			let currentSectionType = self.networkManager.homeImagesSections[sectionIndex].type
+
 			switch currentSectionType {
-			case .orthogonal:
+			case .explore:
 				let section = self.sectionLayoutForHomeOrthogonalCell()
 				self.createSectionHeaderLayout(forSection: section)
 				return section
-			case .main:
+			case .new:
 				let section = self.sectionLayoutForHomeImageCell()
 				self.createSectionHeaderLayout(forSection: section)
 				return section
@@ -401,12 +404,13 @@ extension HomeViewController {
 	}
 	
 	func sectionLayoutForHomeImageCell() -> NSCollectionLayoutSection {
+		// will return back to estimated shortly for both itemSize & groupSize
 		let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-																					heightDimension: .estimated(100.0))
+																					heightDimension: .absolute(100.0))
 		let item = NSCollectionLayoutItem(layoutSize: itemSize)
 		
 		let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-																					 heightDimension: .estimated(100.0))
+																					 heightDimension: .absolute(100.0))
 		let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize,
 																								 subitems: [item])
 
@@ -433,25 +437,27 @@ extension HomeViewController {
 	
 	private func configureDatasource() {
 		datasource = UICollectionViewDiffableDataSource(collectionView: collectionView, cellProvider: {
-			(collectionView, indexPath, imagePlaceholder) -> UICollectionViewCell? in
-					
-			let currentSectionType = sampleData[indexPath.section].type
+			[weak self] (collectionView, indexPath, imagePlaceholder) -> UICollectionViewCell? in
 			
+			guard let self = self else { return nil }
+			
+			let currentSectionType = self.networkManager.homeImagesSections[indexPath.section].type
+
 			switch currentSectionType {
-			case .orthogonal:
+			case .explore:
 				guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeOrthogonalCell.reuseIdentifier,
 																														for: indexPath) as? HomeOrthogonalCell else { return nil }
 				
-				cell.displayText = String(orthogonalPics[indexPath.row].height)
-				cell.displayBackgroundColor = orthogonalPics[indexPath.row].placeholderColor
-				
+				cell.layer.borderWidth = 1.0
+				cell.layer.borderColor = UIColor.systemRed.cgColor
+
 				return cell
-			case .main:
+			case .new:
 				guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeImageCell.reuseIdentifier,
 																														for: indexPath) as? HomeImageCell else { return nil }
 				
-				cell.displayText = String(samplePics[indexPath.row].height)
-				cell.displayBackgroundColor = samplePics[indexPath.row].placeholderColor
+				cell.layer.borderWidth = 1.0
+				cell.layer.borderColor = UIColor.systemGreen.cgColor
 				
 				return cell
 			}
@@ -472,7 +478,7 @@ extension HomeViewController {
 																																								 withReuseIdentifier: HomeCollectionReusableView.reuseIdentifier,
 																																								 for: indexPath) as? HomeCollectionReusableView else { return nil }
 				reusableView.displayText = currentSection.title
-				reusableView.displayStyle = currentSection.type == .orthogonal ? .large : .small
+				reusableView.displayStyle = currentSection.type == .explore ? .large : .small
 				return reusableView
 			}
 			
@@ -481,12 +487,20 @@ extension HomeViewController {
 	}
 	
 	private func applySnapshot() {
-		var snapshot = NSDiffableDataSourceSnapshot<SectionPlaceHolder, ImagePlaceholder>()
-		snapshot.appendSections(sampleData)
-		sampleData.forEach { sampleSection in
-			snapshot.appendItems(sampleSection.images, toSection: sampleSection)
+		let homeSections = NetworkingManager.shared.homeImagesSections
+		
+		var snapshot = NSDiffableDataSourceSnapshot<PhotoSection, Photo>()
+		snapshot.appendSections(homeSections)
+		homeSections.forEach { section in
+			snapshot.appendItems(section.items, toSection: section)
 		}
-		datasource.apply(snapshot)
+		
+		// a small workaround to fix the layout of the orthogonal section
+		// of cells - the second application of snapshot correctly places
+		// the cells without affecting the UI
+		datasource.apply(snapshot, animatingDifferences: true) {
+			self.datasource.apply(snapshot, animatingDifferences: true)
+		}
 	}
 
 }
