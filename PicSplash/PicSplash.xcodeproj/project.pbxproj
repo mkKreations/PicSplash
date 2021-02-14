@@ -11,6 +11,7 @@
 		2C1F917B25D9762100BCCD87 /* AsyncOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C1F917A25D9762100BCCD87 /* AsyncOperation.swift */; };
 		2C1F917F25D9776100BCCD87 /* ImageDownloadOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C1F917E25D9776100BCCD87 /* ImageDownloadOperation.swift */; };
 		2C1F918225D97B9B00BCCD87 /* NetworkingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C1F918125D97B9B00BCCD87 /* NetworkingManager.swift */; };
+		2C1F918B25D9945C00BCCD87 /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C1F918A25D9945C00BCCD87 /* Secrets.swift */; };
 		2C69E85F25D8D964008502D8 /* TrendingReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C69E85E25D8D964008502D8 /* TrendingReusableView.swift */; };
 		2C88EFB425D07AF000150D54 /* ScrollingNavigationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C88EFB325D07AF000150D54 /* ScrollingNavigationView.swift */; };
 		2CAE2F6825D88F8E00DCC243 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAE2F6725D88F8E00DCC243 /* HomeViewController.swift */; };
@@ -42,6 +43,7 @@
 		2C1F917A25D9762100BCCD87 /* AsyncOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncOperation.swift; sourceTree = "<group>"; };
 		2C1F917E25D9776100BCCD87 /* ImageDownloadOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDownloadOperation.swift; sourceTree = "<group>"; };
 		2C1F918125D97B9B00BCCD87 /* NetworkingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkingManager.swift; sourceTree = "<group>"; };
+		2C1F918A25D9945C00BCCD87 /* Secrets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Secrets.swift; sourceTree = "<group>"; };
 		2C69E85E25D8D964008502D8 /* TrendingReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendingReusableView.swift; sourceTree = "<group>"; };
 		2C88EFB325D07AF000150D54 /* ScrollingNavigationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingNavigationView.swift; sourceTree = "<group>"; };
 		2CAE2F6725D88F8E00DCC243 /* HomeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
@@ -104,6 +106,7 @@
 			children = (
 				2CAF5EEF25D60095000322B9 /* DetailAnimator.swift */,
 				2C1F917A25D9762100BCCD87 /* AsyncOperation.swift */,
+				2C1F918A25D9945C00BCCD87 /* Secrets.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -294,6 +297,7 @@
 				2CD3C2D125CF686D00BC0507 /* ImagePlaceholder.swift in Sources */,
 				2CAF5EEC25D5EA31000322B9 /* DetailViewController.swift in Sources */,
 				2CF14EE625D33151000F1210 /* UIButton+extensions.swift in Sources */,
+				2C1F918B25D9945C00BCCD87 /* Secrets.swift in Sources */,
 				2C1F917F25D9776100BCCD87 /* ImageDownloadOperation.swift in Sources */,
 				2C1F917B25D9762100BCCD87 /* AsyncOperation.swift in Sources */,
 				2CAE645725D37788009A31F6 /* LoginView.swift in Sources */,
