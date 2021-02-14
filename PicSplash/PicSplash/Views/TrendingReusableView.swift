@@ -31,7 +31,7 @@ class TrendingReusableView: UICollectionReusableView {
 		displayLabel.translatesAutoresizingMaskIntoConstraints = false
 		displayLabel.numberOfLines = 1
 		displayLabel.textColor = .white
-		displayLabel.font = UIFont.preferredFont(forTextStyle: .title2)
+		displayLabel.font = UIFont.systemFont(ofSize: 26.0, weight: .bold)
 		addSubview(displayLabel)
 
 		displayLabel.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true

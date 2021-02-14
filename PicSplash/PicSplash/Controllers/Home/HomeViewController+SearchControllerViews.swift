@@ -8,16 +8,22 @@
 import UIKit
 
 extension HomeViewController {
+	fileprivate static let trendingTopMargin: CGFloat = 20.0
 	
 	// MARK: Trending
 	
 	// call this method in -viewDidLoad
 	func configureTrendingCollectionView() {
+		// make trendingCollectionView extend for all of collectionView - including topMargin
+		trendingCollectionView.contentInset = UIEdgeInsets(top: Self.trendingTopMargin, left: 0.0, bottom: 0.0, right: 0.0)
 		trendingCollectionView.collectionViewLayout = configureTrendingCompositionalLayout() // set to our custom layout
 		trendingCollectionView.translatesAutoresizingMaskIntoConstraints = false
 		trendingCollectionView.register(TrendingCell.self, forCellWithReuseIdentifier: TrendingCell.reuseIdentifier)
+		trendingCollectionView.register(TrendingReusableView.self,
+																		forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+																		withReuseIdentifier: TrendingReusableView.reuseIdentifier)
 		trendingCollectionView.alpha = 0.0
-		trendingCollectionView.backgroundColor = .picSplashBlack
+		trendingCollectionView.backgroundColor = .black
 		trendingCollectionView.isUserInteractionEnabled = false
 		view.addSubview(trendingCollectionView)
 		
@@ -43,7 +49,18 @@ extension HomeViewController {
 		
 		let section = NSCollectionLayoutSection(group: group)
 		
+		configureTrendingHeader(forSection: section) // add section header
+		
 		return UICollectionViewCompositionalLayout(section: section)
+	}
+	
+	func configureTrendingHeader(forSection section: NSCollectionLayoutSection) {
+		let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+																						heightDimension: .absolute(48.0))
+		let sectionHeader = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize,
+																																		elementKind: UICollectionView.elementKindSectionHeader,
+																																		alignment: .top)
+		section.boundarySupplementaryItems = [sectionHeader]
 	}
 	
 	func configureTrendingDatasource() {
@@ -60,8 +77,29 @@ extension HomeViewController {
 			
 			return cell
 		})
+		
+		configureHomeReusableViewForDatasource()
 	}
 	
+	private func configureHomeReusableViewForDatasource() {
+		trendingDatasource?.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
+			guard let self = self else { return nil }
+			
+			if kind == UICollectionView.elementKindSectionHeader {
+				let currentTrendingSection = self.trendingDatasource?.snapshot().sectionIdentifiers[indexPath.section]
+				
+				guard let reusableView = collectionView.dequeueReusableSupplementaryView(ofKind: kind,
+																																								 withReuseIdentifier: TrendingReusableView.reuseIdentifier,
+																																								 for: indexPath) as? TrendingReusableView else { return nil }
+				reusableView.displayText = currentTrendingSection?.title
+				return reusableView
+			}
+			
+			return nil
+		}
+	}
+
+		
 	func applyTrendingSnapshot() {
 		var trendingSnapshot = NSDiffableDataSourceSnapshot<TrendingSection, Trending>()
 		trendingSnapshot.appendSections(trendingData)
