@@ -290,7 +290,7 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 	// with any other animations - but we're
 	// not doing much here
 	func didPressSearchCancelButton(withFirstResponder firstResponder: UIView) {
-		firstResponder.endEditing(true) // resign first responder
+		firstResponder.resignFirstResponder() // resign first responder
 		
 		// dismiss trending collectionView if showing
 		if isShowingTrending {
