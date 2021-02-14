@@ -32,7 +32,7 @@ extension HomeViewController {
 		applyTrendingSnapshot()
 	}
 	
-	func constrainTrendingCollectionView() {
+	private func constrainTrendingCollectionView() {
 		trendingCollectionViewTopConstraint = trendingCollectionView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0.0)
 		trendingCollectionViewTopConstraint?.isActive = true
 		trendingCollectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
@@ -40,7 +40,7 @@ extension HomeViewController {
 		trendingCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
 	}
 	
-	func configureTrendingCompositionalLayout() -> UICollectionViewCompositionalLayout {
+	private func configureTrendingCompositionalLayout() -> UICollectionViewCompositionalLayout {
 		let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
 		let item = NSCollectionLayoutItem(layoutSize: itemSize)
 		
@@ -54,7 +54,7 @@ extension HomeViewController {
 		return UICollectionViewCompositionalLayout(section: section)
 	}
 	
-	func configureTrendingHeader(forSection section: NSCollectionLayoutSection) {
+	private func configureTrendingHeader(forSection section: NSCollectionLayoutSection) {
 		let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
 																						heightDimension: .absolute(48.0))
 		let sectionHeader = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize,
@@ -63,7 +63,7 @@ extension HomeViewController {
 		section.boundarySupplementaryItems = [sectionHeader]
 	}
 	
-	func configureTrendingDatasource() {
+	private func configureTrendingDatasource() {
 		trendingDatasource = UICollectionViewDiffableDataSource<TrendingSection, Trending>(collectionView: trendingCollectionView, cellProvider: {
 			(collectionView, indexPath, _) -> UICollectionViewCell? in
 			
@@ -99,8 +99,7 @@ extension HomeViewController {
 		}
 	}
 
-		
-	func applyTrendingSnapshot() {
+	private func applyTrendingSnapshot() {
 		var trendingSnapshot = NSDiffableDataSourceSnapshot<TrendingSection, Trending>()
 		trendingSnapshot.appendSections(trendingData)
 		trendingData.forEach { trendingSnapshot.appendItems($0.items, toSection: $0) }
@@ -124,6 +123,62 @@ extension HomeViewController {
 						
 			// manage state
 			self.isShowingTrending = willAppear
+		}
+	}
+	
+	
+	
+	// MARK: loading
+	
+	func configureLoadingViewAndIndicator() {
+		loadingView.translatesAutoresizingMaskIntoConstraints = false
+		loadingView.backgroundColor = .black
+		loadingView.isUserInteractionEnabled = false
+		loadingView.alpha = 0.0
+		
+		loadingActivityActivator.translatesAutoresizingMaskIntoConstraints = false
+		loadingActivityActivator.alpha = 0.0
+		loadingActivityActivator.isUserInteractionEnabled = false
+		
+		loadingView.addSubview(loadingActivityActivator)
+		view.addSubview(loadingView)
+
+		constrainLoadingViewAndActivityIndicator()
+	}
+	
+	private func constrainLoadingViewAndActivityIndicator() {
+		loadingView.topAnchor.constraint(equalTo: view.topAnchor, constant: Self.navMinHeight).isActive = true
+		loadingView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+		loadingView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+		loadingView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+		
+		loadingActivityActivator.centerYAnchor.constraint(equalTo: loadingView.centerYAnchor).isActive = true
+		loadingActivityActivator.centerXAnchor.constraint(equalTo: loadingView.centerXAnchor).isActive = true
+	}
+	
+	func animateLoadingView(forAppearance willAppear: Bool, withDuration duration: TimeInterval = 0.03) {
+		loadingView.alpha = willAppear ? 0.0 : 1.0
+		loadingActivityActivator.alpha = willAppear ? 0.0 : 1.0
+
+		if willAppear {
+			loadingActivityActivator.startAnimating()
+		}
+		
+		UIView.animate(withDuration: duration,
+									 delay: 0.0, options: .curveEaseInOut) {
+			self.loadingView.alpha = willAppear ? 1.0 : 0.0
+			self.loadingActivityActivator.alpha = willAppear ? 1.0 : 0.0
+		} completion: { _ in
+			// enable/disable userInteraction
+			self.loadingView.isUserInteractionEnabled = willAppear
+			
+			// stop animating loading
+			if !willAppear {				
+				self.loadingActivityActivator.stopAnimating()
+			}
+						
+			// manage state
+			self.isShowingLoadingView = willAppear
 		}
 	}
 	

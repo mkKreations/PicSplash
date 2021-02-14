@@ -35,6 +35,9 @@ final class HomeViewController: UIViewController {
 	var trendingCollectionViewTopConstraint: NSLayoutConstraint?
 	var trendingDatasource: UICollectionViewDiffableDataSource<TrendingSection, Trending>?
 	var isShowingTrending: Bool = false
+	let loadingView: UIView = UIView(frame: .zero)
+	let loadingActivityActivator: UIActivityIndicatorView = UIActivityIndicatorView(style: .large)
+	var isShowingLoadingView: Bool = false
 		
 	
 	// MARK: view life cycle
@@ -51,6 +54,10 @@ final class HomeViewController: UIViewController {
 		// we are adding trendingCollectionView to view
 		// within this method and fully configuring it
 		configureTrendingCollectionView()
+		
+		// we are adding loadingView & its indicator to view
+		// within this method and fully configuring them
+		configureLoadingViewAndIndicator()
 		
 		// TODO: remove this to unsilence constraint breaks from estimated cell heights
 		UserDefaults.standard.set(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
@@ -269,7 +276,12 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 		animateTrendingCollectionView(forAppearance: true, withDuration: Self.trendingAnimationDuration)
 	}
 	
-	func didSearch(withTerm term: String) {
+	func didSearch(withTerm term: String, andFirstResponder firstResponder: UIView) {
+		firstResponder.resignFirstResponder()
+		
+		if isShowingTrending {
+			animateLoadingView(forAppearance: true, withDuration: Self.trendingAnimationDuration)
+		}
 		print("term: \(term)")
 	}
 	
@@ -283,6 +295,11 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 		// dismiss trending collectionView if showing
 		if isShowingTrending {
 			animateTrendingCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
+		}
+		
+		// dismiss loadingView if showing
+		if isShowingLoadingView {
+			animateLoadingView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
 		}
 	}
 	
