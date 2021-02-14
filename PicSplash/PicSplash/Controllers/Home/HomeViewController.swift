@@ -252,7 +252,7 @@ extension HomeViewController: LoginViewButtonActionsProvider {
 
 
 	
-// MARK: scrollNavView button actions/delegate methods
+// MARK: scrollNavView/search button actions/delegate methods
 
 extension HomeViewController: ScrollingNavigationButtonsProvider {
 	
