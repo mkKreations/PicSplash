@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		2C0B794025D447FE007D18D3 /* LoginTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C0B793F25D447FE007D18D3 /* LoginTextField.swift */; };
+		2C69E85F25D8D964008502D8 /* TrendingReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C69E85E25D8D964008502D8 /* TrendingReusableView.swift */; };
 		2C88EFB425D07AF000150D54 /* ScrollingNavigationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C88EFB325D07AF000150D54 /* ScrollingNavigationView.swift */; };
 		2CAE2F6825D88F8E00DCC243 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAE2F6725D88F8E00DCC243 /* HomeViewController.swift */; };
 		2CAE2F7325D895AB00DCC243 /* HomeViewController+SearchControllerViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAE2F7225D895AB00DCC243 /* HomeViewController+SearchControllerViews.swift */; };
@@ -35,6 +36,7 @@
 
 /* Begin PBXFileReference section */
 		2C0B793F25D447FE007D18D3 /* LoginTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginTextField.swift; sourceTree = "<group>"; };
+		2C69E85E25D8D964008502D8 /* TrendingReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendingReusableView.swift; sourceTree = "<group>"; };
 		2C88EFB325D07AF000150D54 /* ScrollingNavigationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingNavigationView.swift; sourceTree = "<group>"; };
 		2CAE2F6725D88F8E00DCC243 /* HomeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
 		2CAE2F7225D895AB00DCC243 /* HomeViewController+SearchControllerViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HomeViewController+SearchControllerViews.swift"; sourceTree = "<group>"; };
@@ -161,6 +163,7 @@
 				2CAE645625D37788009A31F6 /* LoginView.swift */,
 				2C0B793F25D447FE007D18D3 /* LoginTextField.swift */,
 				2CAF5EF225D6D55A000322B9 /* DetailActionButton.swift */,
+				2C69E85E25D8D964008502D8 /* TrendingReusableView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -283,6 +286,7 @@
 				2CAE2F7325D895AB00DCC243 /* HomeViewController+SearchControllerViews.swift in Sources */,
 				2CD3C2D525CF8B3500BC0507 /* HomeOrthogonalCell.swift in Sources */,
 				2CD3C2D825CF97F100BC0507 /* HomeCollectionReusableView.swift in Sources */,
+				2C69E85F25D8D964008502D8 /* TrendingReusableView.swift in Sources */,
 				2CD3C2C925CF652600BC0507 /* HomeImageCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
