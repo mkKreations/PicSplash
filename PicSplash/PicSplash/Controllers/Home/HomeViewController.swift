@@ -76,7 +76,9 @@ final class HomeViewController: UIViewController {
 				}
 				
 				// unpack data
-				guard let _ = data else { return }
+				guard let photos = data else { return }
+				
+				print("PHOTOS with count :\(photos.count): \(photos)")
 				
 				// successful so dismiss loading
 				if self.isShowingLoadingView {
