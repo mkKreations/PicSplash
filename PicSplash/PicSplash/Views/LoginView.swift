@@ -10,7 +10,7 @@ import UIKit
 // delegation to manage button actions
 
 protocol LoginViewButtonActionsProvider: AnyObject {
-	func didPressCancelButton(_ sender: UIButton)
+	func didPressCancelButton(_ sender: UIButton, withFirstResponder firstResponder: UIView?)
 	func didPressLoginButton(_ sender: UIButton)
 	func didPressForgotPasswordButton(_ sender: UIButton)
 	func didPressNoAccountJoinButton(_ sender: UIButton)
@@ -162,7 +162,15 @@ class LoginView: UIView {
 	
 	// button actions
 	@objc private func cancelButtonPressed(_ sender: UIButton) {
-		delegate?.didPressCancelButton(sender)
+		var firstResponder: UIView?
+		bottomStackView.arrangedSubviews.forEach { subview in
+			if let loginTextField = subview as? LoginTextField,
+				 loginTextField.isCurrentFirstResponder {
+				firstResponder = loginTextField
+			}
+		}
+		
+		delegate?.didPressCancelButton(sender, withFirstResponder: firstResponder)
 	}
 	
 	@objc private func loginButtonPressed(_ sender: UIButton) {

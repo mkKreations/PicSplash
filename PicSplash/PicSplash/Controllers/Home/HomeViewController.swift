@@ -10,8 +10,9 @@ import UIKit
 final class HomeViewController: UIViewController {
 	// class vars
 	private static let navMaxHeight: CGFloat = 320.0
-	private static let navMinHeight: CGFloat = 70.0
+	static let navMinHeight: CGFloat = 70.0
 	private static let navSnapToTopBuffer: CGFloat = 150.0
+	static let trendingAnimationDuration: TimeInterval = 0.4
 
 	
 	// instance vars
@@ -28,6 +29,17 @@ final class HomeViewController: UIViewController {
 	private var loginViewBottomConstraint: NSLayoutConstraint?
 	var selectedCell: HomeImageCell? // view controller transition
 	var selectedCellImageSnapshot: UIView? // view controller transition
+	private var isShowingLoginView: Bool = false
+	private var isObservingKeyboard: Bool = false
+	let trendingCollectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+	var trendingDatasource: UICollectionViewDiffableDataSource<TrendingSection, Trending>?
+	var isShowingTrending: Bool = false
+	let loadingView: UIView = UIView(frame: .zero)
+	let loadingActivityActivator: UIActivityIndicatorView = UIActivityIndicatorView(style: .large)
+	var isShowingLoadingView: Bool = false
+	let searchResultsCollectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+	var searchResultsDatasource: UICollectionViewDiffableDataSource<SectionPlaceHolder, ImagePlaceholder>?
+	var isShowingSearchResults: Bool = false
 		
 	
 	// MARK: view life cycle
@@ -35,12 +47,37 @@ final class HomeViewController: UIViewController {
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		
+		view.backgroundColor = .black
+		
 		configureSubviews()
 		configureDatasource()
 		applySnapshot()
 		
+		// we are adding & fully configuring
+		// each view as a subview to view
+		configureTrendingCollectionView()
+		configureLoadingViewAndIndicator()
+		configureSearchResultsCollectionView()
+		
 		// TODO: remove this to unsilence constraint breaks from estimated cell heights
 		UserDefaults.standard.set(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
+	}
+	
+	override func viewWillAppear(_ animated: Bool) {
+		super.viewWillAppear(animated)
+		
+		// add ourselves as keyboard notification observer
+		if !isObservingKeyboard {
+			NotificationCenter.default.addObserver(self,
+																						 selector: #selector(keyboardWillShow(notification:)),
+																						 name: UIResponder.keyboardWillShowNotification,
+																						 object: nil)
+			NotificationCenter.default.addObserver(self,
+																						 selector: #selector(keyboardWillHide(notification:)),
+																						 name: UIResponder.keyboardWillHideNotification,
+																						 object: nil)
+			isObservingKeyboard = true
+		}
 	}
 	
 	override func viewDidAppear(_ animated: Bool) {
@@ -49,7 +86,17 @@ final class HomeViewController: UIViewController {
 		// we know our loginView will have size by now
 		adjustLoginViewPositionForAppearance()
 	}
+	
+	override func viewWillDisappear(_ animated: Bool) {
+		super.viewWillDisappear(animated)
 		
+		// remove ourselves as observer
+		if isObservingKeyboard {
+			NotificationCenter.default.removeObserver(self)
+			isObservingKeyboard = false
+		}
+	}
+			
 	
 	// MARK: subviews config
 	
@@ -59,6 +106,7 @@ final class HomeViewController: UIViewController {
 		collectionView.contentInsetAdjustmentBehavior = .never // by default, behavior adjusts inset 20 pts for status bar
 		collectionView.scrollsToTop = true // ensure value is true
 		collectionView.showsVerticalScrollIndicator = false
+		collectionView.scrollsToTop = false // will implement our custom scrollsToTop behavior
 		collectionView.delegate = self
 		collectionView.register(HomeOrthogonalCell.self, forCellWithReuseIdentifier: HomeOrthogonalCell.reuseIdentifier)
 		collectionView.register(HomeImageCell.self, forCellWithReuseIdentifier: HomeImageCell.reuseIdentifier)
@@ -93,7 +141,15 @@ final class HomeViewController: UIViewController {
 
 extension HomeViewController: LoginViewButtonActionsProvider {
 	
-	func didPressCancelButton(_ sender: UIButton) {
+	func didPressCancelButton(_ sender: UIButton, withFirstResponder firstResponder: UIView?) {
+		// passing first responder through so view controller
+		// can time dismissing of first responder with login
+		// view dismiss - but as of now, we're just dismissing
+		// them at same time
+		if isShowingLoginView, let firstResponder = firstResponder {
+			firstResponder.endEditing(true) // dismiss keyboard
+		}
+		
 		dismissLoginView()
 	}
 	
@@ -144,8 +200,29 @@ extension HomeViewController: LoginViewButtonActionsProvider {
 		}
 
 		UIView.animate(withDuration: 0.3,
-									 delay: 0.0, options: .curveEaseOut, animations: {
-										self.loginFadeView.alpha = 1.0
+									 delay: 0.0, options: .curveEaseOut) {
+			self.loginFadeView.alpha = 1.0
+			self.view.layoutIfNeeded()
+		} completion: { complete in
+			self.isShowingLoginView = true
+		}
+	}
+	
+	private func animateLoginView(forKeyboardHeight keyboardHeight: CGFloat) {
+		let viewMidYConstant = (view.bounds.size.height / 2.0) - (loginView.bounds.size.height / 2.0)
+		
+		// make sure loginView is located where we set it at in animateLoginViewAppearance()
+		guard loginViewBottomConstraint?.constant == viewMidYConstant else { return }
+		
+		// subtracting a bit from keyboardHeight so there's a bit of overlap
+		loginViewBottomConstraint?.constant = keyboardHeight - 20.0
+		
+		// duration doesn't matter here because any animations that occur during
+		// keyboard appearance last for the same duration as the keyboard appearing
+		// even if I try to modify the duration - check the keyboard notification
+		// method notes
+		UIView.animate(withDuration: 0.3,
+									 delay: 0.0, options: .curveEaseInOut, animations: {
 										self.view.layoutIfNeeded()
 									 }, completion: nil)
 	}
@@ -166,6 +243,7 @@ extension HomeViewController: LoginViewButtonActionsProvider {
 		} completion: { complete in
 			if complete {
 				self.loginFadeView.removeFromSuperview() // remove loginFadeView
+				self.isShowingLoginView = false
 			}
 		}
 	}
@@ -174,10 +252,9 @@ extension HomeViewController: LoginViewButtonActionsProvider {
 
 
 	
-// MARK: scrollNavView button actions
+// MARK: scrollNavView/search button actions/delegate methods
 
 extension HomeViewController: ScrollingNavigationButtonsProvider {
-	// delegate methods
 	
 	func didPressMenuButton(_ button: UIButton) {
 		// present fresh instance of menu VC modally via sheet
@@ -186,6 +263,73 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 	
 	func didPressLogInButton(_ button: UIButton) {
 		animateLoginViewAppearance()
+	}
+	
+	// we begin our search flow here by showing our trendingCollectionView
+	func didBeginEditingSearchBar(_ searchBar: UISearchBar) {
+		let offset = -collectionView.contentOffset.y
+		
+		// only snap if within the money zone $$
+		if offset <= Self.navMaxHeight && offset > Self.navMinHeight {
+			snapScrollViewContentToTop(collectionView, withDuration: Self.trendingAnimationDuration)
+		}
+		
+		animateTrendingCollectionView(forAppearance: true, withDuration: Self.trendingAnimationDuration)
+	}
+	
+	func didSearch(withTerm term: String, andFirstResponder firstResponder: UIView) {
+		firstResponder.resignFirstResponder()
+		
+		// do any loading here before presenting the searchResultsCollectionView
+		
+//		animateLoadingView(forAppearance: true, withDuration: Self.trendingAnimationDuration)
+				
+		animateSearchResultsCollectionView(forAppearance: true,
+																			 withDuration: Self.trendingAnimationDuration) { [weak self] in
+			guard let self = self else { return }
+			
+			if self.isShowingLoadingView {
+				self.animateLoadingView(forAppearance: false) // dismiss loading view
+			}
+		}
+		
+		print("term: \(term)")
+	}
+	
+	// pass first responder so view controller
+	// can time dismissing of first responder
+	// with any other animations - but we're
+	// not doing much here
+	func didPressSearchCancelButton(withFirstResponder firstResponder: UIView) {
+		firstResponder.resignFirstResponder() // resign first responder
+		
+		// dismiss trending collectionView if showing
+		if isShowingTrending {
+			animateTrendingCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
+		}
+		
+		// dismiss loadingView if showing
+		if isShowingLoadingView {
+			animateLoadingView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
+		}
+		
+		// dismiss searchResults if showing
+		if isShowingSearchResults {
+			animateSearchResultsCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
+		}
+	}
+	
+	// when user clicks "x" within search bar and there is no first responder
+	func didClearSearchWithNoFirstResponder() {
+		// dismiss loading view if showing
+		if isShowingLoadingView {
+			animateLoadingView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
+		}
+		
+		// dismiss searchResults if showing
+		if isShowingSearchResults {
+			animateSearchResultsCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
+		}
 	}
 	
 }
@@ -230,7 +374,7 @@ extension HomeViewController {
 		return section
 	}
 	
-	private func sectionLayoutForHomeImageCell() -> NSCollectionLayoutSection {
+	func sectionLayoutForHomeImageCell() -> NSCollectionLayoutSection {
 		let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
 																					heightDimension: .estimated(100.0))
 		let item = NSCollectionLayoutItem(layoutSize: itemSize)
@@ -414,6 +558,9 @@ extension HomeViewController {
 		// we'll negate it to work with positive values
 		let offset: CGFloat = -scrollView.contentOffset.y
 		
+		
+		// logic to handle setting of scrollingNavView frame
+		
 		// set restriction on min height for scrollingNavView
 		let height: CGFloat = max(offset, Self.navMinHeight)
 		
@@ -422,20 +569,20 @@ extension HomeViewController {
 		scrollNavViewFrame.size.height = height
 		scrollingNavView.frame = scrollNavViewFrame
 		
-		// logic to pass percentage increase/decrease values to scrollingNavView
 		
-		// nothing to do here for now
-		// if we're scaling into scrollingNavView by scrolling down
-		// when at top or when scrollView bounces at rest point
-		if height > Self.navMaxHeight { return }
+		// logic to handle setting alphas on scrollingNavView subviews
 		
-		// logic for percent decrease - primarily
-		// when scrolling down & back up
-		let desiredScrollRange: CGFloat = Self.navMaxHeight - Self.navMinHeight // represents old number
-		let absoluteHeight = abs(height - Self.navMaxHeight) // represents new number
-		let decrease = desiredScrollRange - absoluteHeight
-		let percentDecrease = decrease / desiredScrollRange
-		scrollingNavView.animateSubviews(forScrollDelta: percentDecrease)
+		if offset < Self.navMaxHeight && offset > Self.navMinHeight {
+			let desiredScrollRange: CGFloat = Self.navMaxHeight - Self.navMinHeight // represents old number
+			let absoluteHeight = abs(height - Self.navMaxHeight) // represents new number
+			let difference = desiredScrollRange - absoluteHeight
+			let percentDifference = difference / desiredScrollRange
+			scrollingNavView.animateSubviews(forScrollDelta: percentDifference)
+		} else if offset <= Self.navMinHeight {
+			scrollingNavView.animateSubviews(forScrollDelta: 0.0)
+		} else if offset >= Self.navMaxHeight {
+			scrollingNavView.animateSubviews(forScrollDelta: 1.0)
+		}
 	}
 		
 	func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
@@ -454,12 +601,14 @@ extension HomeViewController {
 		let offset = -scrollView.contentOffset.y
 		
 		if offset < Self.navSnapToTopBuffer && offset > Self.navMinHeight {
-			snapScrollViewContentToTop(scrollView)
+			snapScrollViewContentToTop(scrollView, withDuration: 0.3)
 		}
 	}
 	
-	private func snapScrollViewContentToTop(_ scrollView: UIScrollView) {
-		UIView.animate(withDuration: 0.3,
+	// allow passing of duration so we can
+	// time this animation with other ones
+	private func snapScrollViewContentToTop(_ scrollView: UIScrollView, withDuration duration: TimeInterval = 0.03) {
+		UIView.animate(withDuration: duration,
 									 delay: 0.0,
 									 options: .curveEaseInOut,
 									 animations: {
@@ -467,6 +616,52 @@ extension HomeViewController {
 										scrollView.contentOffset = CGPoint(x: 0.0, y: -Self.navMinHeight)
 										self.view.layoutIfNeeded() // force update view
 									 }, completion: nil)
+	}
+	
+}
+
+
+
+// MARK: keyboard observer methods
+
+// currently we only expect to see the keyboard in 2 cases
+// 1 - When user clicks on search bar in scrollingNavView
+// 2 - When user clicks in textField within LoginView
+
+extension HomeViewController {
+	
+	// OJO!!
+	
+	// DO NOT call any animation code within these keyboard notification
+	// methods unless you're fine with the keyboard animation duration
+	// overriding any of your custom animations... this happens by defaut,
+	// as these keyboard methods are called within an animation block called
+	// by the system, so in order to override this, just call your code in
+	// the code that triggers these methods.. for example
+	
+	// if pressing a cancel button dismisses the keyboard, call the animation
+	// code in the cancel button action code, not in keyboardWillHide(notification:) method
+	
+	// in order to prevent our animations from being overriden, we keep any
+	// code within these methods to a minimum and handle as much outside of
+	// these methods as possible
+	
+	@objc func keyboardWillShow(notification: NSNotification) {
+		if isShowingLoginView {
+			// unpack keyboard height
+			guard let userInfoDict = notification.userInfo,
+						let keyboardHeightNSValue = userInfoDict[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else { return }
+			
+			let keyboardHeight = keyboardHeightNSValue.cgRectValue.height
+			
+			animateLoginView(forKeyboardHeight: keyboardHeight)
+		}
+		
+		scrollingNavView.setShowsCancelButton(shows: true, animated: true)
+	}
+	
+	@objc func keyboardWillHide(notification: NSNotification) {
+		scrollingNavView.setShowsCancelButton(shows: false, animated: true)
 	}
 	
 }

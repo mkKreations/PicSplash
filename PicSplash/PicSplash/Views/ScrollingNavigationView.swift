@@ -12,6 +12,10 @@ import UIKit
 protocol ScrollingNavigationButtonsProvider: AnyObject {
 	func didPressMenuButton(_ button: UIButton)
 	func didPressLogInButton(_ button: UIButton)
+	func didPressSearchCancelButton(withFirstResponder firstResponder: UIView)
+	func didBeginEditingSearchBar(_ searchBar: UISearchBar)
+	func didSearch(withTerm term: String, andFirstResponder firstResponder: UIView)
+	func didClearSearchWithNoFirstResponder()
 }
 
 
@@ -30,13 +34,14 @@ class ScrollingNavigationView: UIView {
 	private let loginButton: UIButton = UIButton(type: .system)
 	private let menuButton: UIButton = UIButton(type: .system)
 	weak var delegate: ScrollingNavigationButtonsProvider?
+	private var shouldBeginEditing: Bool = true // to receive calls from user clicking x within search bar - see below
 
 	
 	// inits
 	override init(frame: CGRect) {
 		super.init(frame: frame)
 		
-		backgroundColor = .systemYellow
+		backgroundColor = .picSplashLightBlack
 		
 		configureSubviews()
 		constrainSubviews()
@@ -50,6 +55,11 @@ class ScrollingNavigationView: UIView {
 	func animateSubviews(forScrollDelta scrollDelta: CGFloat) {
 		displayLabel.alpha = scrollDelta
 		buttonsStackView.alpha = scrollDelta
+		displayImageView.alpha = scrollDelta
+	}
+	
+	func setShowsCancelButton(shows: Bool, animated: Bool) {
+		searchBar.setShowsCancelButton(shows, animated: animated)
 	}
 	
 	
@@ -102,7 +112,9 @@ class ScrollingNavigationView: UIView {
 		// to also set placeholder text color
 		searchBar.searchTextField.attributedPlaceholder = NSAttributedString(string: "Search Photos",
 																																				 attributes: [NSAttributedString.Key.foregroundColor : UIColor.white])
+		searchBar.delegate = self // respond to search events
 		searchBar.searchBarStyle = .minimal
+		searchBar.tintColor = .white // set Cancel button tint color
 		searchBar.searchTextField.leftView?.tintColor = .white // set magnifying glass tintColor
 	}
 	
@@ -151,4 +163,36 @@ class ScrollingNavigationView: UIView {
 		delegate?.didPressLogInButton(sender)
 	}
 
+}
+
+extension ScrollingNavigationView: UISearchBarDelegate {
+	func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+		searchBar.text = "" // reset text
+		delegate?.didPressSearchCancelButton(withFirstResponder: searchBar)
+	}
+		
+	func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+		delegate?.didBeginEditingSearchBar(searchBar)
+	}
+	
+	func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+		guard let searchTerm = searchBar.text else { return }
+		delegate?.didSearch(withTerm: searchTerm, andFirstResponder: searchBar)
+	}
+	
+	// implementing the following methods to reliably receive calls
+	// when user clicks "x" and searchBar is not first responder
+	func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+		if !searchBar.isFirstResponder {
+			shouldBeginEditing = false
+			delegate?.didClearSearchWithNoFirstResponder()
+		}
+	}
+
+	func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
+		let returnValue = shouldBeginEditing
+		shouldBeginEditing = true
+		return returnValue
+	}
+	
 }
