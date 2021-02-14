@@ -269,6 +269,10 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 		animateTrendingCollectionView(forAppearance: true, withDuration: Self.trendingAnimationDuration)
 	}
 	
+	func didSearch(withTerm term: String) {
+		print("term: \(term)")
+	}
+	
 	// pass first responder so view controller
 	// can time dismissing of first responder
 	// with any other animations - but we're

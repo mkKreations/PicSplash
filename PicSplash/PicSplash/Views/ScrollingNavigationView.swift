@@ -14,6 +14,7 @@ protocol ScrollingNavigationButtonsProvider: AnyObject {
 	func didPressLogInButton(_ button: UIButton)
 	func didPressSearchCancelButton(withFirstResponder firstResponder: UIView)
 	func didBeginEditingSearchBar(_ searchBar: UISearchBar)
+	func didSearch(withTerm term: String)
 }
 
 
@@ -169,6 +170,10 @@ extension ScrollingNavigationView: UISearchBarDelegate {
 		
 	func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
 		delegate?.didBeginEditingSearchBar(searchBar)
-		print("THIS THE ONE")
+	}
+	
+	func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+		guard let searchTerm = searchBar.text else { return }
+		delegate?.didSearch(withTerm: searchTerm)
 	}
 }
