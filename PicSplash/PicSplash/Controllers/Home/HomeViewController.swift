@@ -36,6 +36,7 @@ final class HomeViewController: UIViewController {
 	var isShowingTrending: Bool = false
 	let loadingView: UIView = UIView(frame: .zero)
 	let loadingActivityActivator: UIActivityIndicatorView = UIActivityIndicatorView(style: .large)
+	var loadingViewTopConstraint: NSLayoutConstraint?
 	var isShowingLoadingView: Bool = false
 	let searchResultsCollectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
 	var searchResultsDatasource: UICollectionViewDiffableDataSource<SectionPlaceHolder, ImagePlaceholder>?
@@ -62,9 +63,9 @@ final class HomeViewController: UIViewController {
 		// TODO: remove this to unsilence constraint breaks from estimated cell heights
 		UserDefaults.standard.set(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
 		
-		// logic will be refactored shortly
 		if !isShowingLoadingView {
-			animateLoadingView(forAppearance: true, withDuration: Self.trendingAnimationDuration)
+			// show loadingView right away - no animationDuration
+			animateLoadingView(forAppearance: true, withDuration: 0.0, fullScreen: true)
 		}
 		
 		NetworkingManager.shared.dowloadHomeImagesListData { data, error in
@@ -82,7 +83,7 @@ final class HomeViewController: UIViewController {
 				
 				// successful so dismiss loading
 				if self.isShowingLoadingView {
-					self.animateLoadingView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
+					self.animateLoadingView(forAppearance: false, withDuration: Self.trendingAnimationDuration, fullScreen: true)
 				}
 			}
 		}

@@ -139,7 +139,8 @@ extension HomeViewController {
 	}
 	
 	private func constrainLoadingViewAndActivityIndicator() {
-		loadingView.topAnchor.constraint(equalTo: view.topAnchor, constant: Self.navMinHeight).isActive = true
+		loadingViewTopConstraint = loadingView.topAnchor.constraint(equalTo: view.topAnchor, constant: Self.navMinHeight)
+		loadingViewTopConstraint?.isActive = true
 		loadingView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
 		loadingView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
 		loadingView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
@@ -148,7 +149,10 @@ extension HomeViewController {
 		loadingActivityActivator.centerXAnchor.constraint(equalTo: loadingView.centerXAnchor).isActive = true
 	}
 	
-	func animateLoadingView(forAppearance willAppear: Bool, withDuration duration: TimeInterval = 0.03) {
+	func animateLoadingView(forAppearance willAppear: Bool,
+													withDuration duration: TimeInterval = 0.03,
+													fullScreen: Bool = false) {
+		loadingViewTopConstraint?.constant = fullScreen ? 0.0 : Self.navMinHeight // size loadingView correctly
 		loadingView.alpha = willAppear ? 0.0 : 1.0
 		loadingActivityActivator.alpha = willAppear ? 0.0 : 1.0
 
