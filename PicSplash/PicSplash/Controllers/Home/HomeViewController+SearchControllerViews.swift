@@ -33,8 +33,7 @@ extension HomeViewController {
 	}
 	
 	private func constrainTrendingCollectionView() {
-		trendingCollectionViewTopConstraint = trendingCollectionView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0.0)
-		trendingCollectionViewTopConstraint?.isActive = true
+		trendingCollectionView.topAnchor.constraint(equalTo: view.topAnchor, constant: Self.navMinHeight).isActive = true
 		trendingCollectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
 		trendingCollectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
 		trendingCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
@@ -107,12 +106,6 @@ extension HomeViewController {
 	}
 	
 	func animateTrendingCollectionView(forAppearance willAppear: Bool, withDuration duration: TimeInterval = 0.03) {
-		// set correct initial states
-		if willAppear {
-			trendingCollectionView.alpha = 0.0 // make sure alpha is correct value
-			trendingCollectionViewTopConstraint?.constant = Self.navMinHeight
-		}
-		
 		UIView.animate(withDuration: duration,
 									 delay: 0.0, options: .curveEaseInOut) {
 			self.trendingCollectionView.alpha = willAppear ? 1.0 : 0.0

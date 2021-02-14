@@ -15,6 +15,7 @@ protocol ScrollingNavigationButtonsProvider: AnyObject {
 	func didPressSearchCancelButton(withFirstResponder firstResponder: UIView)
 	func didBeginEditingSearchBar(_ searchBar: UISearchBar)
 	func didSearch(withTerm term: String, andFirstResponder firstResponder: UIView)
+	func didClearSearchWithNoFirstResponder()
 }
 
 
@@ -33,6 +34,7 @@ class ScrollingNavigationView: UIView {
 	private let loginButton: UIButton = UIButton(type: .system)
 	private let menuButton: UIButton = UIButton(type: .system)
 	weak var delegate: ScrollingNavigationButtonsProvider?
+	private var shouldBeginEditing: Bool = true // to receive calls from user clicking x within search bar - see below
 
 	
 	// inits
@@ -177,4 +179,20 @@ extension ScrollingNavigationView: UISearchBarDelegate {
 		guard let searchTerm = searchBar.text else { return }
 		delegate?.didSearch(withTerm: searchTerm, andFirstResponder: searchBar)
 	}
+	
+	// implementing the following methods to reliably receive calls
+	// when user clicks "x" and searchBar is not first responder
+	func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+		if !searchBar.isFirstResponder {
+			shouldBeginEditing = false
+			delegate?.didClearSearchWithNoFirstResponder()
+		}
+	}
+
+	func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
+		let returnValue = shouldBeginEditing
+		shouldBeginEditing = true
+		return returnValue
+	}
+	
 }

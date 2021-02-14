@@ -32,7 +32,6 @@ final class HomeViewController: UIViewController {
 	private var isShowingLoginView: Bool = false
 	private var isObservingKeyboard: Bool = false
 	let trendingCollectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
-	var trendingCollectionViewTopConstraint: NSLayoutConstraint?
 	var trendingDatasource: UICollectionViewDiffableDataSource<TrendingSection, Trending>?
 	var isShowingTrending: Bool = false
 	let loadingView: UIView = UIView(frame: .zero)
@@ -106,6 +105,7 @@ final class HomeViewController: UIViewController {
 		collectionView.contentInsetAdjustmentBehavior = .never // by default, behavior adjusts inset 20 pts for status bar
 		collectionView.scrollsToTop = true // ensure value is true
 		collectionView.showsVerticalScrollIndicator = false
+		collectionView.scrollsToTop = false // will implement our custom scrollsToTop behavior
 		collectionView.delegate = self
 		collectionView.register(HomeOrthogonalCell.self, forCellWithReuseIdentifier: HomeOrthogonalCell.reuseIdentifier)
 		collectionView.register(HomeImageCell.self, forCellWithReuseIdentifier: HomeImageCell.reuseIdentifier)
@@ -298,6 +298,14 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 		}
 		
 		// dismiss loadingView if showing
+		if isShowingLoadingView {
+			animateLoadingView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
+		}
+	}
+	
+	// when user clicks "x" within search bar and there is no first responder
+	func didClearSearchWithNoFirstResponder() {
+		// dismiss loading view if showing
 		if isShowingLoadingView {
 			animateLoadingView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
 		}
