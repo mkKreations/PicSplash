@@ -97,6 +97,8 @@ class NetworkingManager {
 
 		jsonList.forEach { item in
 			guard let blurHashString: String = item["blur_hash"] as? String,
+						let width: Int = item["width"] as? Int,
+						let height: Int = item["height"] as? Int,
 						let userDict: [String: Any] = item["user"] as? [String: Any],
 						let userName: String = userDict["username"] as? String,
 						let urlsDict: [String: String] = item["urls"] as? [String: String],
@@ -105,10 +107,14 @@ class NetworkingManager {
 			
 			photoExploreSection.items.append(Photo(imageUrl: imageUrl,
 																						 author: userName,
-																						 blurString: blurHashString))
+																						 blurString: blurHashString,
+																						 height: height,
+																						 width: width))
 			photoNewSection.items.append(Photo(imageUrl: imageUrl,
 																				 author: userName,
-																				 blurString: blurHashString))
+																				 blurString: blurHashString,
+																				 height: height,
+																				 width: width))
 		}
 		print("JSON DATA: \(jsonList)")
 		

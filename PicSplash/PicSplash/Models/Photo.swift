@@ -12,11 +12,15 @@ final class Photo {
 	let imageUrl: String
 	let author: String
 	let blurString: String
+	let height: Int
+	let width: Int
 	
-	init(imageUrl: String, author: String, blurString: String) {
+	init(imageUrl: String, author: String, blurString: String, height: Int, width: Int) {
 		self.imageUrl = imageUrl
 		self.author = author
 		self.blurString = blurString
+		self.height = height
+		self.width = width
 	}
 }
 

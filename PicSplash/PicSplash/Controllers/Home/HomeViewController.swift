@@ -53,7 +53,6 @@ final class HomeViewController: UIViewController {
 		
 		configureSubviews()
 		configureDatasource()
-		applySnapshot()
 		
 		// we are adding & fully configuring
 		// each view as a subview to view
@@ -406,11 +405,11 @@ extension HomeViewController {
 	func sectionLayoutForHomeImageCell() -> NSCollectionLayoutSection {
 		// will return back to estimated shortly for both itemSize & groupSize
 		let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-																					heightDimension: .absolute(100.0))
+																					heightDimension: .estimated(100.0))
 		let item = NSCollectionLayoutItem(layoutSize: itemSize)
 		
 		let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-																					 heightDimension: .absolute(100.0))
+																					 heightDimension: .estimated(100.0))
 		let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize,
 																								 subitems: [item])
 
@@ -458,8 +457,13 @@ extension HomeViewController {
 				
 				let photo = currentSection.items[indexPath.row]
 //				cell.displayImage = UIImage(blurHash: photo.blurString, size: CGSize(width: self.view.bounds.width, height: .infinity))
-				guard let image = UIImage(blurHash: photo.blurString, size: CGSize(width: self.view.bounds.width, height: 64.0)) else { return nil }
-				cell.displayImage = image
+//				guard let image = UIImage(blurHash: photo.blurString, size: CGSize(width: self.view.bounds.width, height: 64.0)) else { return nil }
+				let cellWidth: CGFloat = self.view.bounds.width
+//
+				let product = cellWidth * CGFloat(photo.height)
+				let cellHeight: CGFloat = product / CGFloat(photo.width)
+				cell.imageHeight = Int(cellHeight)
+//				cell.displayImage = image
 				cell.layer.borderWidth = 1.0
 				cell.layer.borderColor = UIColor.systemGreen.cgColor
 				
@@ -503,7 +507,7 @@ extension HomeViewController {
 		// of cells - the second application of snapshot correctly places
 		// the cells without affecting the UI
 		datasource.apply(snapshot, animatingDifferences: true) {
-			self.datasource.apply(snapshot, animatingDifferences: true)
+			self.datasource.apply(snapshot, animatingDifferences: false)
 		}
 	}
 
@@ -526,6 +530,13 @@ extension HomeViewController: UICollectionViewDelegate {
 		selectedCell = collectionView.cellForItem(at: indexPath) as? HomeImageCell
 		selectedCellImageSnapshot = selectedCell?.displayImageView.snapshotView(afterScreenUpdates: false)
 		presentDetailViewController(withImagePlaceholder: selectedImagePlaceholder)
+	}
+	
+	func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+		// TODO: image lazy loading here
+		guard let _ = collectionView.cellForItem(at: indexPath) as? HomeImageCell else { return }
+		
+		let _ = self.networkManager.homeImagesSections[indexPath.section]
 	}
 	
 	private func presentDetailViewController(withImagePlaceholder imagePlaceholder: ImagePlaceholder) {

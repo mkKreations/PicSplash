@@ -45,6 +45,14 @@ class HomeImageCell: UICollectionViewCell {
 		}
 	}
 	
+	var imageHeight: Int? {
+		didSet {
+			if let height = imageHeight {
+				imageViewHeightConstraint.constant = CGFloat(height)
+			}
+		}
+	}
+	
 	
 	// inits
 	override init(frame: CGRect) {
