@@ -447,9 +447,6 @@ extension HomeViewController {
 				guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeOrthogonalCell.reuseIdentifier,
 																														for: indexPath) as? HomeOrthogonalCell else { return nil }
 				
-				cell.layer.borderWidth = 1.0
-				cell.layer.borderColor = UIColor.systemRed.cgColor
-
 				return cell
 			case .new:
 				guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeImageCell.reuseIdentifier,
@@ -464,8 +461,6 @@ extension HomeViewController {
 				let cellHeight: CGFloat = product / CGFloat(photo.width)
 				cell.imageHeight = Int(cellHeight)
 //				cell.displayImage = image
-				cell.layer.borderWidth = 1.0
-				cell.layer.borderColor = UIColor.systemGreen.cgColor
 				
 				return cell
 			}
@@ -533,10 +528,26 @@ extension HomeViewController: UICollectionViewDelegate {
 	}
 	
 	func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-		// TODO: image lazy loading here
-		guard let _ = collectionView.cellForItem(at: indexPath) as? HomeImageCell else { return }
+		let section = self.networkManager.homeImagesSections[indexPath.section]
+		let photo = section.items[indexPath.row]
+
+		switch section.type {
+		case .explore:
+			NetworkingManager.shared.processBlurredImage(usingBlurHashString: photo.blurString) { blurredImage in
+				DispatchQueue.main.async {
+					guard let exploreSectionCell = collectionView.cellForItem(at: indexPath) as? HomeOrthogonalCell else { return }
+					exploreSectionCell.displayImage = blurredImage
+				}
+			}
+		case .new:
+			NetworkingManager.shared.processBlurredImage(usingBlurHashString: photo.blurString) { blurredImage in
+				DispatchQueue.main.async {
+					guard let newSectionCell = collectionView.cellForItem(at: indexPath) as? HomeImageCell else { return }
+					newSectionCell.displayImage = blurredImage
+				}
+			}
+		}
 		
-		let _ = self.networkManager.homeImagesSections[indexPath.section]
 	}
 	
 	private func presentDetailViewController(withImagePlaceholder imagePlaceholder: ImagePlaceholder) {

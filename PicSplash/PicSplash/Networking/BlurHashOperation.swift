@@ -7,8 +7,12 @@
 
 import UIKit
 
+// creating an Operation for this task
+// because it's computationally expensive
+// and lags when called on main thread
+
 class BlurHashOperation: Operation {
-	private let blurHash: String
+	let blurHash: String
 	
 	var blurredImage: UIImage?
 	

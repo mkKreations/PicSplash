@@ -41,6 +41,12 @@ class NetworkingManager {
 		operationQueue.qualityOfService = .userInteractive
 		return operationQueue
 	}()
+	private let blurHashImageQueue: OperationQueue = {
+		let operationQueue = OperationQueue()
+		operationQueue.qualityOfService = .userInteractive
+		return operationQueue
+	}()
+	let blurHashImageCache: NSCache<NSString, UIImage> = NSCache()
 	private(set) var homeImagesSections: [PhotoSection] = [
 		PhotoSection(title: "Explore", type: .explore, items: []),
 		PhotoSection(title: "New", type: .new, items: []),
@@ -69,6 +75,36 @@ class NetworkingManager {
 		}.resume()
 	}
 	
+	func processBlurredImage(usingBlurHashString blurHashString: String, withCompletion completion: @escaping (UIImage) -> ()) {
+		if let cachedBlurredImage = blurHashImageCache.object(forKey: NSString(string: blurHashString)) {
+			print("RETURNING CACHED BLURRED IMAGE")
+			completion(cachedBlurredImage)
+			return
+		} else {
+			// first see if the operation is currently running on blurHashImageQueue
+			// if so - do nothing as of now since operation already has highest queue priority
+			if let operations = (blurHashImageQueue.operations as? [BlurHashOperation])?
+					.filter({ $0.blurHash == blurHashString && $0.isExecuting && $0.isFinished == false }),
+				 let _ = operations.first {
+				print("BLURRED IMAGE OPERATION CURRENTLY RUNNING")
+			} else {
+				let blurHashOperation = BlurHashOperation(blurHash: blurHashString)
+				blurHashOperation.queuePriority = .veryHigh
+				blurHashOperation.completionBlock = {
+					// make sure the operation completed & we have a blurredImage
+					guard let blurredImage = blurHashOperation.blurredImage else { return }
+
+					print("CACHING BLURRED IMAGE")
+					
+					// cache the image using the blur hash as the key
+					self.blurHashImageCache.setObject(blurredImage, forKey: NSString(string: blurHashString))
+					completion(blurredImage)
+				}
+				// add to image queue
+				blurHashImageQueue.addOperation(blurHashOperation)
+			}
+		}
+	}
 	
 	// MARK: helpers to process requests
 	
@@ -76,11 +112,13 @@ class NetworkingManager {
 																				 urlResponse response: URLResponse?,
 																				 error: Error?,
 																				 andCompletion completion: @escaping ([PhotoSection]?, NetworkingError?) -> ()) {
+		// return and capture error from server
 		if let error = error {
 			completion(nil, .serverError(error))
 			return
 		}
 		
+		// ensure we have successful httpResponse
 		guard let httpResponse = response as? HTTPURLResponse,
 					(200...300).contains(httpResponse.statusCode) else {
 			completion(nil, .invalidResponse)
@@ -89,16 +127,19 @@ class NetworkingManager {
 		
 		print("REQUESTS REMAINING: \(httpResponse.allHeaderFields["x-ratelimit-remaining"]) :(")
 			
+		// unpack data & deserialize response data into JSON
 		guard let data = data,
 					let jsonList = try? JSONSerialization.jsonObject(with: data, options: []) as? [[String: Any]] else {
 			completion(nil, .failedDeserialization)
 			return
 		}
 		
-		// get the section we want to modify
+		// get the section we want to modify - we know we'll have them - no need to bail out
 		guard var photoExploreSection = homeImagesSections.filter({ $0.type == .explore }).first else { return }
 		guard var photoNewSection = homeImagesSections.filter({ $0.type == .new }).first else { return }
 
+		// the mapping of JSON data to our object is not 1 to 1 so we unpack the old fashioned way
+		// and append the data to our homeImagesSections - also handle blurHash
 		jsonList.forEach { item in
 			guard let blurHashString: String = item["blur_hash"] as? String,
 						let width: Int = item["width"] as? Int,
@@ -107,7 +148,7 @@ class NetworkingManager {
 						let userName: String = userDict["username"] as? String,
 						let urlsDict: [String: String] = item["urls"] as? [String: String],
 						let imageUrl: String = urlsDict["small"]
-			else { return }
+			else { return } // should I throw NetworkError here?
 			
 			photoExploreSection.items.append(Photo(imageUrl: imageUrl,
 																						 author: userName,
@@ -119,16 +160,14 @@ class NetworkingManager {
 																				 blurString: blurHashString,
 																				 height: height,
 																				 width: width))
+			
 		}
-		print("JSON DATA: \(jsonList)")
+//		print("JSON DATA: \(jsonList)")
 		
 		// reset data on our property
 		homeImagesSections[0] = photoExploreSection
 		homeImagesSections[1] = photoNewSection
 		
-		print("HOME IMAGE SECTION 0: \(photoExploreSection)")
-		print("HOME IMAGE SECTION 1: \(photoNewSection)")
-
 		completion(homeImagesSections, nil)
 	}
 }

@@ -19,11 +19,11 @@ class HomeOrthogonalCell: UICollectionViewCell {
 	
 	
 	// public setters
-//	var displayImage: UIImage? {
-//		didSet {
-//			displayImageView.image = displayImage
-//		}
-//	}
+	var displayImage: UIImage? {
+		didSet {
+			displayImageView.image = displayImage
+		}
+	}
 	
 	var displayBackgroundColor: UIColor? {
 		didSet {
@@ -63,7 +63,7 @@ class HomeOrthogonalCell: UICollectionViewCell {
 	// helper methods
 	private func configureSubviews() {
 		displayImageView.translatesAutoresizingMaskIntoConstraints = false
-		displayImageView.contentMode = .scaleAspectFit
+		displayImageView.contentMode = .scaleAspectFill
 		contentView.addSubview(displayImageView)
 		
 		gradientOverlayView.translatesAutoresizingMaskIntoConstraints = false
