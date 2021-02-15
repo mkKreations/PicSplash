@@ -451,16 +451,15 @@ extension HomeViewController {
 			case .new:
 				guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeImageCell.reuseIdentifier,
 																														for: indexPath) as? HomeImageCell else { return nil }
-				
+
+				// get current photo
 				let photo = currentSection.items[indexPath.row]
-//				cell.displayImage = UIImage(blurHash: photo.blurString, size: CGSize(width: self.view.bounds.width, height: .infinity))
-//				guard let image = UIImage(blurHash: photo.blurString, size: CGSize(width: self.view.bounds.width, height: 64.0)) else { return nil }
-				let cellWidth: CGFloat = self.view.bounds.width
-//
+				
+				// determine & set cell height from photo dimensions
+				let cellWidth: CGFloat = collectionView.bounds.width
 				let product = cellWidth * CGFloat(photo.height)
 				let cellHeight: CGFloat = product / CGFloat(photo.width)
 				cell.imageHeight = Int(cellHeight)
-//				cell.displayImage = image
 				
 				return cell
 			}
