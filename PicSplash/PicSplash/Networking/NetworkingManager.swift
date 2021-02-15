@@ -11,6 +11,7 @@ import UIKit
 
 enum NetworkingError: Error {
 	case serverError(Error)
+	case invalidUrl
 	case invalidResponse
 	case failedDeserialization
 }
@@ -54,7 +55,10 @@ class NetworkingManager {
 		requestUrlString.append(Self.homeImagesListPath)
 		requestUrlString.append(Self.clientIDPath)
 		
-		guard let requestUrl = URL(string: requestUrlString) else { return }
+		guard let requestUrl = URL(string: requestUrlString) else {
+			completion(nil, .invalidUrl)
+			return
+		}
 
 		print("OUR URL: \(requestUrl)")
 		
