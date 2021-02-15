@@ -542,8 +542,17 @@ extension HomeViewController: UICollectionViewDelegate {
 			NetworkingManager.shared.processBlurredImage(usingBlurHashString: photo.blurString) { blurredImage in
 				DispatchQueue.main.async {
 					guard let exploreSectionCell = collectionView.cellForItem(at: indexPath) as? HomeOrthogonalCell else { return }
-					exploreCell.isLoading = false
+					exploreSectionCell.isLoading = false
 					exploreSectionCell.displayImage = blurredImage
+				}
+			}
+			
+			// fetch actual image to show
+			NetworkingManager.shared.downloadImage(forImageUrlString: photo.imageUrl) { image, error in
+				DispatchQueue.main.async {
+					guard let exploreSectionCell = collectionView.cellForItem(at: indexPath) as? HomeOrthogonalCell else { return }
+					exploreSectionCell.isLoading = false
+					exploreSectionCell.displayImage = image
 				}
 			}
 		case .new:
@@ -560,6 +569,15 @@ extension HomeViewController: UICollectionViewDelegate {
 					guard let newSectionCell = collectionView.cellForItem(at: indexPath) as? HomeImageCell else { return }
 					newSectionCell.isLoading = false
 					newSectionCell.displayImage = blurredImage
+				}
+			}
+			
+			// fetch actual image to show
+			NetworkingManager.shared.downloadImage(forImageUrlString: photo.imageUrl) { image, error in
+				DispatchQueue.main.async {
+					guard let newSectionCell = collectionView.cellForItem(at: indexPath) as? HomeImageCell else { return }
+					newSectionCell.isLoading = false
+					newSectionCell.displayImage = image
 				}
 			}
 		}

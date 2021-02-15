@@ -13,37 +13,39 @@ import UIKit
 // managing Operation instances within NetworkingManager
 
 class ImageDownloadOperation: AsyncOperation {
-	private let url: URL
+	let imageUrl: URL
+	
+	var imageHandler: ImageDownloadHandler?
 	
 	init(url: URL) {
-		self.url = url
+		self.imageUrl = url
 		super.init()
 	}
 	
 	override func main() {
-		URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
+		URLSession.shared.dataTask(with: imageUrl) { [weak self] data, response, error in
 			guard let self = self else { return }
 			
 			defer { self.state = .finished } // make sure we update our state before handing off control
 			
-			if let _ = error {
-				// call completion here and pass thru error
+			if let error = error {
+				self.imageHandler?(nil, NetworkingError.serverError(error))
 				return
 			}
 			
 			guard let httpResponse = response as? HTTPURLResponse,
 						(200...300).contains(httpResponse.statusCode) else {
-				// call completion here and pass thru error
+				self.imageHandler?(nil, NetworkingError.invalidResponse)
 				return
 			}
 			
 			guard let data = data,
-						let _ = UIImage(data: data) else {
-				// call completion here and pass thru error
+						let image = UIImage(data: data) else {
+				self.imageHandler?(nil, NetworkingError.failedDataProcessing)
 				return
 			}
 			
-			// call completion handler and pass thru image
-		}
+			self.imageHandler?(image, nil)
+		}.resume()
 	}
 }

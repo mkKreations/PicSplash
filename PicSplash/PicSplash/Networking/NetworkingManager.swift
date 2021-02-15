@@ -14,7 +14,11 @@ enum NetworkingError: Error {
 	case invalidUrl
 	case invalidResponse
 	case failedDeserialization
+	case failedDataProcessing
 }
+
+// typealias to help pass around completions
+typealias ImageDownloadHandler = (_ image: UIImage?, _ error: NetworkingError?) -> ()
 
 // singleton to handle our networking
 // not needed to be thread-safe atm
@@ -36,17 +40,19 @@ class NetworkingManager {
 	
 	// MARK: instance vars
 	
+	private var completionHandler: ImageDownloadHandler? // only to store references to any local completion blocks
 	private let imageDownloadQueue: OperationQueue = {
 		let operationQueue = OperationQueue()
 		operationQueue.qualityOfService = .userInteractive
 		return operationQueue
 	}()
+	private let imageDownloadCache: NSCache<NSString, UIImage> = NSCache()
 	private let blurHashImageQueue: OperationQueue = {
 		let operationQueue = OperationQueue()
 		operationQueue.qualityOfService = .userInteractive
 		return operationQueue
 	}()
-	let blurHashImageCache: NSCache<NSString, UIImage> = NSCache()
+	private let blurHashImageCache: NSCache<NSString, UIImage> = NSCache()
 	private(set) var homeImagesSections: [PhotoSection] = [
 		PhotoSection(title: "Explore", type: .explore, items: []),
 		PhotoSection(title: "New", type: .new, items: []),
@@ -110,7 +116,6 @@ class NetworkingManager {
 		if let cachedBlurredImage = blurHashImageCache.object(forKey: NSString(string: blurHashString)) {
 			print("RETURNING CACHED BLURRED IMAGE")
 			completion?(cachedBlurredImage)
-			return
 		} else {
 			// first see if the operation is currently running on blurHashImageQueue
 			// if so - do nothing as of now since operation already has highest queue priority
@@ -131,8 +136,54 @@ class NetworkingManager {
 					self.blurHashImageCache.setObject(blurredImage, forKey: NSString(string: blurHashString))
 					completion?(blurredImage)
 				}
-				// add to image queue
+				// add to blur hash queue
 				blurHashImageQueue.addOperation(blurHashOperation)
+			}
+		}
+	}
+	
+	func downloadImage(forImageUrlString imageUrlString: String, withCompletion completion: ((UIImage?, NetworkingError?) -> Void)?) {
+		guard let imageUrl = URL(string: imageUrlString) else {
+			completion?(nil, NetworkingError.invalidUrl)
+			return
+		}
+	
+		// capture local completion
+		self.completionHandler = completion
+		
+		if let cachedImage = imageDownloadCache.object(forKey: NSString(string: imageUrlString)) {
+			print("RETURNING CACHED IMAGE")
+			completion?(cachedImage, nil)
+		} else {
+			// first see if the operation is currently running on
+			// imageDownloadQueue if so - raise its priority to top level
+			if let operations = (imageDownloadQueue.operations as? [ImageDownloadOperation])?
+						.filter({ $0.imageUrl.absoluteString == imageUrlString && $0.isExecuting == true && $0.isFinished == false }),
+				 let currentOperation = operations.first {
+				
+				currentOperation.queuePriority = .veryHigh
+				print("IMAGE OPERATION CURRENTLY RUNNING")
+				
+			} else {
+				let imageDownloadOperation = ImageDownloadOperation(url: imageUrl)
+				imageDownloadOperation.queuePriority = .high
+				imageDownloadOperation.imageHandler = { image, error in
+					if let error = error {
+						self.completionHandler?(nil, error)
+						return
+					}
+					
+					guard let image = image else { return }
+					
+					print("CACHING IMAGE")
+					
+					// cache the image using the url as the key
+					self.imageDownloadCache.setObject(image, forKey: NSString(string: imageUrlString))
+					
+					self.completionHandler?(image, error)
+				}
+				// add to image download queue
+				imageDownloadQueue.addOperation(imageDownloadOperation)
 			}
 		}
 	}
