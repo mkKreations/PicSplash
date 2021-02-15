@@ -63,12 +63,12 @@ final class HomeViewController: UIViewController {
 		// TODO: remove this to unsilence constraint breaks from estimated cell heights
 		UserDefaults.standard.set(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
 		
+		// show loadingView right away - no animationDuration
 		if !isShowingLoadingView {
-			// show loadingView right away - no animationDuration
 			animateLoadingView(forAppearance: true, withDuration: 0.0, fullScreen: true)
 		}
 		
-		NetworkingManager.shared.dowloadHomeImagesListData { data, error in
+		NetworkingManager.shared.downloadHomeInitialData { error in
 			DispatchQueue.main.async {
 				// print error & return
 				if let error = error {
@@ -76,9 +76,6 @@ final class HomeViewController: UIViewController {
 					return
 				}
 				
-				// unpack data
-				guard let _ = data else { return }
-
 				// apply snapshot as the data
 				// has been updated within NetworkManager
 				self.applySnapshot()

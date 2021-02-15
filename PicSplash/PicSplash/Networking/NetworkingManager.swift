@@ -55,14 +55,14 @@ class NetworkingManager {
 	
 	// MARK: network requests
 	
-	func dowloadHomeImagesListData(withCompletion completion: @escaping ([PhotoSection]?, NetworkingError?) -> ()) {
+	func downloadHomeInitialData(withCompletion completion: @escaping (NetworkingError?) -> ()) {
 		// construct urlString
 		var requestUrlString: String = Self.baseUrlString
 		requestUrlString.append(Self.homeImagesListPath)
 		requestUrlString.append(Self.clientIDPath)
 		
 		guard let requestUrl = URL(string: requestUrlString) else {
-			completion(nil, .invalidUrl)
+			completion(.invalidUrl)
 			return
 		}
 
@@ -71,14 +71,45 @@ class NetworkingManager {
 		URLSession.shared.dataTask(with: requestUrl) { [weak self] data, response, error in
 			guard let self = self else { return }
 			
-			self.processHomeImagesListData(data: data, urlResponse: response, error: error, andCompletion: completion)
+			// process our home images list data
+			try? self.processHomeImagesListData(data: data, urlResponse: response, error: error)
+			
+			// load first couple of blurred images for both sections
+			
+			// get indexPaths of the items whose blurred images we want to load
+			let newSection: Int = PhotoSectionType.new.rawValue
+			let firstNewCellIndexPath = IndexPath(row: 0, section: newSection)
+			let secondNewCellIndexPath = IndexPath(row: 1, section: newSection)
+			
+			let exploreSection: Int = PhotoSectionType.explore.rawValue
+			let firstExploreCellIndexPath = IndexPath(row: 0, section: exploreSection)
+			let secondExploreCellIndexPath = IndexPath(row: 1, section: exploreSection)
+
+			// create operations & cache results from those indexPaths
+			[firstNewCellIndexPath, secondNewCellIndexPath, firstExploreCellIndexPath, secondExploreCellIndexPath].forEach { indexPath in
+				// get photo
+				let photo = self.homeImagesSections[indexPath.section].items[indexPath.row]
+				
+				// we know that operations will be created for these tasks since
+				// this is initial load - also we know that the blurred images will
+				// be cached using their blurString
+				self.processBlurredImage(usingBlurHashString: photo.blurString, withCompletion: nil)
+			}
+			
+			// adding a barrierBlock ensures that all previous tasks on this queue will be completed
+			// before running this task. within here, we're just calling our completion block to hand
+			// control back over to the UI - important to deploy barrier block on correct queue
+			self.blurHashImageQueue.addBarrierBlock {
+				completion(nil)
+			}
+			
 		}.resume()
 	}
 	
-	func processBlurredImage(usingBlurHashString blurHashString: String, withCompletion completion: @escaping (UIImage) -> ()) {
+	func processBlurredImage(usingBlurHashString blurHashString: String, withCompletion completion: ((UIImage) -> ())?) {
 		if let cachedBlurredImage = blurHashImageCache.object(forKey: NSString(string: blurHashString)) {
 			print("RETURNING CACHED BLURRED IMAGE")
-			completion(cachedBlurredImage)
+			completion?(cachedBlurredImage)
 			return
 		} else {
 			// first see if the operation is currently running on blurHashImageQueue
@@ -98,7 +129,7 @@ class NetworkingManager {
 					
 					// cache the image using the blur hash as the key
 					self.blurHashImageCache.setObject(blurredImage, forKey: NSString(string: blurHashString))
-					completion(blurredImage)
+					completion?(blurredImage)
 				}
 				// add to image queue
 				blurHashImageQueue.addOperation(blurHashOperation)
@@ -110,19 +141,16 @@ class NetworkingManager {
 	
 	private func processHomeImagesListData(data: Data?,
 																				 urlResponse response: URLResponse?,
-																				 error: Error?,
-																				 andCompletion completion: @escaping ([PhotoSection]?, NetworkingError?) -> ()) {
+																				 error: Error?) throws {
 		// return and capture error from server
 		if let error = error {
-			completion(nil, .serverError(error))
-			return
+			throw NetworkingError.serverError(error)
 		}
 		
 		// ensure we have successful httpResponse
 		guard let httpResponse = response as? HTTPURLResponse,
 					(200...300).contains(httpResponse.statusCode) else {
-			completion(nil, .invalidResponse)
-			return
+			throw NetworkingError.invalidResponse
 		}
 		
 		print("REQUESTS REMAINING: \(httpResponse.allHeaderFields["x-ratelimit-remaining"]) :(")
@@ -130,8 +158,7 @@ class NetworkingManager {
 		// unpack data & deserialize response data into JSON
 		guard let data = data,
 					let jsonList = try? JSONSerialization.jsonObject(with: data, options: []) as? [[String: Any]] else {
-			completion(nil, .failedDeserialization)
-			return
+			throw NetworkingError.failedDeserialization
 		}
 		
 		// get the section we want to modify - we know we'll have them - no need to bail out
@@ -167,7 +194,5 @@ class NetworkingManager {
 		// reset data on our property
 		homeImagesSections[0] = photoExploreSection
 		homeImagesSections[1] = photoNewSection
-		
-		completion(homeImagesSections, nil)
 	}
 }

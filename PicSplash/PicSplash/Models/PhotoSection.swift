@@ -7,9 +7,12 @@
 
 import Foundation
 
-enum PhotoSectionType {
-	case explore
-	case new
+// the Int raw values will
+// represent indexPath.section
+
+enum PhotoSectionType: Int {
+	case explore = 0
+	case new = 1
 }
 
 struct PhotoSection {
