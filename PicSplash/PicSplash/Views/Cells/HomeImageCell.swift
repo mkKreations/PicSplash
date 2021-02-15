@@ -18,6 +18,7 @@ class HomeImageCell: UICollectionViewCell {
 	let displayImageView: UIImageView = UIImageView(frame: .zero)
 	let displayLabel: UILabel = UILabel(frame: .zero)
 	private var imageViewHeightConstraint: NSLayoutConstraint! // manage imageView height manually
+	private let loader: UIActivityIndicatorView = UIActivityIndicatorView(style: .large)
 	
 		
 	// public setters
@@ -53,6 +54,14 @@ class HomeImageCell: UICollectionViewCell {
 		}
 	}
 	
+	var isLoading: Bool {
+		get { self.loader.isAnimating }
+		
+		set(newValue) {
+			newValue == true ? self.loader.startAnimating() : self.loader.stopAnimating()
+		}
+	}
+	
 	
 	// inits
 	override init(frame: CGRect) {
@@ -79,6 +88,9 @@ class HomeImageCell: UICollectionViewCell {
 		displayLabel.translatesAutoresizingMaskIntoConstraints = false
 		displayLabel.textColor = .white
 		contentView.addSubview(displayLabel)
+		
+		loader.translatesAutoresizingMaskIntoConstraints = false
+		contentView.addSubview(loader)
 	}
 	
 	private func constrainSubviews() {
@@ -97,6 +109,9 @@ class HomeImageCell: UICollectionViewCell {
 		displayLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -5.0).isActive = true
 		displayLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -5.0).isActive = true
 		displayLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 5.0).isActive = true
+		
+		loader.centerYAnchor.constraint(equalTo: contentView.centerYAnchor).isActive = true
+		loader.centerXAnchor.constraint(equalTo: contentView.centerXAnchor).isActive = true
 	}
 	
 	// keeping this logic separate

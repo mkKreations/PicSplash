@@ -527,21 +527,41 @@ extension HomeViewController: UICollectionViewDelegate {
 	}
 	
 	func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+		// get section & photo for indexPath
 		let section = self.networkManager.homeImagesSections[indexPath.section]
 		let photo = section.items[indexPath.row]
 
 		switch section.type {
 		case .explore:
+			
+			// reset image
+			guard let exploreCell = cell as? HomeOrthogonalCell else { return }
+			exploreCell.displayImage = nil
+			
+			// show loading if no blurred image to show
+			exploreCell.isLoading = true
+			
+			// "fetch" blurred image from NetworkManager
 			NetworkingManager.shared.processBlurredImage(usingBlurHashString: photo.blurString) { blurredImage in
 				DispatchQueue.main.async {
 					guard let exploreSectionCell = collectionView.cellForItem(at: indexPath) as? HomeOrthogonalCell else { return }
+					exploreCell.isLoading = false
 					exploreSectionCell.displayImage = blurredImage
 				}
 			}
 		case .new:
+			// reset image
+			guard let newCell = cell as? HomeImageCell else { return }
+			newCell.displayImage = nil
+			
+			// show loading if no blurred image to show
+			newCell.isLoading = true
+			
+			// "fetch" blurred image from NetworkManager
 			NetworkingManager.shared.processBlurredImage(usingBlurHashString: photo.blurString) { blurredImage in
 				DispatchQueue.main.async {
 					guard let newSectionCell = collectionView.cellForItem(at: indexPath) as? HomeImageCell else { return }
+					newSectionCell.isLoading = false
 					newSectionCell.displayImage = blurredImage
 				}
 			}

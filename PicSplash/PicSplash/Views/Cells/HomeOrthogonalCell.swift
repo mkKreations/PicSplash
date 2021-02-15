@@ -16,7 +16,8 @@ class HomeOrthogonalCell: UICollectionViewCell {
 	private let displayImageView: UIImageView = UIImageView(frame: .zero)
 	private let gradientOverlayView: ImageShadowOverlayView = ImageShadowOverlayView(overlayStyle: .full)
 	private let displayLabel: UILabel = UILabel(frame: .zero)
-	
+	private let loader: UIActivityIndicatorView = UIActivityIndicatorView(style: .large)
+
 	
 	// public setters
 	var displayImage: UIImage? {
@@ -41,6 +42,13 @@ class HomeOrthogonalCell: UICollectionViewCell {
 		}
 	}
 	
+	var isLoading: Bool {
+		get { self.loader.isAnimating }
+		
+		set(newValue) {
+			newValue == true ? self.loader.startAnimating() : self.loader.stopAnimating()
+		}
+	}
 	
 	
 	// inits
@@ -73,6 +81,9 @@ class HomeOrthogonalCell: UICollectionViewCell {
 		displayLabel.textColor = .white
 		displayLabel.textAlignment = .center
 		contentView.addSubview(displayLabel)
+		
+		loader.translatesAutoresizingMaskIntoConstraints = false
+		contentView.addSubview(loader)
 	}
 	
 	private func constrainSubviews() {
@@ -90,6 +101,9 @@ class HomeOrthogonalCell: UICollectionViewCell {
 		displayLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor).isActive = true
 		displayLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 10.0).isActive = true
 		displayLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -10.0).isActive = true
+		
+		loader.centerYAnchor.constraint(equalTo: contentView.centerYAnchor).isActive = true
+		loader.centerXAnchor.constraint(equalTo: contentView.centerXAnchor).isActive = true
 	}
 
 	// long press gesture
