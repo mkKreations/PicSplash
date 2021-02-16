@@ -59,8 +59,9 @@ class NetworkingManager {
 	
 	
 	// MARK: helpers
-	
-	// we'll call
+
+	// we're not cancelling operations - instead we're keeping track
+	// of all current operations and managing their queue priorities
 	func lowerQueuePriority(forImageUrlString imageUrlString: String) {
 		// ensure we have the operation running in the queue
 		guard let operations = (imageDownloadQueue.operations as? [ImageDownloadOperation])?
@@ -74,19 +75,42 @@ class NetworkingManager {
 		imageDownloadCache.object(forKey: NSString(string: blurHash))
 	}
 	
+	private func constructInitialRequestUrl() -> (url: URL?, error: NetworkingError?) {
+		// construct urlString
+		var requestUrlString: String = Self.baseUrlString
+		requestUrlString.append(Self.homeImagesListPath)
+		
+		// ensure we have valid Url
+		guard var baseComponent: URLComponents = URLComponents(string: requestUrlString) else {
+			return (nil, .invalidUrl)
+		}
+		
+		let queryItems: [URLQueryItem] = [
+			URLQueryItem(name: "client_id", value: Secrets.API_KEY),
+			URLQueryItem(name: "page", value: "1"),
+			URLQueryItem(name: "per_page", value: "30"),
+		]
+		baseComponent.queryItems = queryItems
+		
+		// ensure we have valid Url
+		guard let requestUrl = baseComponent.url else {
+			return (nil, .invalidUrl)
+		}
+		
+		return (requestUrl, nil)
+	}
+	
 	
 	
 	// MARK: asynchronous tasks
 	
 	func downloadHomeInitialData(withCompletion completion: @escaping (NetworkingError?) -> ()) {
 		// construct urlString
-		var requestUrlString: String = Self.baseUrlString
-		requestUrlString.append(Self.homeImagesListPath)
-		requestUrlString.append(Self.clientIDPath)
+		let initialRequestUrlTuple = constructInitialRequestUrl()
 		
-		// ensure we have valid Url
-		guard let requestUrl = URL(string: requestUrlString) else {
-			completion(.invalidUrl)
+		// make sure we got valid url
+		guard let requestUrl = initialRequestUrlTuple.url else {
+			completion(initialRequestUrlTuple.error)
 			return
 		}
 
