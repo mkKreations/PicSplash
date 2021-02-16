@@ -100,6 +100,30 @@ class NetworkingManager {
 		return (requestUrl, nil)
 	}
 	
+	private func constructPhotoOfTheDayUrl() -> (url: URL?, error: NetworkingError?) {
+		// construct urlString
+		var requestString: String = Self.baseUrlString
+		requestString.append("/photos/random")
+		
+		// ensure we have valid Url
+		guard var baseComponent: URLComponents = URLComponents(string: requestString) else {
+			return (nil, .invalidUrl)
+		}
+		
+		let queryItems: [URLQueryItem] = [
+			URLQueryItem(name: "featured", value: nil),
+			URLQueryItem(name: "orientation", value: "landscape"),
+		]
+		baseComponent.queryItems = queryItems
+		
+		// ensure we have valid Url
+		guard let requestUrl = baseComponent.url else {
+			return (nil, .invalidUrl)
+		}
+		
+		return (requestUrl, nil)
+	}
+	
 	
 	
 	// MARK: asynchronous tasks
