@@ -58,6 +58,24 @@ class NetworkingManager {
 	
 	
 	
+	// MARK: helpers
+	
+	// we'll call
+	func lowerQueuePriority(forImageUrlString imageUrlString: String) {
+		// ensure we have the operation running in the queue
+		guard let operations = (imageDownloadQueue.operations as? [ImageDownloadOperation])?
+						.filter({ $0.imageUrl.absoluteString == imageUrlString && $0.isExecuting == true && $0.isFinished == false }),
+					let currentOperation = operations.first else { return }
+		print("REDUCE THE QUEUE PRIORITY OF OPERATION \(imageUrlString)")
+		currentOperation.queuePriority = .low // if so, lower its priority
+	}
+
+	func blurredImage(forBlurHashString blurHash: String) -> UIImage? {
+		imageDownloadCache.object(forKey: NSString(string: blurHash))
+	}
+	
+	
+	
 	// MARK: asynchronous tasks
 	
 	func downloadHomeInitialData(withCompletion completion: @escaping (NetworkingError?) -> ()) {
@@ -89,11 +107,7 @@ class NetworkingManager {
 			completion(nil)
 		}
 	}
-	
-	func blurredImage(forBlurHashString blurHash: String) -> UIImage? {
-		imageDownloadCache.object(forKey: NSString(string: blurHash))
-	}
-		
+			
 	func downloadImage(forImageUrlString imageUrlString: String, withCompletion completion: ((UIImage?, NetworkingError?) -> Void)?) {
 		guard let imageUrl = URL(string: imageUrlString) else {
 			completion?(nil, NetworkingError.invalidUrl)
@@ -139,7 +153,7 @@ class NetworkingManager {
 			}
 		}
 	}
-	
+		
 }
 
 

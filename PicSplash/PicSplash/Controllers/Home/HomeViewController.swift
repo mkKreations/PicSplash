@@ -583,6 +583,17 @@ extension HomeViewController: UICollectionViewDelegate {
 		}
 	}
 	
+	func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+		// this is specifically for the workaround in
+		// applyInitialSnapshot() - we don't want to
+		// lower the queue priority of the first 1-2 cells
+		if indexPath.row == 0 { return }
+		
+		let sections = NetworkingManager.shared.homeImagesSections
+		let notDisplayingPhoto = sections[indexPath.section].items[indexPath.row]
+		NetworkingManager.shared.lowerQueuePriority(forImageUrlString: notDisplayingPhoto.imageUrl)
+	}
+	
 	private func presentDetailViewController(withImagePlaceholder imagePlaceholder: ImagePlaceholder) {
 		let detailVC = DetailViewController(imagePlaceholder: imagePlaceholder)
 		detailVC.transitioningDelegate = self
