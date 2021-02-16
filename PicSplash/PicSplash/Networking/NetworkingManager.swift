@@ -170,7 +170,7 @@ class NetworkingManager {
 		
 		// this operation fetches & caches the image for the Photo of the Day object
 		let photoOfTheDayImageDownloadOperation = ImageDownloadOperation()
-		photoOfTheDayImageDownloadOperation.addDependency(photoOfTheDayOperation) // wait until previous operation finishes before executing
+		photoOfTheDayImageDownloadOperation.addDependency(photoOfTheDayOperation) // image download waits until object fetch finishes before executing
 		photoOfTheDayImageDownloadOperation.imageHandler = { image, error in
 			if let error = error {
 				print("Photo of the day image download error: \(error)")
