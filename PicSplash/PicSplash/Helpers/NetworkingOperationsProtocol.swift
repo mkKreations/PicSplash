@@ -15,7 +15,9 @@ import UIKit
 // each AsyncOperation subclass can pass out any
 // information during their operations
 
-protocol NetworkingOperationsProtocol {
+protocol NetworkingOperationsProtocol: AnyObject {
+	var homeSections: [PhotoSection] { get }
+	
 	func cacheBlurredImage(_ blurredImage: UIImage, forBlurHash blurHash: String)
-	func loadedPhotoSection(_ photoSection: [PhotoSection], forPhotoSectionType photoSectionType: PhotoSectionType)
+	func loadedPhotoSection(_ photoSection: [Photo], forPhotoSectionType photoSectionType: PhotoSectionType)
 }
