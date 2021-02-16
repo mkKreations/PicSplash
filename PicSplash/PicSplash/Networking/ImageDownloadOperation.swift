@@ -13,9 +13,24 @@ import UIKit
 // managing Operation instances within NetworkingManager
 
 class ImageDownloadOperation: AsyncOperation {
-	let imageUrl: URL
+	// private var to pass in in case that the
+	// user passes image url via dependencies
+	// I honestly hate force unwrapping this but
+	// I'm trying to pick the safest URL to man
+	private static let dependencyCheckUrl: URL = URL(string: "https://www.google.com/")!
+	
+	private(set) var imageUrl: URL
 	
 	var imageHandler: ImageDownloadHandler?
+
+	// OJO:
+	// only use covenience init if you will
+	// be passing the URL in via operation
+	// dependencies, otherwise, use init
+	// using a url
+	convenience override init() {
+		self.init(url: ImageDownloadOperation.dependencyCheckUrl)
+	}
 	
 	init(url: URL) {
 		self.imageUrl = url
@@ -23,6 +38,16 @@ class ImageDownloadOperation: AsyncOperation {
 	}
 	
 	override func main() {
+		// check to see if we have any passed in dependencies
+		let dependencyImageUrlStringOptional = dependencies.compactMap({ ($0 as? ImageDownloadUrlProvider)?.imageUrlString }).first
+		
+		// if it passes all checks, assign value to imageUrl
+		if imageUrl == Self.dependencyCheckUrl,
+			 let dependencyImageUrlString = dependencyImageUrlStringOptional,
+			 let dependencyImageUrl = URL(string: dependencyImageUrlString) {
+			imageUrl = dependencyImageUrl
+		}
+		
 		URLSession.shared.dataTask(with: imageUrl) { [weak self] data, response, error in
 			guard let self = self else { return }
 			

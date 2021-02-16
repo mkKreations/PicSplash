@@ -163,31 +163,39 @@ class NetworkingManager {
 		self.imageDownloadQueue.addOperation(initialCollectionViewDataLoadOperation)
 		
 		// PhotoOfTheDay
+		
+		// this operation fetches the Photo of the Day object
 		let photoOfTheDayOperation = PhotoOfTheDayOperation(photoOfTheDayUrl: photoOfTheDayUrl)
 		photoOfTheDayOperation.delegate = self
+		
+		// this operation fetches & caches the image for the Photo of the Day object
+		let photoOfTheDayImageDownloadOperation = ImageDownloadOperation()
+		photoOfTheDayImageDownloadOperation.addDependency(photoOfTheDayOperation) // wait until previous operation finishes before executing
+		photoOfTheDayImageDownloadOperation.imageHandler = { image, error in
+			if let error = error {
+				print("Photo of the day image download error: \(error)")
+				return
+			}
+			
+			guard let image = image else { return }
+			
+			print("CACHING PHOTO OF THE DAY IMAGE")
+			
+			// cache the image using the url as the key
+			self.imageDownloadCache.setObject(image, forKey: NSString(string: photoOfTheDayImageDownloadOperation.imageUrl.absoluteString))
+		}
+
+		// add PhotoOfTheDay operations
 		self.imageDownloadQueue.addOperation(photoOfTheDayOperation)
+		self.imageDownloadQueue.addOperation(photoOfTheDayImageDownloadOperation)
 		
 		// once all data fetching Operations have been added to queue
 		// add this BarrierBlock to the queue which requires
 		// that all previously added tasks must be completed
-		// in order for this task to be executed - we're attempting to
-		// fetch the photo of the day before returning control back
-		// over to the UI
+		// in order for this task to be executed - we're simply
+		// handing control back over to the UI
 		self.imageDownloadQueue.addBarrierBlock {
-			
-			// we know the photoOfTheDayOperation has completed
-			// so we should safely have this value but, if not, we're
-			// not stopping the loading of all initial home data
-			guard let photoOfTheDay = self.photoOfTheDay else {
-				completion(nil)
-				return
-			}
-			
-			// download the image and cache - once operation is
-			// complete, hand control back over to the UI
-			self.downloadImage(forImageUrlString: photoOfTheDay.imageUrl) { (_, _) in
-				completion(nil)
-			}
+			completion(nil)
 		}
 	}
 			
