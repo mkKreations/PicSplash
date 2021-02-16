@@ -41,6 +41,7 @@
 		2CF14EE025D321A5000F1210 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF14EDF25D321A5000F1210 /* MenuView.swift */; };
 		2CF14EE625D33151000F1210 /* UIButton+extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF14EE525D33151000F1210 /* UIButton+extensions.swift */; };
 		2CF378BF25DAD59300617878 /* BlurHashOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF378BE25DAD59300617878 /* BlurHashOperation.swift */; };
+		2CF378C225DB5DDC00617878 /* NetworkingOperationsProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF378C125DB5DDC00617878 /* NetworkingOperationsProtocol.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -80,6 +81,7 @@
 		2CF14EDF25D321A5000F1210 /* MenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
 		2CF14EE525D33151000F1210 /* UIButton+extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIButton+extensions.swift"; sourceTree = "<group>"; };
 		2CF378BE25DAD59300617878 /* BlurHashOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlurHashOperation.swift; sourceTree = "<group>"; };
+		2CF378C125DB5DDC00617878 /* NetworkingOperationsProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkingOperationsProtocol.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -120,6 +122,7 @@
 				2C1F918A25D9945C00BCCD87 /* Secrets.swift */,
 				2C1F919025D9BF9800BCCD87 /* BlurHashDecode.swift */,
 				2C1F919625D9C3A800BCCD87 /* HomeImageProtocol.swift */,
+				2CF378C125DB5DDC00617878 /* NetworkingOperationsProtocol.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -308,6 +311,7 @@
 				2C1F918E25D9ABBF00BCCD87 /* Photo.swift in Sources */,
 				2CD3C29D25CF04BB00BC0507 /* AppDelegate.swift in Sources */,
 				2CAF5EF025D60095000322B9 /* DetailAnimator.swift in Sources */,
+				2CF378C225DB5DDC00617878 /* NetworkingOperationsProtocol.swift in Sources */,
 				2C1F919725D9C3A800BCCD87 /* HomeImageProtocol.swift in Sources */,
 				2CAE2F6825D88F8E00DCC243 /* HomeViewController.swift in Sources */,
 				2CF14EDD25D31F7A000F1210 /* UIColor+extensions.swift in Sources */,
