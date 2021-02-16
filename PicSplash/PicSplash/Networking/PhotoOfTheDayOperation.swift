@@ -112,3 +112,13 @@ class PhotoOfTheDayOperation: AsyncOperation {
 	}
 	
 }
+
+
+
+// MARK: ImageDownloadUrlProvider conformance
+
+extension PhotoOfTheDayOperation: ImageDownloadUrlProvider {
+	var imageUrlString: String? {
+		photoOfTheDay?.imageUrl
+	}
+}
