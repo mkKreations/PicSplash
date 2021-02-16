@@ -130,6 +130,31 @@ class NetworkingManager {
 		return (requestUrl, nil)
 	}
 	
+	private func constructExploreCollectionsFetchUrl() -> (url: URL?, error: NetworkingError?) {
+		// construct urlString
+		var requestString: String = Self.baseUrlString
+		requestString.append("/collections")
+		
+		// ensure we have valid Url
+		guard var baseComponent: URLComponents = URLComponents(string: requestString) else {
+			return (nil, .invalidUrl)
+		}
+		
+		let queryItems: [URLQueryItem] = [
+			URLQueryItem(name: "client_id", value: Secrets.API_KEY),
+			URLQueryItem(name: "page", value: "1"),
+			URLQueryItem(name: "per_page", value: "30"),
+		]
+		baseComponent.queryItems = queryItems
+		
+		// ensure we have valid Url
+		guard let requestUrl = baseComponent.url else {
+			return (nil, .invalidUrl)
+		}
+		
+		return (requestUrl, nil)
+	}
+	
 	
 	
 	// MARK: asynchronous tasks
@@ -138,6 +163,7 @@ class NetworkingManager {
 		// construct all urls necessary to load initial data for home
 		let initialCollectionViewDataLoadUrlTuple = constructInitialCollectionViewDataLoadUrl()
 		let photoOfTheDayUrlTuple = constructPhotoOfTheDayUrl()
+		let exploreCollectionsFetchUrlTuple = constructExploreCollectionsFetchUrl()
 		
 		// make sure we got valid url - InitialCollectionViewDataLoad
 		guard let initialCollectionViewDataLoadUrl = initialCollectionViewDataLoadUrlTuple.url else {
@@ -150,9 +176,16 @@ class NetworkingManager {
 			completion(photoOfTheDayUrlTuple.error)
 			return
 		}
+		
+		// make sure we got valid url - ExploreCollections
+		guard let exploreCollectionsFetchUrl = exploreCollectionsFetchUrlTuple.url else {
+			completion(exploreCollectionsFetchUrlTuple.error)
+			return
+		}
 
 		print("InitialCollectionViewDataLoadUrl URL: \(initialCollectionViewDataLoadUrl)")
 		print("PhotoOfTheDay URL: \(photoOfTheDayUrl)")
+		print("ExploreCollections URL: \(exploreCollectionsFetchUrl)")
 
 		// create and add each Operation required
 		// to load all home data for initial load
