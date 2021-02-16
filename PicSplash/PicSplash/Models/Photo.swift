@@ -27,11 +27,21 @@ final class Photo {
 // for diffable datasource
 extension Photo: Hashable {
 	static func == (lhs: Photo, rhs: Photo) -> Bool {
-		lhs.id == rhs.id // id is enough to make it unique
+			lhs.id == rhs.id &&
+			lhs.imageUrl == rhs.imageUrl &&
+			lhs.author == rhs.author &&
+			lhs.blurString == rhs.blurString &&
+			lhs.height == rhs.height &&
+			lhs.width == rhs.width
 	}
 	
 	func hash(into hasher: inout Hasher) {
-		hasher.combine(id) // id is enough to make it unique
+		hasher.combine(id)
+		hasher.combine(imageUrl)
+		hasher.combine(author)
+		hasher.combine(blurString)
+		hasher.combine(height)
+		hasher.combine(width)
 	}
 
 }
