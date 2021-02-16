@@ -47,19 +47,14 @@ class NetworkingManager {
 		return operationQueue
 	}()
 	private let imageDownloadCache: NSCache<NSString, UIImage> = NSCache()
-	private let blurHashImageQueue: OperationQueue = {
-		let operationQueue = OperationQueue()
-		operationQueue.qualityOfService = .userInteractive
-		return operationQueue
-	}()
-	private let blurHashImageCache: NSCache<NSString, UIImage> = NSCache()
 	private(set) var homeImagesSections: [PhotoSection] = [
 		PhotoSection(title: "Explore", type: .explore, items: []),
 		PhotoSection(title: "New", type: .new, items: []),
 	]
 	
 	
-	// MARK: network requests
+	
+	// MARK: asynchronous tasks
 	
 	func downloadHomeInitialData(withCompletion completion: @escaping (NetworkingError?) -> ()) {
 		// construct urlString
@@ -80,68 +75,32 @@ class NetworkingManager {
 			// process our home images list data
 			try? self.processHomeImagesListData(data: data, urlResponse: response, error: error)
 			
-			// load first couple of blurred images for both sections
-			
-			// get indexPaths of the items whose blurred images we want to load
-			let newSection: Int = PhotoSectionType.new.rawValue
-			let firstNewCellIndexPath = IndexPath(row: 0, section: newSection)
-			let secondNewCellIndexPath = IndexPath(row: 1, section: newSection)
-			
-			let exploreSection: Int = PhotoSectionType.explore.rawValue
-			let firstExploreCellIndexPath = IndexPath(row: 0, section: exploreSection)
-			let secondExploreCellIndexPath = IndexPath(row: 1, section: exploreSection)
-
-			// create operations & cache results from those indexPaths
-			[firstNewCellIndexPath, secondNewCellIndexPath, firstExploreCellIndexPath, secondExploreCellIndexPath].forEach { indexPath in
-				// get photo
-				let photo = self.homeImagesSections[indexPath.section].items[indexPath.row]
-				
-				// we know that operations will be created for these tasks since
-				// this is initial load - also we know that the blurred images will
-				// be cached using their blurString
-				self.processBlurredImage(usingBlurHashString: photo.blurString, withCompletion: nil)
+			// draw and cache all blurred images
+			// for our Photo objects before handing
+			// control back over to the UI so we can
+			// show blurred images for Photo while we
+			// lazily load actual image
+			self.homeImagesSections.forEach { section in
+				section.items.forEach { photo in
+					// we're adding these operations to imageDownloadQueue
+					self.drawAndCacheBlurredImage(usingBlurHashString: photo.blurString)
+				}
 			}
 			
 			// adding a barrierBlock ensures that all previous tasks on this queue will be completed
 			// before running this task. within here, we're just calling our completion block to hand
 			// control back over to the UI - important to deploy barrier block on correct queue
-			self.blurHashImageQueue.addBarrierBlock {
+			self.imageDownloadQueue.addBarrierBlock {
 				completion(nil)
 			}
-			
+						
 		}.resume()
 	}
 	
-	func processBlurredImage(usingBlurHashString blurHashString: String, withCompletion completion: ((UIImage) -> ())?) {
-		if let cachedBlurredImage = blurHashImageCache.object(forKey: NSString(string: blurHashString)) {
-			print("RETURNING CACHED BLURRED IMAGE")
-			completion?(cachedBlurredImage)
-		} else {
-			// first see if the operation is currently running on blurHashImageQueue
-			// if so - do nothing as of now since operation already has highest queue priority
-			if let operations = (blurHashImageQueue.operations as? [BlurHashOperation])?
-					.filter({ $0.blurHash == blurHashString && $0.isExecuting && $0.isFinished == false }),
-				 let _ = operations.first {
-				print("BLURRED IMAGE OPERATION CURRENTLY RUNNING")
-			} else {
-				let blurHashOperation = BlurHashOperation(blurHash: blurHashString)
-				blurHashOperation.queuePriority = .veryHigh
-				blurHashOperation.completionBlock = {
-					// make sure the operation completed & we have a blurredImage
-					guard let blurredImage = blurHashOperation.blurredImage else { return }
-
-					print("CACHING BLURRED IMAGE")
-					
-					// cache the image using the blur hash as the key
-					self.blurHashImageCache.setObject(blurredImage, forKey: NSString(string: blurHashString))
-					completion?(blurredImage)
-				}
-				// add to blur hash queue
-				blurHashImageQueue.addOperation(blurHashOperation)
-			}
-		}
+	func blurredImage(forBlurHashString blurHash: String) -> UIImage? {
+		imageDownloadCache.object(forKey: NSString(string: blurHash))
 	}
-	
+		
 	func downloadImage(forImageUrlString imageUrlString: String, withCompletion completion: ((UIImage?, NetworkingError?) -> Void)?) {
 		guard let imageUrl = URL(string: imageUrlString) else {
 			completion?(nil, NetworkingError.invalidUrl)
@@ -153,7 +112,7 @@ class NetworkingManager {
 		
 		if let cachedImage = imageDownloadCache.object(forKey: NSString(string: imageUrlString)) {
 			print("RETURNING CACHED IMAGE")
-			completion?(cachedImage, nil)
+			self.completionHandler?(cachedImage, nil)
 		} else {
 			// first see if the operation is currently running on
 			// imageDownloadQueue if so - raise its priority to top level
@@ -188,7 +147,25 @@ class NetworkingManager {
 		}
 	}
 	
-	// MARK: helpers to process requests
+	
+	
+	// MARK: helpers
+	
+	private func drawAndCacheBlurredImage(usingBlurHashString blurHashString: String) {
+		let blurHashOperation = BlurHashOperation(blurHash: blurHashString)
+		blurHashOperation.queuePriority = .veryHigh
+		blurHashOperation.completionBlock = {
+			// make sure the operation completed & we have a blurredImage
+			guard let blurredImage = blurHashOperation.blurredImage else { return }
+			
+			print("CACHING BLURRED IMAGE")
+			
+			// cache the image using the blur hash as the key
+			self.imageDownloadCache.setObject(blurredImage, forKey: NSString(string: blurHashString))
+		}
+		// add to image download queue
+		imageDownloadQueue.addOperation(blurHashOperation)
+	}
 	
 	private func processHomeImagesListData(data: Data?,
 																				 urlResponse response: URLResponse?,

@@ -530,58 +530,32 @@ extension HomeViewController: UICollectionViewDelegate {
 
 		switch section.type {
 		case .explore:
-			
-			// reset image
 			guard let exploreCell = cell as? HomeOrthogonalCell else { return }
-			exploreCell.displayImage = nil
 			
-			// show loading if no blurred image to show
-			exploreCell.isLoading = true
+			// set blurredImage
+			exploreCell.displayImage = NetworkingManager.shared.blurredImage(forBlurHashString: photo.blurString)
 			
-			// "fetch" blurred image from NetworkManager
-			NetworkingManager.shared.processBlurredImage(usingBlurHashString: photo.blurString) { blurredImage in
-				DispatchQueue.main.async {
-					guard let exploreSectionCell = collectionView.cellForItem(at: indexPath) as? HomeOrthogonalCell else { return }
-					exploreSectionCell.isLoading = false
-					exploreSectionCell.displayImage = blurredImage
-				}
-			}
-			
-			// fetch actual image to show
+			// fetch & set actual image
 			NetworkingManager.shared.downloadImage(forImageUrlString: photo.imageUrl) { image, error in
 				DispatchQueue.main.async {
 					guard let exploreSectionCell = collectionView.cellForItem(at: indexPath) as? HomeOrthogonalCell else { return }
-					exploreSectionCell.isLoading = false
 					exploreSectionCell.displayImage = image
 				}
 			}
 		case .new:
-			// reset image
 			guard let newCell = cell as? HomeImageCell else { return }
-			newCell.displayImage = nil
+
+			// set blurredImage
+			newCell.displayImage = NetworkingManager.shared.blurredImage(forBlurHashString: photo.blurString)
 			
-			// show loading if no blurred image to show
-			newCell.isLoading = true
-			
-			// "fetch" blurred image from NetworkManager
-			NetworkingManager.shared.processBlurredImage(usingBlurHashString: photo.blurString) { blurredImage in
-				DispatchQueue.main.async {
-					guard let newSectionCell = collectionView.cellForItem(at: indexPath) as? HomeImageCell else { return }
-					newSectionCell.isLoading = false
-					newSectionCell.displayImage = blurredImage
-				}
-			}
-			
-			// fetch actual image to show
+			// fetch & set actual image
 			NetworkingManager.shared.downloadImage(forImageUrlString: photo.imageUrl) { image, error in
 				DispatchQueue.main.async {
 					guard let newSectionCell = collectionView.cellForItem(at: indexPath) as? HomeImageCell else { return }
-					newSectionCell.isLoading = false
 					newSectionCell.displayImage = image
 				}
 			}
 		}
-		
 	}
 	
 	private func presentDetailViewController(withImagePlaceholder imagePlaceholder: ImagePlaceholder) {

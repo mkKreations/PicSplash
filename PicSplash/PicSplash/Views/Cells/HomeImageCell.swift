@@ -54,6 +54,9 @@ class HomeImageCell: UICollectionViewCell {
 		}
 	}
 	
+	// currently not using as we're
+	// presenting the blurHash image
+	// when the actual image is loading
 	var isLoading: Bool {
 		get { self.loader.isAnimating }
 		
