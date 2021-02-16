@@ -47,6 +47,7 @@ class NetworkingManager {
 		return operationQueue
 	}()
 	private let imageDownloadCache: NSCache<NSString, UIImage> = NSCache()
+	private(set) var photoOfTheDay: Photo?
 	private(set) var homeImagesSections: [PhotoSection] = {
 	var sections: [PhotoSection] = []
 		// instantiate PhotoSection from our enum
@@ -222,5 +223,9 @@ extension NetworkingManager: NetworkingOperationsProtocol {
 		var section = homeImagesSections[photoSectionType.rawValue]
 		section.items = photoSection
 		homeImagesSections[photoSectionType.rawValue] = section
+	}
+	
+	func loadedPhotoOfTheDay(_ photoOfTheDay: Photo) {
+		self.photoOfTheDay = photoOfTheDay // only need to capture reference
 	}
 }

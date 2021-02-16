@@ -20,4 +20,5 @@ protocol NetworkingOperationsProtocol: AnyObject {
 	
 	func cacheBlurredImage(_ blurredImage: UIImage, forBlurHash blurHash: String)
 	func loadedPhotoSection(_ photoSection: [Photo], forPhotoSectionType photoSectionType: PhotoSectionType)
+	func loadedPhotoOfTheDay(_ photoOfTheDay: Photo)
 }
