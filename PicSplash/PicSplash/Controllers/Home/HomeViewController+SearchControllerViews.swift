@@ -151,6 +151,7 @@ extension HomeViewController {
 	
 	func animateLoadingView(forAppearance willAppear: Bool,
 													withDuration duration: TimeInterval = 0.03,
+													withDelay delay: TimeInterval = 0.0,
 													fullScreen: Bool = false) {
 		loadingViewTopConstraint?.constant = fullScreen ? 0.0 : Self.navMinHeight // size loadingView correctly
 		loadingView.alpha = willAppear ? 0.0 : 1.0
@@ -168,7 +169,7 @@ extension HomeViewController {
 		self.isShowingLoadingView = willAppear
 		
 		UIView.animate(withDuration: duration,
-									 delay: 0.0, options: .curveEaseInOut) {
+									 delay: delay, options: .curveEaseInOut) {
 			self.loadingView.alpha = willAppear ? 1.0 : 0.0
 			self.loadingActivityActivator.alpha = willAppear ? 1.0 : 0.0
 		} completion: { _ in

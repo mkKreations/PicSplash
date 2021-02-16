@@ -10,9 +10,18 @@ import Foundation
 // the Int raw values will
 // represent indexPath.section
 
-enum PhotoSectionType: Int {
+enum PhotoSectionType: Int, CaseIterable {
 	case explore = 0
 	case new = 1
+	
+	var sectionTitle: String {
+		switch self {
+		case .explore:
+			return "Explore"
+		case .new:
+			return "New"
+		}
+	}
 }
 
 struct PhotoSection {

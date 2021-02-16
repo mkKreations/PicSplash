@@ -78,11 +78,18 @@ final class HomeViewController: UIViewController {
 				
 				// apply snapshot as the data
 				// has been updated within NetworkManager
-				self.applySnapshot()
+				self.applyInitialSnapshot()
 				
 				// successful so dismiss loading
 				if self.isShowingLoadingView {
-					self.animateLoadingView(forAppearance: false, withDuration: Self.trendingAnimationDuration, fullScreen: true)
+					// a little delay in dismissing loadingView
+					// allows the collectionView to adjust the
+					// second orthogonal cell - look at
+					// applyInitialSnapshot() for more
+					self.animateLoadingView(forAppearance: false,
+																	withDuration: Self.trendingAnimationDuration,
+																	withDelay: 0.5,
+																	fullScreen: true)
 				}
 			}
 		}
@@ -485,7 +492,7 @@ extension HomeViewController {
 		}
 	}
 	
-	private func applySnapshot() {
+	private func applyInitialSnapshot() {
 		let homeSections = NetworkingManager.shared.homeImagesSections
 		
 		var snapshot = NSDiffableDataSourceSnapshot<PhotoSection, Photo>()
@@ -493,12 +500,30 @@ extension HomeViewController {
 		homeSections.forEach { section in
 			snapshot.appendItems(section.items, toSection: section)
 		}
+
+		// this is a 2-piece workaround
 		
-		// a small workaround to fix the layout of the orthogonal section
-		// of cells - the second application of snapshot correctly places
-		// the cells without affecting the UI
+		// 1) applying a snapshot in the completion of another snapshot fixes
+		// a layout issue within our orthogonal cell section that only shows
+		// the first cell even though the section is groupPagingCentered so
+		// really we should see one full cell and the leading edge of the second
+		
+		// 2) I believe for the above reason, that this now causes the issue in
+		// that the second cell doesn't receive a call to willDisplayCell (initially)
+		// as all other cells do - so we reload that specific cell so that it loads
+		// correctly initially
+		
+		// all in all, we delay the dismissing of the loadingView so that the
+		// user doesn't see any UI "jumps" - specifically the collectionView
+		// forcing the correct placement of the second orthogoncal cell
 		datasource.apply(snapshot, animatingDifferences: true) {
-			self.datasource.apply(snapshot, animatingDifferences: false)
+			self.datasource.apply(snapshot, animatingDifferences: false) // 1
+			
+			let reloadPhotoSection: PhotoSectionType = .explore
+			guard homeSections[reloadPhotoSection.rawValue].items.count > 2 else { return }
+			let photoToReload = homeSections[reloadPhotoSection.rawValue].items[1]
+			snapshot.reloadItems([photoToReload])
+			self.datasource.apply(snapshot) // 2
 		}
 	}
 

@@ -47,10 +47,14 @@ class NetworkingManager {
 		return operationQueue
 	}()
 	private let imageDownloadCache: NSCache<NSString, UIImage> = NSCache()
-	private(set) var homeImagesSections: [PhotoSection] = [
-		PhotoSection(title: "Explore", type: .explore, items: []),
-		PhotoSection(title: "New", type: .new, items: []),
-	]
+	private(set) var homeImagesSections: [PhotoSection] = {
+	var sections: [PhotoSection] = []
+		// instantiate PhotoSection from our enum
+		PhotoSectionType.allCases.forEach { type in
+			sections.append(PhotoSection(title: type.sectionTitle, type: type, items: []))
+		}
+		return sections
+	}()
 	
 	
 	
