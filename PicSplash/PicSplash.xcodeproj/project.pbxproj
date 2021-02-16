@@ -42,6 +42,7 @@
 		2CF14EE625D33151000F1210 /* UIButton+extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF14EE525D33151000F1210 /* UIButton+extensions.swift */; };
 		2CF378BF25DAD59300617878 /* BlurHashOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF378BE25DAD59300617878 /* BlurHashOperation.swift */; };
 		2CF378C225DB5DDC00617878 /* NetworkingOperationsProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF378C125DB5DDC00617878 /* NetworkingOperationsProtocol.swift */; };
+		2CF378C925DB618300617878 /* InitialCollectionViewDataLoadOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF378C825DB618300617878 /* InitialCollectionViewDataLoadOperation.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -82,6 +83,7 @@
 		2CF14EE525D33151000F1210 /* UIButton+extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIButton+extensions.swift"; sourceTree = "<group>"; };
 		2CF378BE25DAD59300617878 /* BlurHashOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlurHashOperation.swift; sourceTree = "<group>"; };
 		2CF378C125DB5DDC00617878 /* NetworkingOperationsProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkingOperationsProtocol.swift; sourceTree = "<group>"; };
+		2CF378C825DB618300617878 /* InitialCollectionViewDataLoadOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitialCollectionViewDataLoadOperation.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -101,6 +103,7 @@
 				2C1F917E25D9776100BCCD87 /* ImageDownloadOperation.swift */,
 				2C1F918125D97B9B00BCCD87 /* NetworkingManager.swift */,
 				2CF378BE25DAD59300617878 /* BlurHashOperation.swift */,
+				2CF378C825DB618300617878 /* InitialCollectionViewDataLoadOperation.swift */,
 			);
 			path = Networking;
 			sourceTree = "<group>";
@@ -307,6 +310,7 @@
 				2C88EFB425D07AF000150D54 /* ScrollingNavigationView.swift in Sources */,
 				2CF14EE025D321A5000F1210 /* MenuView.swift in Sources */,
 				2CF378BF25DAD59300617878 /* BlurHashOperation.swift in Sources */,
+				2CF378C925DB618300617878 /* InitialCollectionViewDataLoadOperation.swift in Sources */,
 				2CF14ED925D3192E000F1210 /* MenuTopView.swift in Sources */,
 				2C1F918E25D9ABBF00BCCD87 /* Photo.swift in Sources */,
 				2CD3C29D25CF04BB00BC0507 /* AppDelegate.swift in Sources */,
