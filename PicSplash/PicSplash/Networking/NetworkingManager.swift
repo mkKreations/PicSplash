@@ -72,11 +72,15 @@ class NetworkingManager {
 		currentOperation.queuePriority = .low // if so, lower its priority
 	}
 
-	func blurredImage(forBlurHashString blurHash: String) -> UIImage? {
+	func cachedBlurredImage(forBlurHashString blurHash: String) -> UIImage? {
 		imageDownloadCache.object(forKey: NSString(string: blurHash))
 	}
 	
-	private func constructInitialRequestUrl() -> (url: URL?, error: NetworkingError?) {
+	func cachedImage(forImageUrlString imageUrlString: String) -> UIImage? {
+		imageDownloadCache.object(forKey: NSString(string: imageUrlString))
+	}
+		
+	private func constructInitialCollectionViewDataLoadUrl() -> (url: URL?, error: NetworkingError?) {
 		// construct urlString
 		var requestUrlString: String = Self.baseUrlString
 		requestUrlString.append(Self.homeImagesListPath)
@@ -112,6 +116,7 @@ class NetworkingManager {
 		}
 		
 		let queryItems: [URLQueryItem] = [
+			URLQueryItem(name: "client_id", value: Secrets.API_KEY),
 			URLQueryItem(name: "featured", value: nil),
 			URLQueryItem(name: "orientation", value: "landscape"),
 		]
@@ -130,30 +135,59 @@ class NetworkingManager {
 	// MARK: asynchronous tasks
 	
 	func downloadHomeInitialData(withCompletion completion: @escaping (NetworkingError?) -> ()) {
-		// construct urlString
-		let initialRequestUrlTuple = constructInitialRequestUrl()
+		// construct all urls necessary to load initial data for home
+		let initialCollectionViewDataLoadUrlTuple = constructInitialCollectionViewDataLoadUrl()
+		let photoOfTheDayUrlTuple = constructPhotoOfTheDayUrl()
 		
-		// make sure we got valid url
-		guard let requestUrl = initialRequestUrlTuple.url else {
-			completion(initialRequestUrlTuple.error)
+		// make sure we got valid url - InitialCollectionViewDataLoad
+		guard let initialCollectionViewDataLoadUrl = initialCollectionViewDataLoadUrlTuple.url else {
+			completion(initialCollectionViewDataLoadUrlTuple.error)
+			return
+		}
+		
+		// make sure we got valid url - PhotoOfTheDay
+		guard let photoOfTheDayUrl = photoOfTheDayUrlTuple.url else {
+			completion(photoOfTheDayUrlTuple.error)
 			return
 		}
 
-		print("OUR URL: \(requestUrl)")
-		
+		print("InitialCollectionViewDataLoadUrl URL: \(initialCollectionViewDataLoadUrl)")
+		print("PhotoOfTheDay URL: \(photoOfTheDayUrl)")
+
 		// create and add each Operation required
 		// to load all home data for initial load
-		let initialCollectionViewDataLoadOperation = InitialCollectionViewDataLoadOperation(initialDataToLoadUrl: requestUrl)
+		
+		// InitialCollectionViewDataLoad
+		let initialCollectionViewDataLoadOperation = InitialCollectionViewDataLoadOperation(initialDataToLoadUrl: initialCollectionViewDataLoadUrl)
 		initialCollectionViewDataLoadOperation.delegate = self
 		self.imageDownloadQueue.addOperation(initialCollectionViewDataLoadOperation)
+		
+		// PhotoOfTheDay
+		let photoOfTheDayOperation = PhotoOfTheDayOperation(photoOfTheDayUrl: photoOfTheDayUrl)
+		photoOfTheDayOperation.delegate = self
+		self.imageDownloadQueue.addOperation(photoOfTheDayOperation)
 		
 		// once all data fetching Operations have been added to queue
 		// add this BarrierBlock to the queue which requires
 		// that all previously added tasks must be completed
-		// in order for this task to be executed - we're
-		// simply handing control back off to the UI
+		// in order for this task to be executed - we're attempting to
+		// fetch the photo of the day before returning control back
+		// over to the UI
 		self.imageDownloadQueue.addBarrierBlock {
-			completion(nil)
+			
+			// we know the photoOfTheDayOperation has completed
+			// so we should safely have this value but, if not, we're
+			// not stopping the loading of all initial home data
+			guard let photoOfTheDay = self.photoOfTheDay else {
+				completion(nil)
+				return
+			}
+			
+			// download the image and cache - once operation is
+			// complete, hand control back over to the UI
+			self.downloadImage(forImageUrlString: photoOfTheDay.imageUrl) { (_, _) in
+				completion(nil)
+			}
 		}
 	}
 			

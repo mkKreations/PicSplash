@@ -35,7 +35,6 @@ class PhotoOfTheDayOperation: AsyncOperation {
 	override func main() {
 		URLSession.shared.dataTask(with: photoOfTheDayUrl) { [weak self] data, response, error in
 			guard let self = self else { return }
-			
 			// process our photo of the day and
 			// pass it off to our delegate
 			try? self.processPhotoOfTheDayData(data: data, response: response, error: error)
@@ -90,24 +89,24 @@ class PhotoOfTheDayOperation: AsyncOperation {
 		// unpack necessary vars
 		guard let urlsDict = json["urls"] as? [String: String],
 					let imageUrl = urlsDict["small"],
-					let userDict = json["user"] as? [String: String],
-					let username = userDict["username"],
+					let userDict = json["user"] as? [String: Any],
+					let username = userDict["username"] as? String,
 					let blurHash = json["blur_hash"] as? String,
 					let width = json["width"] as? Int,
 					let height = json["height"] as? Int else {
 			throw NetworkingError.failedDataProcessing
 		}
-					
+
 		// create our photo of the day
 		let photoOfTheDay = Photo(imageUrl: imageUrl,
 															author: username,
 															blurString: blurHash,
 															height: height,
 															width: width)
-		
+
 		// capture reference for ourself
 		self.photoOfTheDay = photoOfTheDay
-		
+
 		// pass it off to delegate
 		delegate?.loadedPhotoOfTheDay(photoOfTheDay)
 	}

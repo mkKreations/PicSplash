@@ -76,6 +76,9 @@ final class HomeViewController: UIViewController {
 					return
 				}
 				
+				// set the photo of the day image
+				self.setPhotoOfTheDayImage()
+				
 				// apply snapshot as the data
 				// has been updated within NetworkManager
 				self.applyInitialSnapshot()
@@ -163,6 +166,21 @@ final class HomeViewController: UIViewController {
 		view.addSubview(loginView) // this view on top of all
 		
 		layoutLoginViewForInitialAppearance()
+	}
+	
+	private func setPhotoOfTheDayImage() {
+		// make sure we have photo of the day
+		guard let photoOfTheDay: Photo = NetworkingManager.shared.photoOfTheDay else { return }
+		
+		// attempt to set blurred image
+		if let blurredImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: photoOfTheDay.blurString) {
+			scrollingNavView.image = blurredImage
+		}
+		
+		// attempt to set actual image
+		if let image = NetworkingManager.shared.cachedImage(forImageUrlString: photoOfTheDay.imageUrl) {
+			scrollingNavView.image = image
+		}
 	}
 		
 }
@@ -558,7 +576,7 @@ extension HomeViewController: UICollectionViewDelegate {
 			guard let exploreCell = cell as? HomeOrthogonalCell else { return }
 			
 			// set blurredImage
-			exploreCell.displayImage = NetworkingManager.shared.blurredImage(forBlurHashString: photo.blurString)
+			exploreCell.displayImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: photo.blurString)
 			
 			// fetch & set actual image
 			NetworkingManager.shared.downloadImage(forImageUrlString: photo.imageUrl) { image, error in
@@ -571,7 +589,7 @@ extension HomeViewController: UICollectionViewDelegate {
 			guard let newCell = cell as? HomeImageCell else { return }
 
 			// set blurredImage
-			newCell.displayImage = NetworkingManager.shared.blurredImage(forBlurHashString: photo.blurString)
+			newCell.displayImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: photo.blurString)
 			
 			// fetch & set actual image
 			NetworkingManager.shared.downloadImage(forImageUrlString: photo.imageUrl) { image, error in

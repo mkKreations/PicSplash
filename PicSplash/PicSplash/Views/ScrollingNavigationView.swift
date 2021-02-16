@@ -62,6 +62,14 @@ class ScrollingNavigationView: UIView {
 		searchBar.setShowsCancelButton(shows, animated: animated)
 	}
 	
+	var image: UIImage? {
+		get { displayImageView.image }
+		
+		set {
+			displayImageView.image = newValue
+		}
+	}
+	
 	
 	// helpers
 	private func configureSubviews() {
