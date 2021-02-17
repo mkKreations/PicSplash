@@ -582,32 +582,32 @@ extension HomeViewController: UICollectionViewDelegate {
 		let section = self.networkManager.homeImagesSections[indexPath.section]
 		let homeImage = section.items[indexPath.row]
 
+		// fetch & set actual image
+		NetworkingManager.shared.downloadImage(forImageUrlString: homeImage.imageUrlString) { image, error in
+			DispatchQueue.main.async {
+				// would love to set the cell.displayImage here but due to cell reuse
+				// the image would load to the incorrect cell - currently looking for
+				// better solution
+			}
+		}
+
 		switch section.type {
 		case .explore:
 			guard let exploreCell = cell as? HomeOrthogonalCell else { return }
 			
-			// set blurredImage
+			// set blurredImage & actual image
 			exploreCell.displayImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: homeImage.blurHashString)
-			
-			// fetch & set actual image
-			NetworkingManager.shared.downloadImage(forImageUrlString: homeImage.imageUrlString) { image, error in
-				DispatchQueue.main.async {
-					guard let exploreSectionCell = collectionView.cellForItem(at: indexPath) as? HomeOrthogonalCell else { return }
-					exploreSectionCell.displayImage = image
-				}
+			if let cachedImage = NetworkingManager.shared.cachedImage(forImageUrlString: homeImage.imageUrlString) {
+				exploreCell.displayImage = cachedImage
 			}
+
 		case .new:
 			guard let newCell = cell as? HomeImageCell else { return }
 
-			// set blurredImage
+			// set blurredImage & actual image
 			newCell.displayImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: homeImage.blurHashString)
-			
-			// fetch & set actual image
-			NetworkingManager.shared.downloadImage(forImageUrlString: homeImage.imageUrlString) { image, error in
-				DispatchQueue.main.async {
-					guard let newSectionCell = collectionView.cellForItem(at: indexPath) as? HomeImageCell else { return }
-					newSectionCell.displayImage = image
-				}
+			if let cachedImage = NetworkingManager.shared.cachedImage(forImageUrlString: homeImage.imageUrlString) {
+				newCell.displayImage = cachedImage
 			}
 		}
 	}
