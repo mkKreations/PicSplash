@@ -294,9 +294,9 @@ extension NetworkingManager: NetworkingOperationsProtocol {
 		self.imageDownloadCache.setObject(blurredImage, forKey: NSString(string: blurHash))
 	}
 	
-	func loadedPhotoSection(_ photoSection: [Photo], forPhotoSectionType photoSectionType: PhotoSectionType) {
+	func loadedPhotoSection(_ homeImages: [HomeImageProtocol], forPhotoSectionType photoSectionType: PhotoSectionType) {
 		var section = homeImagesSections[photoSectionType.rawValue]
-		section.items = photoSection
+		section.items = homeImages
 		homeImagesSections[photoSectionType.rawValue] = section
 	}
 	
