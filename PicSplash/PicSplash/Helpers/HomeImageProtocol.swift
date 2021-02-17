@@ -12,7 +12,23 @@ import UIKit
 // any diffable datasource, this section object
 // will have an array of these HomeImageProtocol items
 
-protocol HomeImageProtocol: AnyObject, Hashable {
+protocol HomeImageProtocol: AnyObject {
 	var displayText: String? { get }
-	var displayImageUrlString: String? { get }
+	var imageUrlString: String { get }
+	var blurHashString: String { get }
+	var imageWidth: Int { get }
+	var imageHeight: Int { get }
+}
+
+// default values so every class that conforms
+// doesn't have to implement every var/func
+
+extension HomeImageProtocol {
+	var imageWidth: Int {
+		0
+	}
+	
+	var imageHeight: Int {
+		0
+	}
 }

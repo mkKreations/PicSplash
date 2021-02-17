@@ -42,7 +42,11 @@ extension Collection: HomeImageProtocol {
 		title
 	}
 	
-	var displayImageUrlString: String? {
+	var imageUrlString: String {
 		imageUrl
+	}
+	
+	var blurHashString: String {
+		blurHash
 	}
 }

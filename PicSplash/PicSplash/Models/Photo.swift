@@ -51,7 +51,19 @@ extension Photo: HomeImageProtocol {
 		author
 	}
 	
-	var displayImageUrlString: String? {
+	var imageUrlString: String {
 		imageUrl
+	}
+	
+	var blurHashString: String {
+		blurString
+	}
+	
+	var imageWidth: Int {
+		width
+	}
+	
+	var imageHeight: Int {
+		height
 	}
 }

@@ -19,7 +19,7 @@ final class HomeViewController: UIViewController {
 	private lazy var collectionView: UICollectionView = {
 		UICollectionView(frame: view.frame, collectionViewLayout: configureCompositionalLayout())
 	}()
-	private var datasource: UICollectionViewDiffableDataSource<PhotoSection, Photo>!
+	private var datasource: UICollectionViewDiffableDataSource<PhotoSection, AnyHashable>?
 	lazy var scrollingNavView: ScrollingNavigationView = { // expose to public for view controller transition
 		ScrollingNavigationView(frame: CGRect(origin: .zero,
 																					size: CGSize(width: view.frame.width, height: Self.navMaxHeight)))
@@ -479,8 +479,8 @@ extension HomeViewController {
 				
 				// determine & set cell height from photo dimensions
 				let cellWidth: CGFloat = collectionView.bounds.width
-				let product = cellWidth * CGFloat(photo.height)
-				let cellHeight: CGFloat = product / CGFloat(photo.width)
+				let product = cellWidth * CGFloat(photo.imageHeight)
+				let cellHeight: CGFloat = product / CGFloat(photo.imageWidth)
 				cell.imageHeight = Int(cellHeight)
 				
 				return cell
@@ -492,13 +492,13 @@ extension HomeViewController {
 	}
 	
 	private func configureHomeReusableViewForDatasource() {
-		datasource.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
+		datasource?.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
 			guard let self = self else { return nil }
 			
 			if kind == UICollectionView.elementKindSectionHeader {
-				let currentSection = self.datasource.snapshot().sectionIdentifiers[indexPath.section]
 				
-				guard let reusableView = collectionView.dequeueReusableSupplementaryView(ofKind: kind,
+				guard let currentSection = self.datasource?.snapshot().sectionIdentifiers[indexPath.section],
+							let reusableView = collectionView.dequeueReusableSupplementaryView(ofKind: kind,
 																																								 withReuseIdentifier: HomeCollectionReusableView.reuseIdentifier,
 																																								 for: indexPath) as? HomeCollectionReusableView else { return nil }
 				reusableView.displayText = currentSection.title
@@ -513,10 +513,20 @@ extension HomeViewController {
 	private func applyInitialSnapshot() {
 		let homeSections = NetworkingManager.shared.homeImagesSections
 		
-		var snapshot = NSDiffableDataSourceSnapshot<PhotoSection, Photo>()
+		var snapshot = NSDiffableDataSourceSnapshot<PhotoSection, AnyHashable>()
 		snapshot.appendSections(homeSections)
 		homeSections.forEach { section in
-			snapshot.appendItems(section.items, toSection: section)
+			switch section.type {
+			case .explore:
+//				if let collections = section.items as? [Collection] {
+				if let photos = section.items as? [Photo] {
+					snapshot.appendItems(photos, toSection: section)
+				}
+			case .new:
+				if let photos = section.items as? [Photo] {
+					snapshot.appendItems(photos, toSection: section)
+				}
+			}
 		}
 
 		// this is a 2-piece workaround
@@ -534,14 +544,17 @@ extension HomeViewController {
 		// all in all, we delay the dismissing of the loadingView so that the
 		// user doesn't see any UI "jumps" - specifically the collectionView
 		// forcing the correct placement of the second orthogoncal cell
-		datasource.apply(snapshot, animatingDifferences: true) {
-			self.datasource.apply(snapshot, animatingDifferences: false) // 1
+		datasource?.apply(snapshot, animatingDifferences: true) {
+			self.datasource?.apply(snapshot, animatingDifferences: false) // 1
 			
 			let reloadPhotoSection: PhotoSectionType = .explore
-			guard homeSections[reloadPhotoSection.rawValue].items.count > 2 else { return }
-			let photoToReload = homeSections[reloadPhotoSection.rawValue].items[1]
+			guard homeSections[reloadPhotoSection.rawValue].items.count > 2,
+//						let photoToReload = homeSections[reloadPhotoSection.rawValue].items[1] as? Collection
+						let photoToReload = homeSections[reloadPhotoSection.rawValue].items[1] as? Photo
+			else { return }
+			
 			snapshot.reloadItems([photoToReload])
-			self.datasource.apply(snapshot) // 2
+			self.datasource?.apply(snapshot) // 2
 		}
 	}
 
@@ -569,17 +582,17 @@ extension HomeViewController: UICollectionViewDelegate {
 	func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
 		// get section & photo for indexPath
 		let section = self.networkManager.homeImagesSections[indexPath.section]
-		let photo = section.items[indexPath.row]
+		let homeImage = section.items[indexPath.row]
 
 		switch section.type {
 		case .explore:
 			guard let exploreCell = cell as? HomeOrthogonalCell else { return }
 			
 			// set blurredImage
-			exploreCell.displayImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: photo.blurString)
+			exploreCell.displayImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: homeImage.blurHashString)
 			
 			// fetch & set actual image
-			NetworkingManager.shared.downloadImage(forImageUrlString: photo.imageUrl) { image, error in
+			NetworkingManager.shared.downloadImage(forImageUrlString: homeImage.imageUrlString) { image, error in
 				DispatchQueue.main.async {
 					guard let exploreSectionCell = collectionView.cellForItem(at: indexPath) as? HomeOrthogonalCell else { return }
 					exploreSectionCell.displayImage = image
@@ -589,10 +602,10 @@ extension HomeViewController: UICollectionViewDelegate {
 			guard let newCell = cell as? HomeImageCell else { return }
 
 			// set blurredImage
-			newCell.displayImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: photo.blurString)
+			newCell.displayImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: homeImage.blurHashString)
 			
 			// fetch & set actual image
-			NetworkingManager.shared.downloadImage(forImageUrlString: photo.imageUrl) { image, error in
+			NetworkingManager.shared.downloadImage(forImageUrlString: homeImage.imageUrlString) { image, error in
 				DispatchQueue.main.async {
 					guard let newSectionCell = collectionView.cellForItem(at: indexPath) as? HomeImageCell else { return }
 					newSectionCell.displayImage = image
@@ -608,8 +621,8 @@ extension HomeViewController: UICollectionViewDelegate {
 		if indexPath.row == 0 { return }
 		
 		let sections = NetworkingManager.shared.homeImagesSections
-		let notDisplayingPhoto = sections[indexPath.section].items[indexPath.row]
-		NetworkingManager.shared.lowerQueuePriority(forImageUrlString: notDisplayingPhoto.imageUrl)
+		let noLongerDisplayingHomeImage = sections[indexPath.section].items[indexPath.row]
+		NetworkingManager.shared.lowerQueuePriority(forImageUrlString: noLongerDisplayingHomeImage.imageUrlString)
 	}
 	
 	private func presentDetailViewController(withImagePlaceholder imagePlaceholder: ImagePlaceholder) {

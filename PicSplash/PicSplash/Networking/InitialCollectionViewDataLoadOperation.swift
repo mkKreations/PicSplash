@@ -49,7 +49,7 @@ class InitialCollectionViewDataLoadOperation: AsyncOperation {
 			self.delegate?.homeSections.forEach { section in
 				section.items.forEach { photo in
 					// we're adding these operations to internalQueue
-					self.drawAndCacheBlurredImage(usingBlurHashString: photo.blurString)
+					self.drawAndCacheBlurredImage(usingBlurHashString: photo.blurHashString)
 				}
 			}
 

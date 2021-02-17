@@ -28,7 +28,7 @@ struct PhotoSection {
 	let id: UUID = UUID() // unique ID to help distinguish value type instances
 	let title: String
 	let type: PhotoSectionType
-	var items: [Photo]
+	var items: [HomeImageProtocol]
 }
 
 extension PhotoSection: Hashable {
