@@ -14,7 +14,7 @@ import Foundation
 // so, the subclass will report out to NetworkingManager
 // via its delegate anything the NetworkingManager needs
 
-class InitialCollectionViewDataLoadOperation: AsyncOperation {
+class NewSectionOperation: AsyncOperation {
 	// instance vars
 	
 	private let requestUrl: URL

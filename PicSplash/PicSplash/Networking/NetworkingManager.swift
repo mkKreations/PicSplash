@@ -80,7 +80,7 @@ class NetworkingManager {
 		imageDownloadCache.object(forKey: NSString(string: imageUrlString))
 	}
 		
-	private func constructInitialCollectionViewDataLoadUrl() -> (url: URL?, error: NetworkingError?) {
+	private func constructNewSectionFetchUrl() -> (url: URL?, error: NetworkingError?) {
 		// construct urlString
 		var requestUrlString: String = Self.baseUrlString
 		requestUrlString.append(Self.homeImagesListPath)
@@ -161,13 +161,13 @@ class NetworkingManager {
 	
 	func downloadHomeInitialData(withCompletion completion: @escaping (NetworkingError?) -> ()) {
 		// construct all urls necessary to load initial data for home
-		let initialCollectionViewDataLoadUrlTuple = constructInitialCollectionViewDataLoadUrl()
+		let newSectionFetchUrlTuple = constructNewSectionFetchUrl()
 		let photoOfTheDayUrlTuple = constructPhotoOfTheDayUrl()
 		let exploreCollectionsFetchUrlTuple = constructExploreCollectionsFetchUrl()
 		
 		// make sure we got valid url - InitialCollectionViewDataLoad
-		guard let initialCollectionViewDataLoadUrl = initialCollectionViewDataLoadUrlTuple.url else {
-			completion(initialCollectionViewDataLoadUrlTuple.error)
+		guard let newSectionFetchUrl = newSectionFetchUrlTuple.url else {
+			completion(newSectionFetchUrlTuple.error)
 			return
 		}
 		
@@ -183,19 +183,19 @@ class NetworkingManager {
 			return
 		}
 
-		print("InitialCollectionViewDataLoadUrl URL: \(initialCollectionViewDataLoadUrl)")
+		print("InitialCollectionViewDataLoadUrl URL: \(newSectionFetchUrl)")
 		print("PhotoOfTheDay URL: \(photoOfTheDayUrl)")
 		print("ExploreCollections URL: \(exploreCollectionsFetchUrl)")
 
 		// create and add each Operation required
 		// to load all home data for initial load
 		
-		// InitialCollectionViewDataLoad
-		let initialCollectionViewDataLoadOperation = InitialCollectionViewDataLoadOperation(initialDataToLoadUrl: initialCollectionViewDataLoadUrl)
-		initialCollectionViewDataLoadOperation.delegate = self
-		self.imageDownloadQueue.addOperation(initialCollectionViewDataLoadOperation)
+		// NewSectionOperation
+		let newSectionOperation = NewSectionOperation(initialDataToLoadUrl: newSectionFetchUrl)
+		newSectionOperation.delegate = self
+		self.imageDownloadQueue.addOperation(newSectionOperation)
 		
-		// PhotoOfTheDay
+		// PhotoOfTheDay - 2 separate operations
 		
 		// this operation fetches the Photo of the Day object
 		let photoOfTheDayOperation = PhotoOfTheDayOperation(photoOfTheDayUrl: photoOfTheDayUrl)
