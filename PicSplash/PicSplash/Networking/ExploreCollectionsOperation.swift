@@ -10,6 +10,7 @@ import Foundation
 class ExploreCollectionsOperation: AsyncOperation {
 	// instance vars
 	
+	private let exploreSection: PhotoSectionType = .explore
 	private let url: URL
 	private let internalQueue: OperationQueue = {
 		let operationQueue = OperationQueue()
@@ -39,8 +40,7 @@ class ExploreCollectionsOperation: AsyncOperation {
 			
 			// draw all blurred images for explore section
 			// and hand them off to delegate for caching
-			let exploreSection: PhotoSectionType = .explore
-			self.delegate?.homeSections[exploreSection.rawValue].items.forEach { collection in
+			self.delegate?.homeSections[self.exploreSection.rawValue].items.forEach { collection in
 				self.drawAndCacheBlurredImage(usingBlurHashString: collection.blurHashString) // we're adding these operations to internalQueue
 			}
 			
@@ -74,12 +74,14 @@ class ExploreCollectionsOperation: AsyncOperation {
 	private func processExploreCollectionsResponse(data: Data?, response: URLResponse?, error: Error?) throws {
 		// return and capture error from server
 		if let error = error {
+			print("\(NetworkingError.serverError(error)) - ExploreCollectionsOperation")
 			throw NetworkingError.serverError(error)
 		}
 		
 		// ensure we have successful httpResponse
 		guard let httpResponse = response as? HTTPURLResponse,
 					(200...300).contains(httpResponse.statusCode) else {
+			print("\(NetworkingError.invalidResponse) - ExploreCollectionsOperation")
 			throw NetworkingError.invalidResponse
 		}
 
@@ -89,6 +91,7 @@ class ExploreCollectionsOperation: AsyncOperation {
 		// unpack data & deserialize response data into JSON
 		guard let data = data,
 					let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [[String: Any]] else {
+			print("\(NetworkingError.failedDeserialization) - ExploreCollectionsOperation")
 			throw NetworkingError.failedDeserialization
 		}
 
@@ -111,6 +114,6 @@ class ExploreCollectionsOperation: AsyncOperation {
 		print("COLLECTIONS COUNT: \(collections.count)")
 		
 		// pass collections to delegate
-		delegate?.loadedHomeImageSection(collections, forPhotoSectionType: .explore)
+		delegate?.loadedHomeImageSection(collections, forPhotoSectionType: self.exploreSection)
 	}
 }
