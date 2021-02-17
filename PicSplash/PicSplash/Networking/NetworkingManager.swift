@@ -222,6 +222,11 @@ class NetworkingManager {
 		self.imageDownloadQueue.addOperation(photoOfTheDayOperation)
 		self.imageDownloadQueue.addOperation(photoOfTheDayImageDownloadOperation)
 		
+		// ExploreCollections
+		let exploreCollectionsOperation = ExploreCollectionsOperation(url: exploreCollectionsFetchUrl)
+		exploreCollectionsOperation.delegate = self
+		self.imageDownloadQueue.addOperation(exploreCollectionsOperation)
+		
 		// once all data fetching Operations have been added to queue
 		// add this BarrierBlock to the queue which requires
 		// that all previously added tasks must be completed
@@ -294,7 +299,7 @@ extension NetworkingManager: NetworkingOperationsProtocol {
 		self.imageDownloadCache.setObject(blurredImage, forKey: NSString(string: blurHash))
 	}
 	
-	func loadedPhotoSection(_ homeImages: [HomeImageProtocol], forPhotoSectionType photoSectionType: PhotoSectionType) {
+	func loadedHomeImageSection(_ homeImages: [HomeImageProtocol], forPhotoSectionType photoSectionType: PhotoSectionType) {
 		var section = homeImagesSections[photoSectionType.rawValue]
 		section.items = homeImages
 		homeImagesSections[photoSectionType.rawValue] = section

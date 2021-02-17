@@ -40,17 +40,15 @@ class InitialCollectionViewDataLoadOperation: AsyncOperation {
 		URLSession.shared.dataTask(with: requestUrl) { [weak self] data, response, error in
 			guard let self = self else { return }
 			
-			// process our home images list data and
-			// pass off sections to our delegate
+			// process our new section list data and
+			// pass off new section to our delegate
 			try? self.processHomeImagesListData(data: data, urlResponse: response, error: error)
 			
-			// draw all blurred images and hand
-			// them off to delegate for caching
-			self.delegate?.homeSections.forEach { section in
-				section.items.forEach { photo in
-					// we're adding these operations to internalQueue
-					self.drawAndCacheBlurredImage(usingBlurHashString: photo.blurHashString)
-				}
+			// draw all blurred images for new section
+			// and hand them off to delegate for caching
+			let newSection: PhotoSectionType = .new
+			self.delegate?.homeSections[newSection.rawValue].items.forEach { photo in
+				self.drawAndCacheBlurredImage(usingBlurHashString: photo.blurHashString) // we're adding these operations to internalQueue
 			}
 
 			// adding a barrierBlock ensures that all previous tasks on this queue will be completed
@@ -72,7 +70,7 @@ class InitialCollectionViewDataLoadOperation: AsyncOperation {
 			// make sure the operation completed & we have a blurredImage
 			guard let blurredImage = blurHashOperation.blurredImage else { return }
 			
-			print("CACHING BLURRED IMAGE")
+			print("CACHING BLURRED HOMEIMAGE - PHOTO")
 			
 			// pass to our delegate for caching
 			self.delegate?.cacheBlurredImage(blurredImage, forBlurHash: blurHashString)
@@ -103,8 +101,7 @@ class InitialCollectionViewDataLoadOperation: AsyncOperation {
 			throw NetworkingError.failedDeserialization
 		}
 		
-		// mutable arrays
-		var exploreSectionPhotos: [Photo] = []
+		// mutable array
 		var newSectionPhotos: [Photo] = []
 
 		// the mapping of JSON data to our object is not 1 to 1 so we unpack the old fashioned way
@@ -118,11 +115,6 @@ class InitialCollectionViewDataLoadOperation: AsyncOperation {
 						let imageUrl: String = urlsDict["small"]
 			else { return } // should I throw NetworkError here?
 			
-			exploreSectionPhotos.append(Photo(imageUrl: imageUrl,
-																				author: userName,
-																				blurString: blurHashString,
-																				height: height,
-																				width: width))
 			newSectionPhotos.append(Photo(imageUrl: imageUrl,
 																		author: userName,
 																		blurString: blurHashString,
@@ -130,11 +122,9 @@ class InitialCollectionViewDataLoadOperation: AsyncOperation {
 																		width: width))
 			
 		}
-//		print("JSON DATA: \(jsonList)")
 		
-		// report these out to our delegate
-		delegate?.loadedPhotoSection(exploreSectionPhotos, forPhotoSectionType: .explore)
-		delegate?.loadedPhotoSection(newSectionPhotos, forPhotoSectionType: .new)
+		// pass data out to our delegate
+		delegate?.loadedHomeImageSection(newSectionPhotos, forPhotoSectionType: .new)
 	}
 
 }

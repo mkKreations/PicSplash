@@ -516,11 +516,10 @@ extension HomeViewController {
 		var snapshot = NSDiffableDataSourceSnapshot<PhotoSection, AnyHashable>()
 		snapshot.appendSections(homeSections)
 		homeSections.forEach { section in
-			switch section.type {
+			switch section.type { // downcast since HomeImageProtocol doesn't inherit from Hashable
 			case .explore:
-//				if let collections = section.items as? [Collection] {
-				if let photos = section.items as? [Photo] {
-					snapshot.appendItems(photos, toSection: section)
+				if let collections = section.items as? [Collection] {
+					snapshot.appendItems(collections, toSection: section)
 				}
 			case .new:
 				if let photos = section.items as? [Photo] {
@@ -547,13 +546,12 @@ extension HomeViewController {
 		datasource?.apply(snapshot, animatingDifferences: true) {
 			self.datasource?.apply(snapshot, animatingDifferences: false) // 1
 			
-			let reloadPhotoSection: PhotoSectionType = .explore
-			guard homeSections[reloadPhotoSection.rawValue].items.count > 2,
-//						let photoToReload = homeSections[reloadPhotoSection.rawValue].items[1] as? Collection
-						let photoToReload = homeSections[reloadPhotoSection.rawValue].items[1] as? Photo
+			let sectionWithHomeImageToReload: PhotoSectionType = .explore
+			guard homeSections[sectionWithHomeImageToReload.rawValue].items.count > 2,
+						let collectionToReload = homeSections[sectionWithHomeImageToReload.rawValue].items[1] as? Collection
 			else { return }
 			
-			snapshot.reloadItems([photoToReload])
+			snapshot.reloadItems([collectionToReload])
 			self.datasource?.apply(snapshot) // 2
 		}
 	}

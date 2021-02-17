@@ -8,12 +8,12 @@
 import Foundation
 
 final class Collection {
-	let id: Int
+	let id: String
 	let title: String
 	let blurHash: String
 	let imageUrl: String
 	
-	init(id: Int, title: String, blurHash: String, imageUrl: String) {
+	init(id: String, title: String, blurHash: String, imageUrl: String) {
 		self.id = id
 		self.title = title
 		self.blurHash = blurHash

@@ -19,6 +19,6 @@ protocol NetworkingOperationsProtocol: AnyObject {
 	var homeSections: [PhotoSection] { get }
 	
 	func cacheBlurredImage(_ blurredImage: UIImage, forBlurHash blurHash: String)
-	func loadedPhotoSection(_ homeImages: [HomeImageProtocol], forPhotoSectionType photoSectionType: PhotoSectionType)
+	func loadedHomeImageSection(_ homeImages: [HomeImageProtocol], forPhotoSectionType photoSectionType: PhotoSectionType)
 	func loadedPhotoOfTheDay(_ photoOfTheDay: Photo)
 }
