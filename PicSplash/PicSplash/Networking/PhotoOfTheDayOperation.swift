@@ -63,17 +63,19 @@ class PhotoOfTheDayOperation: AsyncOperation {
 	}
 	
 	
-	//
+	// helpers
 	
 	private func processPhotoOfTheDayData(data: Data?, response: URLResponse?, error: Error?) throws {
 		// return and capture error from server
 		if let error = error {
+			print("\(NetworkingError.serverError(error)) - PhotoOfTheDayOperation")
 			throw NetworkingError.serverError(error)
 		}
 		
 		// ensure we have successful httpResponse
 		guard let httpResponse = response as? HTTPURLResponse,
 					(200...300).contains(httpResponse.statusCode) else {
+			print("\(NetworkingError.invalidResponse) - PhotoOfTheDayOperation")
 			throw NetworkingError.invalidResponse
 		}
 
@@ -83,6 +85,7 @@ class PhotoOfTheDayOperation: AsyncOperation {
 		// unpack data & deserialize response data into JSON
 		guard let data = data,
 					let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
+			print("\(NetworkingError.failedDeserialization) - PhotoOfTheDayOperation")
 			throw NetworkingError.failedDeserialization
 		}
 		
@@ -94,6 +97,7 @@ class PhotoOfTheDayOperation: AsyncOperation {
 					let blurHash = json["blur_hash"] as? String,
 					let width = json["width"] as? Int,
 					let height = json["height"] as? Int else {
+			print("\(NetworkingError.failedDataProcessing) - PhotoOfTheDayOperation")
 			throw NetworkingError.failedDataProcessing
 		}
 
