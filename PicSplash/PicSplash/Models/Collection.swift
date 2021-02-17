@@ -36,3 +36,13 @@ extension Collection: Hashable {
 		hasher.combine(imageUrl)
 	}
 }
+
+extension Collection: HomeImageProtocol {
+	var displayText: String? {
+		title
+	}
+	
+	var displayImageUrlString: String? {
+		imageUrl
+	}
+}

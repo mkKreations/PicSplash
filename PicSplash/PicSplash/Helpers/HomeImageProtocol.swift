@@ -12,7 +12,7 @@ import UIKit
 // any diffable datasource, this section object
 // will have an array of these HomeImageProtocol items
 
-protocol HomeImageProtocol: AnyObject {
+protocol HomeImageProtocol: AnyObject, Hashable {
 	var displayText: String? { get }
 	var displayImageUrlString: String? { get }
 }
