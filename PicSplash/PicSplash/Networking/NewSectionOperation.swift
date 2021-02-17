@@ -17,6 +17,7 @@ import Foundation
 class NewSectionOperation: AsyncOperation {
 	// instance vars
 	
+	private let newSection: PhotoSectionType = .new
 	private let requestUrl: URL
 	private let internalQueue: OperationQueue = {
 		let operationQueue = OperationQueue()
@@ -46,8 +47,7 @@ class NewSectionOperation: AsyncOperation {
 			
 			// draw all blurred images for new section
 			// and hand them off to delegate for caching
-			let newSection: PhotoSectionType = .new
-			self.delegate?.homeSections[newSection.rawValue].items.forEach { photo in
+			self.delegate?.homeSections[self.newSection.rawValue].items.forEach { photo in
 				self.drawAndCacheBlurredImage(usingBlurHashString: photo.blurHashString) // we're adding these operations to internalQueue
 			}
 
@@ -83,12 +83,14 @@ class NewSectionOperation: AsyncOperation {
 																				 error: Error?) throws {
 		// return and capture error from server
 		if let error = error {
+			print("\(NetworkingError.serverError(error)) - NewSectionOperation")
 			throw NetworkingError.serverError(error)
 		}
 		
 		// ensure we have successful httpResponse
 		guard let httpResponse = response as? HTTPURLResponse,
 					(200...300).contains(httpResponse.statusCode) else {
+			print("\(NetworkingError.invalidResponse) - NewSectionOperation")
 			throw NetworkingError.invalidResponse
 		}
 		
@@ -98,6 +100,7 @@ class NewSectionOperation: AsyncOperation {
 		// unpack data & deserialize response data into JSON
 		guard let data = data,
 					let jsonList = try? JSONSerialization.jsonObject(with: data, options: []) as? [[String: Any]] else {
+			print("\(NetworkingError.failedDeserialization) - NewSectionOperation")
 			throw NetworkingError.failedDeserialization
 		}
 		
@@ -124,7 +127,7 @@ class NewSectionOperation: AsyncOperation {
 		}
 		
 		// pass data out to our delegate
-		delegate?.loadedHomeImageSection(newSectionPhotos, forPhotoSectionType: .new)
+		delegate?.loadedHomeImageSection(newSectionPhotos, forPhotoSectionType: self.newSection)
 	}
 
 }
