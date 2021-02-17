@@ -17,8 +17,6 @@ enum NetworkingError: Error {
 	case failedDataProcessing
 }
 
-// typealias to help pass around completions
-typealias ImageDownloadHandler = (_ image: UIImage?, _ error: NetworkingError?) -> ()
 
 // singleton to handle our networking
 // not needed to be thread-safe atm
@@ -27,10 +25,6 @@ class NetworkingManager {
 	
 	// class vars
 	static private let baseUrlString: String = "https://api.unsplash.com"
-	static private let homeImagesListPath: String = "/photos"
-	static private var clientIDPath: String {
-		"/?client_id=\(Secrets.API_KEY)"
-	}
 	
 	
 	// singleton
@@ -40,7 +34,6 @@ class NetworkingManager {
 	
 	// MARK: instance vars
 	
-	private var completionHandler: ImageDownloadHandler? // only to store references to any local completion blocks
 	private let imageDownloadQueue: OperationQueue = {
 		let operationQueue = OperationQueue()
 		operationQueue.qualityOfService = .userInteractive
@@ -83,7 +76,7 @@ class NetworkingManager {
 	private func constructNewSectionFetchUrl() -> (url: URL?, error: NetworkingError?) {
 		// construct urlString
 		var requestUrlString: String = Self.baseUrlString
-		requestUrlString.append(Self.homeImagesListPath)
+		requestUrlString.append("/photos")
 		
 		// ensure we have valid Url
 		guard var baseComponent: URLComponents = URLComponents(string: requestUrlString) else {
@@ -92,7 +85,7 @@ class NetworkingManager {
 		
 		let queryItems: [URLQueryItem] = [
 			URLQueryItem(name: "client_id", value: Secrets.API_KEY),
-			URLQueryItem(name: "page", value: "1"),
+			URLQueryItem(name: "page", value: "12"),
 			URLQueryItem(name: "per_page", value: "30"),
 		]
 		baseComponent.queryItems = queryItems
@@ -237,18 +230,18 @@ class NetworkingManager {
 		}
 	}
 			
-	func downloadImage(forImageUrlString imageUrlString: String, withCompletion completion: ((UIImage?, NetworkingError?) -> Void)?) {
+	// OJO: make sure to pass indexPath thru!!!
+	func downloadImage(forImageUrlString imageUrlString: String,
+										 forIndexPath indexPath: IndexPath,
+										 withCompletion completion: ((UIImage?, NetworkingError?, IndexPath) -> Void)?) {
 		guard let imageUrl = URL(string: imageUrlString) else {
-			completion?(nil, NetworkingError.invalidUrl)
+			completion?(nil, NetworkingError.invalidUrl, indexPath)
 			return
 		}
-	
-		// capture local completion
-		self.completionHandler = completion
 		
 		if let cachedImage = imageDownloadCache.object(forKey: NSString(string: imageUrlString)) {
 			print("RETURNING CACHED IMAGE")
-			self.completionHandler?(cachedImage, nil)
+			completion?(cachedImage, nil, indexPath)
 		} else {
 			// first see if the operation is currently running on
 			// imageDownloadQueue if so - raise its priority to top level
@@ -264,7 +257,7 @@ class NetworkingManager {
 				imageDownloadOperation.queuePriority = .high
 				imageDownloadOperation.imageHandler = { image, error in
 					if let error = error {
-						self.completionHandler?(nil, error)
+						completion?(nil, error, indexPath)
 						return
 					}
 					
@@ -275,7 +268,7 @@ class NetworkingManager {
 					// cache the image using the url as the key
 					self.imageDownloadCache.setObject(image, forKey: NSString(string: imageUrlString))
 					
-					self.completionHandler?(image, error)
+					completion?(image, error, indexPath)
 				}
 				// add to image download queue
 				imageDownloadQueue.addOperation(imageDownloadOperation)

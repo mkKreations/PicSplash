@@ -582,32 +582,32 @@ extension HomeViewController: UICollectionViewDelegate {
 		let section = self.networkManager.homeImagesSections[indexPath.section]
 		let homeImage = section.items[indexPath.row]
 
-		// fetch & set actual image
-		NetworkingManager.shared.downloadImage(forImageUrlString: homeImage.imageUrlString) { image, error in
-			DispatchQueue.main.async {
-				// would love to set the cell.displayImage here but due to cell reuse
-				// the image would load to the incorrect cell - currently looking for
-				// better solution
-			}
-		}
-
 		switch section.type {
 		case .explore:
 			guard let exploreCell = cell as? HomeOrthogonalCell else { return }
-			
-			// set blurredImage & actual image
-			exploreCell.displayImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: homeImage.blurHashString)
-			if let cachedImage = NetworkingManager.shared.cachedImage(forImageUrlString: homeImage.imageUrlString) {
-				exploreCell.displayImage = cachedImage
-			}
 
+			// set blurredImage
+			exploreCell.displayImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: homeImage.blurHashString)
+
+			// fetch & set actual image
+			NetworkingManager.shared.downloadImage(forImageUrlString: homeImage.imageUrlString, forIndexPath: indexPath) { image, error, itemIndexPath in
+				DispatchQueue.main.async {
+					guard let exploreSectionCell = collectionView.cellForItem(at: itemIndexPath) as? HomeOrthogonalCell else { return }
+					exploreSectionCell.displayImage = image
+				}
+			}
 		case .new:
 			guard let newCell = cell as? HomeImageCell else { return }
 
-			// set blurredImage & actual image
+			// set blurredImage
 			newCell.displayImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: homeImage.blurHashString)
-			if let cachedImage = NetworkingManager.shared.cachedImage(forImageUrlString: homeImage.imageUrlString) {
-				newCell.displayImage = cachedImage
+
+			// fetch & set actual image
+			NetworkingManager.shared.downloadImage(forImageUrlString: homeImage.imageUrlString, forIndexPath: indexPath) { image, error, itemIndexPath in
+				DispatchQueue.main.async {
+					guard let newSectionCell = collectionView.cellForItem(at: itemIndexPath) as? HomeImageCell else { return }
+					newSectionCell.displayImage = image
+				}
 			}
 		}
 	}

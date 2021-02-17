@@ -21,7 +21,7 @@ class ImageDownloadOperation: AsyncOperation {
 	
 	private(set) var imageUrl: URL
 	
-	var imageHandler: ImageDownloadHandler?
+	var imageHandler: ((_ image: UIImage?, _ error: NetworkingError?) -> ())?
 
 	// OJO:
 	// only use covenience init if you will
