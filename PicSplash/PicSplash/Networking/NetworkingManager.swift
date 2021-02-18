@@ -83,9 +83,13 @@ class NetworkingManager {
 			return (nil, .invalidUrl)
 		}
 		
+		// nothing to pass here because
+		// we know we'll have value
+		guard let randomPageValue = (1...50).randomElement() else { return (nil, nil) }
+		
 		let queryItems: [URLQueryItem] = [
 			URLQueryItem(name: "client_id", value: Secrets.API_KEY),
-			URLQueryItem(name: "page", value: "12"),
+			URLQueryItem(name: "page", value: String(randomPageValue)),
 			URLQueryItem(name: "per_page", value: "30"),
 		]
 		baseComponent.queryItems = queryItems
@@ -133,9 +137,14 @@ class NetworkingManager {
 			return (nil, .invalidUrl)
 		}
 		
+		// nothing to pass here because
+		// we know we'll have value, we're
+		// doing this to simulate "random" data
+		guard let randomPageValue = (1...40).randomElement() else { return (nil, nil) }
+		
 		let queryItems: [URLQueryItem] = [
 			URLQueryItem(name: "client_id", value: Secrets.API_KEY),
-			URLQueryItem(name: "page", value: "1"),
+			URLQueryItem(name: "page", value: String(randomPageValue)),
 			URLQueryItem(name: "per_page", value: "30"),
 		]
 		baseComponent.queryItems = queryItems
