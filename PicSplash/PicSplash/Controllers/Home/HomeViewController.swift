@@ -43,6 +43,7 @@ final class HomeViewController: UIViewController {
 	var searchResultsDatasource: UICollectionViewDiffableDataSource<SectionPlaceHolder, ImagePlaceholder>?
 	private let scrollToTopView: UIView = UIView(frame: .zero)
 	var isShowingSearchResults: Bool = false
+	private(set) var isShowingKeyboard: Bool = false
 	let networkManager: NetworkingManager = NetworkingManager.shared
 		
 	
@@ -392,6 +393,13 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 		// dismiss searchResults if showing
 		if isShowingSearchResults {
 			animateSearchResultsCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
+		}
+	}
+
+	// when user clicks "x" within search bar and there is a first responder
+	func didClearSearchWithFirstResponder(_ firstResponder: UIView) {
+		if isShowingKeyboard {
+			firstResponder.endEditing(true)
 		}
 	}
 	
@@ -823,10 +831,14 @@ extension HomeViewController {
 		}
 		
 		scrollingNavView.setShowsCancelButton(shows: true, animated: true)
+		
+		isShowingKeyboard = true
 	}
 	
 	@objc func keyboardWillHide(notification: NSNotification) {
 		scrollingNavView.setShowsCancelButton(shows: false, animated: true)
+		
+		isShowingKeyboard = false
 	}
 	
 }
