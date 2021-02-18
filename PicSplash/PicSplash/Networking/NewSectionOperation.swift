@@ -112,13 +112,15 @@ class NewSectionOperation: AsyncOperation {
 			guard let blurHashString: String = item["blur_hash"] as? String,
 						let width: Int = item["width"] as? Int,
 						let height: Int = item["height"] as? Int,
+						let id: String = item["id"] as? String,
 						let userDict: [String: Any] = item["user"] as? [String: Any],
 						let userName: String = userDict["username"] as? String,
 						let urlsDict: [String: String] = item["urls"] as? [String: String],
 						let imageUrl: String = urlsDict["small"]
 			else { return } // should I throw NetworkError here?
 			
-			newSectionPhotos.append(Photo(imageUrl: imageUrl,
+			newSectionPhotos.append(Photo(id: id,
+																		imageUrl: imageUrl,
 																		author: userName,
 																		blurString: blurHashString,
 																		height: height,

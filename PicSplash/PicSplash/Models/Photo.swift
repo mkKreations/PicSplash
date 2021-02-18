@@ -8,14 +8,15 @@
 import Foundation
 
 final class Photo {
-	let id: UUID = UUID() // unique ID to help distinguish value type instances
+	let id: String
 	let imageUrl: String
 	let author: String
 	let blurString: String
 	let height: Int
 	let width: Int
 	
-	init(imageUrl: String, author: String, blurString: String, height: Int, width: Int) {
+	init(id: String, imageUrl: String, author: String, blurString: String, height: Int, width: Int) {
+		self.id = id
 		self.imageUrl = imageUrl
 		self.author = author
 		self.blurString = blurString

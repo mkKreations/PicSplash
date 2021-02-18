@@ -95,6 +95,7 @@ class PhotoOfTheDayOperation: AsyncOperation {
 					let userDict = json["user"] as? [String: Any],
 					let username = userDict["username"] as? String,
 					let blurHash = json["blur_hash"] as? String,
+					let id = json["id"] as? String,
 					let width = json["width"] as? Int,
 					let height = json["height"] as? Int else {
 			print("\(NetworkingError.failedDataProcessing) - PhotoOfTheDayOperation")
@@ -102,7 +103,8 @@ class PhotoOfTheDayOperation: AsyncOperation {
 		}
 
 		// create our photo of the day
-		let photoOfTheDay = Photo(imageUrl: imageUrl,
+		let photoOfTheDay = Photo(id: id,
+															imageUrl: imageUrl,
 															author: username,
 															blurString: blurHash,
 															height: height,
