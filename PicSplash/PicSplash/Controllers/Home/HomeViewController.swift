@@ -13,6 +13,7 @@ final class HomeViewController: UIViewController {
 	static let navMinHeight: CGFloat = 70.0
 	private static let navSnapToTopBuffer: CGFloat = 150.0
 	static let trendingAnimationDuration: TimeInterval = 0.4
+	private static let scrollToTopMargin: CGFloat = 22.0
 
 	
 	// instance vars
@@ -40,6 +41,7 @@ final class HomeViewController: UIViewController {
 	var isShowingLoadingView: Bool = false
 	let searchResultsCollectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
 	var searchResultsDatasource: UICollectionViewDiffableDataSource<SectionPlaceHolder, ImagePlaceholder>?
+	private let scrollToTopView: UIView = UIView(frame: .zero)
 	var isShowingSearchResults: Bool = false
 	let networkManager: NetworkingManager = NetworkingManager.shared
 		
@@ -53,13 +55,7 @@ final class HomeViewController: UIViewController {
 		
 		configureSubviews()
 		configureDatasource()
-		
-		// we are adding & fully configuring
-		// each view as a subview to view
-		configureTrendingCollectionView()
-		configureLoadingViewAndIndicator()
-		configureSearchResultsCollectionView()
-		
+						
 		// TODO: remove this to unsilence constraint breaks from estimated cell heights
 		UserDefaults.standard.set(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
 		
@@ -139,7 +135,6 @@ final class HomeViewController: UIViewController {
 		// inset content by our scrollingNavView height
 		collectionView.contentInset = UIEdgeInsets(top: Self.navMaxHeight, left: 0.0, bottom: 0.0, right: 0.0)
 		collectionView.contentInsetAdjustmentBehavior = .never // by default, behavior adjusts inset 20 pts for status bar
-		collectionView.scrollsToTop = true // ensure value is true
 		collectionView.showsVerticalScrollIndicator = false
 		collectionView.scrollsToTop = false // will implement our custom scrollsToTop behavior
 		collectionView.delegate = self
@@ -165,7 +160,25 @@ final class HomeViewController: UIViewController {
 		loginView.delegate = self // respond to button actions
 		view.addSubview(loginView) // this view on top of all
 		
-		layoutLoginViewForInitialAppearance()
+		layoutLoginViewForInitialAppearance() // layout loginView
+		
+		// we are adding & fully configuring
+		// each view as a subview to view
+		// configuring these in an extension
+		configureTrendingCollectionView()
+		configureLoadingViewAndIndicator()
+		configureSearchResultsCollectionView()
+		
+		// scroll to top
+		scrollToTopView.frame = CGRect(origin: .zero,
+																	 size: CGSize(width: view.bounds.width, height: Self.scrollToTopMargin))
+		view.addSubview(scrollToTopView)
+		view.bringSubviewToFront(scrollToTopView)
+	
+		let scrollToTopTapGesture = UITapGestureRecognizer(target: self, action: #selector(scrollToTopOnTap))
+		scrollToTopTapGesture.numberOfTapsRequired = 1
+		scrollToTopTapGesture.numberOfTouchesRequired = 1
+		scrollToTopView.addGestureRecognizer(scrollToTopTapGesture) // add tap gest to scrollToTopView
 	}
 	
 	private func setPhotoOfTheDayImage() {
@@ -425,7 +438,6 @@ extension HomeViewController {
 	}
 	
 	func sectionLayoutForHomeImageCell() -> NSCollectionLayoutSection {
-		// will return back to estimated shortly for both itemSize & groupSize
 		let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
 																					heightDimension: .estimated(100.0))
 		let item = NSCollectionLayoutItem(layoutSize: itemSize)
@@ -747,16 +759,45 @@ extension HomeViewController {
 	// allow passing of duration so we can
 	// time this animation with other ones
 	private func snapScrollViewContentToTop(_ scrollView: UIScrollView, withDuration duration: TimeInterval = 0.03) {
+		self.view.isUserInteractionEnabled = false // disable view interaction during animation
+		
 		UIView.animate(withDuration: duration,
 									 delay: 0.0,
-									 options: .curveEaseInOut,
-									 animations: {
-										// update contentOffset of collectionView
-										scrollView.contentOffset = CGPoint(x: 0.0, y: -Self.navMinHeight)
-										self.view.layoutIfNeeded() // force update view
-									 }, completion: nil)
+									 options: .curveEaseInOut) {
+			// update contentOffset of collectionView
+			scrollView.contentOffset = CGPoint(x: 0.0, y: -Self.navMinHeight)
+			self.view.layoutIfNeeded() // force update view
+		} completion: { _ in
+			self.view.isUserInteractionEnabled = true // enable view interaction after
+		}
 	}
 	
+	@objc private func scrollToTopOnTap(_ tapGesture: UITapGestureRecognizer) {
+		let offset = -collectionView.contentOffset.y
+		
+		if offset < Self.navMinHeight {
+			// our snapScrollViewContentToTop doesn't play
+			// well here because calling view.layoutIfNeeded
+			// while collectionView may be scrolling leads
+			// to cells not being drawn/removed and other glitches
+			collectionView.setContentOffset(CGPoint(x: 0.0, y: -Self.navMaxHeight), animated: true)
+		}
+	}
+	
+	// these overrides are relevant in this extension
+	// because they allow for interacting with the top
+	// edge of screen (where our tap gest is at for
+	// custom scrollToTop behavior) and the showing/hiding
+	// of status bar which is required to interact with
+	// that area
+	override var preferredScreenEdgesDeferringSystemGestures: UIRectEdge {
+		return [.top]
+	}
+	
+	override var prefersStatusBarHidden: Bool {
+		true
+	}
+
 }
 
 
