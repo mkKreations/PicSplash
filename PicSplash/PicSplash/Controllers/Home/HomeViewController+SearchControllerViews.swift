@@ -18,6 +18,7 @@ extension HomeViewController {
 		trendingCollectionView.contentInset = UIEdgeInsets(top: Self.trendingTopMargin, left: 0.0, bottom: 0.0, right: 0.0)
 		trendingCollectionView.collectionViewLayout = configureTrendingCompositionalLayout() // set to our custom layout
 		trendingCollectionView.translatesAutoresizingMaskIntoConstraints = false
+		trendingCollectionView.isUserInteractionEnabled = false
 		trendingCollectionView.register(TrendingCell.self, forCellWithReuseIdentifier: TrendingCell.reuseIdentifier)
 		trendingCollectionView.register(TrendingReusableView.self,
 																		forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
