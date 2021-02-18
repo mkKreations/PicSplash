@@ -44,7 +44,6 @@ final class HomeViewController: UIViewController {
 	private let scrollToTopView: UIView = UIView(frame: .zero)
 	var isShowingSearchResults: Bool = false
 	private(set) var isShowingKeyboard: Bool = false
-	let networkManager: NetworkingManager = NetworkingManager.shared
 		
 	
 	// MARK: view life cycle
@@ -413,7 +412,7 @@ extension HomeViewController {
 	
 	private func configureCompositionalLayout() -> UICollectionViewCompositionalLayout {
 		let layout = UICollectionViewCompositionalLayout { sectionIndex, _ -> NSCollectionLayoutSection? in
-			let currentSectionType = self.networkManager.homeImagesSections[sectionIndex].type
+			let currentSectionType = NetworkingManager.shared.homeImagesSections[sectionIndex].type
 
 			switch currentSectionType {
 			case .explore:
@@ -478,11 +477,9 @@ extension HomeViewController {
 	
 	private func configureDatasource() {
 		datasource = UICollectionViewDiffableDataSource(collectionView: collectionView, cellProvider: {
-			[weak self] (collectionView, indexPath, imagePlaceholder) -> UICollectionViewCell? in
-			
-			guard let self = self else { return nil }
-			
-			let currentSection = self.networkManager.homeImagesSections[indexPath.section]
+			(collectionView, indexPath, imagePlaceholder) -> UICollectionViewCell? in
+						
+			let currentSection = NetworkingManager.shared.homeImagesSections[indexPath.section]
 
 			switch currentSection.type {
 			case .explore:
@@ -584,7 +581,7 @@ extension HomeViewController: UICollectionViewDelegate {
 	
 	func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
 		// get section & photo for indexPath
-		let section = self.networkManager.homeImagesSections[indexPath.section]
+		let section = NetworkingManager.shared.homeImagesSections[indexPath.section]
 		let homeImage = section.items[indexPath.row]
 
 		switch section.type {
