@@ -176,7 +176,7 @@ class NetworkingManager {
 			return
 		}
 
-		print("InitialCollectionViewDataLoadUrl URL: \(newSectionFetchUrl)")
+		print("NewSection URL: \(newSectionFetchUrl)")
 		print("PhotoOfTheDay URL: \(photoOfTheDayUrl)")
 		print("ExploreCollections URL: \(exploreCollectionsFetchUrl)")
 

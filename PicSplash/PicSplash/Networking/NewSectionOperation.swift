@@ -7,12 +7,8 @@
 
 import Foundation
 
-// long name for the class but as it implies,
-// this Operation subclass will be reponsible
-// for any tasks required to present any data
-// within the HomeCollectionView - during doing
-// so, the subclass will report out to NetworkingManager
-// via its delegate anything the NetworkingManager needs
+// this operation is responsible for fetching the
+// "New" section of the home collection view
 
 class NewSectionOperation: AsyncOperation {
 	// instance vars

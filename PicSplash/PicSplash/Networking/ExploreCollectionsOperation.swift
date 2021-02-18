@@ -7,6 +7,9 @@
 
 import Foundation
 
+// this operation is responsible for fetching the
+// "Explore" section of the home collection view
+
 class ExploreCollectionsOperation: AsyncOperation {
 	// instance vars
 	
