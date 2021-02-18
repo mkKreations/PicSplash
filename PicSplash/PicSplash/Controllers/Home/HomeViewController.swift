@@ -540,31 +540,16 @@ extension HomeViewController {
 			}
 		}
 
-		// this is a 2-piece workaround
-		
-		// 1) applying a snapshot in the completion of another snapshot fixes
+		// applying a snapshot in the completion of another snapshot fixes
 		// a layout issue within our orthogonal cell section that only shows
 		// the first cell even though the section is groupPagingCentered so
 		// really we should see one full cell and the leading edge of the second
-		
-		// 2) I believe for the above reason, that this now causes the issue in
-		// that the second cell doesn't receive a call to willDisplayCell (initially)
-		// as all other cells do - so we reload that specific cell so that it loads
-		// correctly initially
 		
 		// all in all, we delay the dismissing of the loadingView so that the
 		// user doesn't see any UI "jumps" - specifically the collectionView
 		// forcing the correct placement of the second orthogoncal cell
 		datasource?.apply(snapshot, animatingDifferences: true) {
-			self.datasource?.apply(snapshot, animatingDifferences: false) // 1
-			
-			let sectionWithHomeImageToReload: PhotoSectionType = .explore
-			guard homeSections[sectionWithHomeImageToReload.rawValue].items.count > 2,
-						let collectionToReload = homeSections[sectionWithHomeImageToReload.rawValue].items[1] as? Collection
-			else { return }
-			
-			snapshot.reloadItems([collectionToReload])
-			self.datasource?.apply(snapshot) // 2
+			self.datasource?.apply(snapshot, animatingDifferences: false)
 		}
 	}
 
