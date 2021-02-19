@@ -45,6 +45,7 @@ class NetworkingManager {
 		return operationQueue
 	}()
 	private let imageDownloadCache: NSCache<NSString, UIImage> = NSCache()
+	private(set) var searchResults: (results: [Photo], searchTerm: String) = ([], "")
 	private(set) var photoOfTheDay: Photo?
 	private(set) var homeImagesSections: [PhotoSection] = {
 	var sections: [PhotoSection] = []
@@ -78,10 +79,10 @@ class NetworkingManager {
 		imageDownloadCache.object(forKey: NSString(string: imageUrlString))
 	}
 	
-	func search(withSearchTerm searchTerm: String, withCompletion completion: @escaping ([Photo]?, NetworkingError?) -> ()) {
+	func search(withSearchTerm searchTerm: String, withCompletion completion: @escaping ([Photo], String, NetworkingError?) -> ()) {
 		// check if search is empty
 		if searchTerm.isEmpty {
-			completion([], nil) // empty results for empty search
+			completion([], "", nil) // empty results for empty search
 			return
 		}
 		
@@ -90,27 +91,24 @@ class NetworkingManager {
 
 		// get url
 		guard let searchUrl = searchUrlTuple.url else {
-			completion(nil, searchUrlTuple.error)
+			completion([], "", searchUrlTuple.error)
 			return
 		}
 		
 		// create search operation
-		let searchOperation = SearchOperation(url: searchUrl)
+		let searchOperation = SearchOperation(requestUrl: searchUrl, searchTerm: searchTerm)
+		searchOperation.delegate = self
 		searchOperation.queuePriority = .veryHigh
-		searchOperation.resultsHandler = { photos, error in
-			// return error and bounce out
-			if let error = error {
-				completion(nil, error)
-				return
-			}
+		searchQueue.addOperation(searchOperation) // adding to our searchQueue
+		
+		// adding barrier block task requires
+		// this operation to wait until all
+		// previous operations have completed
+		searchQueue.addBarrierBlock { [weak self] in
+			guard let self = self else { return }
 			
-			// we know there will at least be an empty array
-			guard let photos = photos else { return }
-			
-			completion(photos, nil) // return photos
+			completion(self.searchResults.results, self.searchResults.searchTerm, nil)
 		}
-		// adding to our searchQueue
-		searchQueue.addOperation(searchOperation)
 	}
 		
 	private func constructNewSectionFetchUrl() -> (url: URL?, error: NetworkingError?) {
@@ -375,5 +373,9 @@ extension NetworkingManager: NetworkingOperationsProtocol {
 	
 	func loadedPhotoOfTheDay(_ photoOfTheDay: Photo) {
 		self.photoOfTheDay = photoOfTheDay // only need to capture reference
+	}
+	
+	func loadedSearchResults(_ searchResults: [Photo], forSearchTerm searchTerm: String) {
+		self.searchResults = (searchResults, searchTerm)
 	}
 }
