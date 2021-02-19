@@ -754,6 +754,9 @@ extension HomeViewController: DetailButtonActionsProvider {
 extension HomeViewController {
 	
 	func scrollViewDidScroll(_ scrollView: UIScrollView) {
+		// only do this logic for our home collection view
+		if scrollView != self.collectionView { return }
+		
 		// offset will begin as negative from origin since
 		// we're using contentInsets on collectionView, so
 		// we'll negate it to work with positive values
