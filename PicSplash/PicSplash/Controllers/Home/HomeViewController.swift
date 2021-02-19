@@ -40,7 +40,7 @@ final class HomeViewController: UIViewController {
 	var loadingViewTopConstraint: NSLayoutConstraint?
 	var isShowingLoadingView: Bool = false
 	let searchResultsCollectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
-	var searchResultsDatasource: UICollectionViewDiffableDataSource<SectionPlaceHolder, ImagePlaceholder>?
+	var searchResultsDatasource: UICollectionViewDiffableDataSource<PhotoSectionType, Photo>?
 	private let scrollToTopView: UIView = UIView(frame: .zero)
 	var isShowingSearchResults: Bool = false
 	private(set) var isShowingKeyboard: Bool = false
@@ -367,6 +367,8 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 				if !photos.isEmpty {
 					// if we have photos, show search results
 					if !self.isShowingSearchResults {
+						self.applySearchResultsSnapshot() // apply snapshot, then show collectionView
+						
 						self.animateSearchResultsCollectionView(forAppearance: true, withDuration: Self.trendingAnimationDuration)
 					}
 				} else {
@@ -600,6 +602,14 @@ extension HomeViewController: UICollectionViewDelegate {
 	}
 	
 	func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+		if collectionView == self.collectionView {
+			homeCollectionView(collectionView, willDisplay: cell, forItemAt: indexPath)
+		} else if collectionView == searchResultsCollectionView {
+			searchCollectionView(collectionView, willDisplay: cell, forItemAt: indexPath)
+		}
+	}
+	
+	private func homeCollectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
 		// get section & photo for indexPath
 		let section = NetworkingManager.shared.homeImagesSections[indexPath.section]
 		let homeImage = section.items[indexPath.row]
@@ -634,7 +644,32 @@ extension HomeViewController: UICollectionViewDelegate {
 		}
 	}
 	
+	private func searchCollectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+		let photo = NetworkingManager.shared.searchResults.results[indexPath.row]
+		
+		guard let cell = cell as? HomeImageCell else { return }
+		
+		// set blurred image
+		cell.displayImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: photo.blurString)
+		
+		// fetch and set actual image for cell
+		NetworkingManager.shared.downloadImage(forImageUrlString: photo.imageUrl, forIndexPath: indexPath) { image, error, itemIndexPath in
+			DispatchQueue.main.async {
+				guard let searchResultsCell = collectionView.cellForItem(at: itemIndexPath) as? HomeImageCell else { return }
+				searchResultsCell.displayImage = image
+			}
+		}
+	}
+	
 	func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+		if collectionView == self.collectionView {
+			homeCollectionView(collectionView, didEndDisplaying: cell, forItemAt: indexPath)
+		} else if collectionView == searchResultsCollectionView {
+			searchCollectionView(collectionView, didEndDisplaying: cell, forItemAt: indexPath)
+		}
+	}
+		
+	private func homeCollectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
 		// this is specifically for the workaround in
 		// applyInitialSnapshot() - we don't want to
 		// lower the queue priority of the first 1-2 cells
@@ -643,6 +678,11 @@ extension HomeViewController: UICollectionViewDelegate {
 		let sections = NetworkingManager.shared.homeImagesSections
 		let noLongerDisplayingHomeImage = sections[indexPath.section].items[indexPath.row]
 		NetworkingManager.shared.lowerQueuePriority(forImageUrlString: noLongerDisplayingHomeImage.imageUrlString)
+	}
+	
+	private func searchCollectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+		let noLongerDisplayingSearchImage = NetworkingManager.shared.searchResults.results[indexPath.row]
+		NetworkingManager.shared.lowerQueuePriority(forImageUrlString: noLongerDisplayingSearchImage.imageUrlString)
 	}
 	
 	private func presentDetailViewController(withImagePlaceholder imagePlaceholder: ImagePlaceholder) {

@@ -194,6 +194,7 @@ extension HomeViewController {
 		searchResultsCollectionView.translatesAutoresizingMaskIntoConstraints = false
 		searchResultsCollectionView.register(HomeImageCell.self, forCellWithReuseIdentifier: HomeImageCell.reuseIdentifier)
 		searchResultsCollectionView.alpha = 0.0
+		searchResultsCollectionView.delegate = self
 		searchResultsCollectionView.isUserInteractionEnabled = false
 		view.addSubview(searchResultsCollectionView)
 		
@@ -216,20 +217,25 @@ extension HomeViewController {
 			guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeImageCell.reuseIdentifier,
 																													for: indexPath) as? HomeImageCell else { return nil }
 			
-			let section = searchResultsSampleData[indexPath.section]
+			// get current photo
+			let photo = NetworkingManager.shared.searchResults.results[indexPath.row]
 			
-			cell.displayText = String(section.images[indexPath.row].height)
-			cell.displayBackgroundColor = section.images[indexPath.row].placeholderColor
+			// determine & set cell height from photo dimensions
+			let cellWidth: CGFloat = collectionView.bounds.width
+			let product = cellWidth * CGFloat(photo.imageHeight)
+			let cellHeight: CGFloat = product / CGFloat(photo.imageWidth)
+			cell.imageHeight = Int(cellHeight)
 			
 			return cell
 		})
 	}
 	
-	private func applySearchResultsSnapshot() {
-		var searchResultsSnapshot = NSDiffableDataSourceSnapshot<SectionPlaceHolder, ImagePlaceholder>()
-		searchResultsSnapshot.appendSections(searchResultsSampleData)
-		searchResultsSampleData.forEach { searchResultsSnapshot.appendItems($0.images, toSection: $0) }
-		searchResultsDatasource?.apply(searchResultsSnapshot)
+	func applySearchResultsSnapshot() {
+		let newSection: PhotoSectionType = PhotoSectionType.new
+		var searchResultsSnapshot = NSDiffableDataSourceSnapshot<PhotoSectionType, Photo>()
+		searchResultsSnapshot.appendSections([newSection]) // doesn't matter which section we pass - only displaying 1 section
+		searchResultsSnapshot.appendItems(NetworkingManager.shared.searchResults.results, toSection: newSection)
+		searchResultsDatasource?.apply(searchResultsSnapshot, animatingDifferences: true, completion: nil)
 	}
 	
 	func animateSearchResultsCollectionView(forAppearance willAppear: Bool,
