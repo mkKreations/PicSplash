@@ -192,6 +192,7 @@ extension HomeViewController {
 		// use pre-existing cell & compositionalLayout section
 		searchResultsCollectionView.collectionViewLayout = UICollectionViewCompositionalLayout(section: sectionLayoutForHomeImageCell())
 		searchResultsCollectionView.translatesAutoresizingMaskIntoConstraints = false
+		searchResultsCollectionView.showsVerticalScrollIndicator = false
 		searchResultsCollectionView.register(HomeImageCell.self, forCellWithReuseIdentifier: HomeImageCell.reuseIdentifier)
 		searchResultsCollectionView.alpha = 0.0
 		searchResultsCollectionView.delegate = self
