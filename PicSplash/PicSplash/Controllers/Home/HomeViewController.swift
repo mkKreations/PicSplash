@@ -826,6 +826,14 @@ extension HomeViewController {
 	}
 	
 	@objc private func scrollToTopOnTap(_ tapGesture: UITapGestureRecognizer) {
+		// detect which collectionView is
+		// showing and handle accordingly
+		if isShowingSearchResults {
+			searchResultsCollectionView.setContentOffset(.zero, animated: true)
+			return
+		}
+		
+		// get offset
 		let offset = -collectionView.contentOffset.y
 		
 		if offset < Self.navMinHeight {
