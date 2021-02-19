@@ -39,6 +39,11 @@ class NetworkingManager {
 		operationQueue.qualityOfService = .userInteractive
 		return operationQueue
 	}()
+	private let searchQueue: OperationQueue = {
+		let operationQueue = OperationQueue()
+		operationQueue.qualityOfService = .userInteractive
+		return operationQueue
+	}()
 	private let imageDownloadCache: NSCache<NSString, UIImage> = NSCache()
 	private(set) var photoOfTheDay: Photo?
 	private(set) var homeImagesSections: [PhotoSection] = {
@@ -71,6 +76,41 @@ class NetworkingManager {
 	
 	func cachedImage(forImageUrlString imageUrlString: String) -> UIImage? {
 		imageDownloadCache.object(forKey: NSString(string: imageUrlString))
+	}
+	
+	func search(withSearchTerm searchTerm: String, withCompletion completion: @escaping ([Photo]?, NetworkingError?) -> ()) {
+		// check if search is empty
+		if searchTerm.isEmpty {
+			completion([], nil) // empty results for empty search
+			return
+		}
+		
+		// attempt to construct url
+		let searchUrlTuple = constructSearchUrl(withSearchTerm: searchTerm)
+
+		// get url
+		guard let searchUrl = searchUrlTuple.url else {
+			completion(nil, searchUrlTuple.error)
+			return
+		}
+		
+		// create search operation
+		let searchOperation = SearchOperation(url: searchUrl)
+		searchOperation.queuePriority = .veryHigh
+		searchOperation.resultsHandler = { photos, error in
+			// return error and bounce out
+			if let error = error {
+				completion(nil, error)
+				return
+			}
+			
+			// we know there will at least be an empty array
+			guard let photos = photos else { return }
+			
+			completion(photos, nil) // return photos
+		}
+		// adding to our searchQueue
+		searchQueue.addOperation(searchOperation)
 	}
 		
 	private func constructNewSectionFetchUrl() -> (url: URL?, error: NetworkingError?) {
@@ -149,6 +189,32 @@ class NetworkingManager {
 		]
 		baseComponent.queryItems = queryItems
 		
+		// ensure we have valid Url
+		guard let requestUrl = baseComponent.url else {
+			return (nil, .invalidUrl)
+		}
+		
+		return (requestUrl, nil)
+	}
+	
+	private func constructSearchUrl(withSearchTerm searchTerm: String) -> (url: URL?, error: NetworkingError?) {
+		// construct urlString
+		var requestString: String = Self.baseUrlString
+		requestString.append("/search/photos")
+		
+		// ensure we have valid Url
+		guard var baseComponent: URLComponents = URLComponents(string: requestString) else {
+			return (nil, .invalidUrl)
+		}
+
+		// construct parameters
+		let queryItems: [URLQueryItem] = [
+			URLQueryItem(name: "client_id", value: Secrets.API_KEY),
+			URLQueryItem(name: "query", value: searchTerm),
+			URLQueryItem(name: "per_page", value: "30"),
+		]
+		baseComponent.queryItems = queryItems
+
 		// ensure we have valid Url
 		guard let requestUrl = baseComponent.url else {
 			return (nil, .invalidUrl)
