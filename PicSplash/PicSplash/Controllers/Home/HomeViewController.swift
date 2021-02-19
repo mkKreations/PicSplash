@@ -341,18 +341,38 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 	}
 	
 	func didSearch(withTerm term: String, andFirstResponder firstResponder: UIView) {
-		firstResponder.resignFirstResponder()
+		firstResponder.resignFirstResponder() // resign first responder
 		
-		// do any loading here before presenting the searchResultsCollectionView
-		
-//		animateLoadingView(forAppearance: true, withDuration: Self.trendingAnimationDuration)
+		// begin loading
+		if !isShowingLoadingView {
+			animateLoadingView(forAppearance: true, withDuration: Self.trendingAnimationDuration)
+		}
+
+		// fetch search term results
+		NetworkingManager.shared.search(withSearchTerm: term) { [weak self] (photos, searchTerm, error) in
+			DispatchQueue.main.async {
+				guard let self = self else { return }
 				
-		animateSearchResultsCollectionView(forAppearance: true,
-																			 withDuration: Self.trendingAnimationDuration) { [weak self] in
-			guard let self = self else { return }
-			
-			if self.isShowingLoadingView {
-				self.animateLoadingView(forAppearance: false) // dismiss loading view
+				// stop loading
+				if self.isShowingLoadingView {
+					self.animateLoadingView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
+				}
+
+				// print error & return
+				if let error = error {
+					print("Search error - \(error)")
+					return
+				}
+				
+				if !photos.isEmpty {
+					// if we have photos, show search results
+					if !self.isShowingSearchResults {
+						self.animateSearchResultsCollectionView(forAppearance: true, withDuration: Self.trendingAnimationDuration)
+					}
+				} else {
+					// TODO: SHOW NO SEARCH RESULTS STATE
+					print("NO RESULTS")
+				}
 			}
 		}
 		
