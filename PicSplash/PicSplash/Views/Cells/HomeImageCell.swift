@@ -18,14 +18,15 @@ class HomeImageCell: UICollectionViewCell {
 	let displayImageView: UIImageView = UIImageView(frame: .zero)
 	let displayLabel: UILabel = UILabel(frame: .zero)
 	private var imageViewHeightConstraint: NSLayoutConstraint! // manage imageView height manually
+	private let loader: UIActivityIndicatorView = UIActivityIndicatorView(style: .large)
 	
 		
 	// public setters
-//	var displayImage: UIImage? {
-//		didSet {
-//			displayImageView.image = displayImage
-//		}
-//	}
+	var displayImage: UIImage? {
+		didSet {
+			displayImageView.image = displayImage
+		}
+	}
 	
 	var displayBackgroundColor: UIColor? {
 		didSet {
@@ -45,6 +46,25 @@ class HomeImageCell: UICollectionViewCell {
 		}
 	}
 	
+	var imageHeight: Int? {
+		didSet {
+			if let height = imageHeight {
+				imageViewHeightConstraint.constant = CGFloat(height)
+			}
+		}
+	}
+	
+	// currently not using as we're
+	// presenting the blurHash image
+	// when the actual image is loading
+	var isLoading: Bool {
+		get { self.loader.isAnimating }
+		
+		set(newValue) {
+			newValue == true ? self.loader.startAnimating() : self.loader.stopAnimating()
+		}
+	}
+	
 	
 	// inits
 	override init(frame: CGRect) {
@@ -61,7 +81,8 @@ class HomeImageCell: UICollectionViewCell {
 	// helper methods
 	private func configureSubviews() {
 		displayImageView.translatesAutoresizingMaskIntoConstraints = false
-		displayImageView.contentMode = .scaleAspectFit
+		displayImageView.contentMode = .scaleAspectFill
+		displayImageView.clipsToBounds = true
 		contentView.addSubview(displayImageView)
 		
 		gradientOverlayView.translatesAutoresizingMaskIntoConstraints = false
@@ -70,6 +91,9 @@ class HomeImageCell: UICollectionViewCell {
 		displayLabel.translatesAutoresizingMaskIntoConstraints = false
 		displayLabel.textColor = .white
 		contentView.addSubview(displayLabel)
+		
+		loader.translatesAutoresizingMaskIntoConstraints = false
+		contentView.addSubview(loader)
 	}
 	
 	private func constrainSubviews() {
@@ -88,6 +112,9 @@ class HomeImageCell: UICollectionViewCell {
 		displayLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -5.0).isActive = true
 		displayLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -5.0).isActive = true
 		displayLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 5.0).isActive = true
+		
+		loader.centerYAnchor.constraint(equalTo: contentView.centerYAnchor).isActive = true
+		loader.centerXAnchor.constraint(equalTo: contentView.centerXAnchor).isActive = true
 	}
 	
 	// keeping this logic separate

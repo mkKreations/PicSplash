@@ -12,3 +12,6 @@ xcuserdata
 
 # xcshareddata
 xcshareddata
+
+# ignoring our file that have our "Secrets"
+Secrets.swift

@@ -16,14 +16,15 @@ class HomeOrthogonalCell: UICollectionViewCell {
 	private let displayImageView: UIImageView = UIImageView(frame: .zero)
 	private let gradientOverlayView: ImageShadowOverlayView = ImageShadowOverlayView(overlayStyle: .full)
 	private let displayLabel: UILabel = UILabel(frame: .zero)
-	
+	private let loader: UIActivityIndicatorView = UIActivityIndicatorView(style: .large)
+
 	
 	// public setters
-//	var displayImage: UIImage? {
-//		didSet {
-//			displayImageView.image = displayImage
-//		}
-//	}
+	var displayImage: UIImage? {
+		didSet {
+			displayImageView.image = displayImage
+		}
+	}
 	
 	var displayBackgroundColor: UIColor? {
 		didSet {
@@ -41,6 +42,16 @@ class HomeOrthogonalCell: UICollectionViewCell {
 		}
 	}
 	
+	// currently not using as we're
+	// presenting the blurHash image
+	// when the actual image is loading
+	var isLoading: Bool {
+		get { self.loader.isAnimating }
+		
+		set(newValue) {
+			newValue == true ? self.loader.startAnimating() : self.loader.stopAnimating()
+		}
+	}
 	
 	
 	// inits
@@ -63,7 +74,7 @@ class HomeOrthogonalCell: UICollectionViewCell {
 	// helper methods
 	private func configureSubviews() {
 		displayImageView.translatesAutoresizingMaskIntoConstraints = false
-		displayImageView.contentMode = .scaleAspectFit
+		displayImageView.contentMode = .scaleAspectFill
 		contentView.addSubview(displayImageView)
 		
 		gradientOverlayView.translatesAutoresizingMaskIntoConstraints = false
@@ -73,6 +84,9 @@ class HomeOrthogonalCell: UICollectionViewCell {
 		displayLabel.textColor = .white
 		displayLabel.textAlignment = .center
 		contentView.addSubview(displayLabel)
+		
+		loader.translatesAutoresizingMaskIntoConstraints = false
+		contentView.addSubview(loader)
 	}
 	
 	private func constrainSubviews() {
@@ -90,6 +104,9 @@ class HomeOrthogonalCell: UICollectionViewCell {
 		displayLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor).isActive = true
 		displayLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 10.0).isActive = true
 		displayLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -10.0).isActive = true
+		
+		loader.centerYAnchor.constraint(equalTo: contentView.centerYAnchor).isActive = true
+		loader.centerXAnchor.constraint(equalTo: contentView.centerXAnchor).isActive = true
 	}
 
 	// long press gesture

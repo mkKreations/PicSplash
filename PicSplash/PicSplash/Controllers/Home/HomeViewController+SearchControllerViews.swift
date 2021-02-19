@@ -18,6 +18,7 @@ extension HomeViewController {
 		trendingCollectionView.contentInset = UIEdgeInsets(top: Self.trendingTopMargin, left: 0.0, bottom: 0.0, right: 0.0)
 		trendingCollectionView.collectionViewLayout = configureTrendingCompositionalLayout() // set to our custom layout
 		trendingCollectionView.translatesAutoresizingMaskIntoConstraints = false
+		trendingCollectionView.isUserInteractionEnabled = false
 		trendingCollectionView.register(TrendingCell.self, forCellWithReuseIdentifier: TrendingCell.reuseIdentifier)
 		trendingCollectionView.register(TrendingReusableView.self,
 																		forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
@@ -139,7 +140,8 @@ extension HomeViewController {
 	}
 	
 	private func constrainLoadingViewAndActivityIndicator() {
-		loadingView.topAnchor.constraint(equalTo: view.topAnchor, constant: Self.navMinHeight).isActive = true
+		loadingViewTopConstraint = loadingView.topAnchor.constraint(equalTo: view.topAnchor, constant: Self.navMinHeight)
+		loadingViewTopConstraint?.isActive = true
 		loadingView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
 		loadingView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
 		loadingView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
@@ -148,7 +150,11 @@ extension HomeViewController {
 		loadingActivityActivator.centerXAnchor.constraint(equalTo: loadingView.centerXAnchor).isActive = true
 	}
 	
-	func animateLoadingView(forAppearance willAppear: Bool, withDuration duration: TimeInterval = 0.03) {
+	func animateLoadingView(forAppearance willAppear: Bool,
+													withDuration duration: TimeInterval = 0.03,
+													withDelay delay: TimeInterval = 0.0,
+													fullScreen: Bool = false) {
+		loadingViewTopConstraint?.constant = fullScreen ? 0.0 : Self.navMinHeight // size loadingView correctly
 		loadingView.alpha = willAppear ? 0.0 : 1.0
 		loadingActivityActivator.alpha = willAppear ? 0.0 : 1.0
 
@@ -156,8 +162,15 @@ extension HomeViewController {
 			loadingActivityActivator.startAnimating()
 		}
 		
+		// manage state
+		
+		// we're managing the state a bit differently with loadingView
+		// compared to trendingView & searchResultsCollectionView in that
+		// we're setting state prior to animation as opposed to after anim
+		self.isShowingLoadingView = willAppear
+		
 		UIView.animate(withDuration: duration,
-									 delay: 0.0, options: .curveEaseInOut) {
+									 delay: delay, options: .curveEaseInOut) {
 			self.loadingView.alpha = willAppear ? 1.0 : 0.0
 			self.loadingActivityActivator.alpha = willAppear ? 1.0 : 0.0
 		} completion: { _ in
@@ -168,9 +181,6 @@ extension HomeViewController {
 			if !willAppear {				
 				self.loadingActivityActivator.stopAnimating()
 			}
-						
-			// manage state
-			self.isShowingLoadingView = willAppear
 		}
 	}
 	
@@ -184,6 +194,7 @@ extension HomeViewController {
 		searchResultsCollectionView.translatesAutoresizingMaskIntoConstraints = false
 		searchResultsCollectionView.register(HomeImageCell.self, forCellWithReuseIdentifier: HomeImageCell.reuseIdentifier)
 		searchResultsCollectionView.alpha = 0.0
+		searchResultsCollectionView.delegate = self
 		searchResultsCollectionView.isUserInteractionEnabled = false
 		view.addSubview(searchResultsCollectionView)
 		
@@ -206,20 +217,25 @@ extension HomeViewController {
 			guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeImageCell.reuseIdentifier,
 																													for: indexPath) as? HomeImageCell else { return nil }
 			
-			let section = searchResultsSampleData[indexPath.section]
+			// get current photo
+			let photo = NetworkingManager.shared.searchResults.results[indexPath.row]
 			
-			cell.displayText = String(section.images[indexPath.row].height)
-			cell.displayBackgroundColor = section.images[indexPath.row].placeholderColor
+			// determine & set cell height from photo dimensions
+			let cellWidth: CGFloat = collectionView.bounds.width
+			let product = cellWidth * CGFloat(photo.imageHeight)
+			let cellHeight: CGFloat = product / CGFloat(photo.imageWidth)
+			cell.imageHeight = Int(cellHeight)
 			
 			return cell
 		})
 	}
 	
-	private func applySearchResultsSnapshot() {
-		var searchResultsSnapshot = NSDiffableDataSourceSnapshot<SectionPlaceHolder, ImagePlaceholder>()
-		searchResultsSnapshot.appendSections(searchResultsSampleData)
-		searchResultsSampleData.forEach { searchResultsSnapshot.appendItems($0.images, toSection: $0) }
-		searchResultsDatasource?.apply(searchResultsSnapshot)
+	func applySearchResultsSnapshot() {
+		let newSection: PhotoSectionType = PhotoSectionType.new
+		var searchResultsSnapshot = NSDiffableDataSourceSnapshot<PhotoSectionType, Photo>()
+		searchResultsSnapshot.appendSections([newSection]) // doesn't matter which section we pass - only displaying 1 section
+		searchResultsSnapshot.appendItems(NetworkingManager.shared.searchResults.results, toSection: newSection)
+		searchResultsDatasource?.apply(searchResultsSnapshot, animatingDifferences: true, completion: nil)
 	}
 	
 	func animateSearchResultsCollectionView(forAppearance willAppear: Bool,

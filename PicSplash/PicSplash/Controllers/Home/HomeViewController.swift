@@ -13,13 +13,14 @@ final class HomeViewController: UIViewController {
 	static let navMinHeight: CGFloat = 70.0
 	private static let navSnapToTopBuffer: CGFloat = 150.0
 	static let trendingAnimationDuration: TimeInterval = 0.4
+	private static let scrollToTopMargin: CGFloat = 22.0
 
 	
 	// instance vars
 	private lazy var collectionView: UICollectionView = {
 		UICollectionView(frame: view.frame, collectionViewLayout: configureCompositionalLayout())
 	}()
-	private var datasource: UICollectionViewDiffableDataSource<SectionPlaceHolder, ImagePlaceholder>!
+	private var datasource: UICollectionViewDiffableDataSource<PhotoSection, AnyHashable>?
 	lazy var scrollingNavView: ScrollingNavigationView = { // expose to public for view controller transition
 		ScrollingNavigationView(frame: CGRect(origin: .zero,
 																					size: CGSize(width: view.frame.width, height: Self.navMaxHeight)))
@@ -36,10 +37,13 @@ final class HomeViewController: UIViewController {
 	var isShowingTrending: Bool = false
 	let loadingView: UIView = UIView(frame: .zero)
 	let loadingActivityActivator: UIActivityIndicatorView = UIActivityIndicatorView(style: .large)
+	var loadingViewTopConstraint: NSLayoutConstraint?
 	var isShowingLoadingView: Bool = false
 	let searchResultsCollectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
-	var searchResultsDatasource: UICollectionViewDiffableDataSource<SectionPlaceHolder, ImagePlaceholder>?
+	var searchResultsDatasource: UICollectionViewDiffableDataSource<PhotoSectionType, Photo>?
+	private let scrollToTopView: UIView = UIView(frame: .zero)
 	var isShowingSearchResults: Bool = false
+	private(set) var isShowingKeyboard: Bool = false
 		
 	
 	// MARK: view life cycle
@@ -51,16 +55,43 @@ final class HomeViewController: UIViewController {
 		
 		configureSubviews()
 		configureDatasource()
-		applySnapshot()
-		
-		// we are adding & fully configuring
-		// each view as a subview to view
-		configureTrendingCollectionView()
-		configureLoadingViewAndIndicator()
-		configureSearchResultsCollectionView()
-		
+						
 		// TODO: remove this to unsilence constraint breaks from estimated cell heights
 		UserDefaults.standard.set(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
+		
+		// show loadingView right away - no animationDuration
+		if !isShowingLoadingView {
+			animateLoadingView(forAppearance: true, withDuration: 0.0, fullScreen: true)
+		}
+		
+		NetworkingManager.shared.downloadHomeInitialData { error in
+			DispatchQueue.main.async {
+				// print error & return
+				if let error = error {
+					print(error)
+					return
+				}
+				
+				// set the photo of the day image
+				self.setPhotoOfTheDayImage()
+				
+				// apply snapshot as the data
+				// has been updated within NetworkManager
+				self.applyInitialSnapshot()
+				
+				// successful so dismiss loading
+				if self.isShowingLoadingView {
+					// a little delay in dismissing loadingView
+					// allows the collectionView to adjust the
+					// second orthogonal cell - look at
+					// applyInitialSnapshot() for more
+					self.animateLoadingView(forAppearance: false,
+																	withDuration: Self.trendingAnimationDuration,
+																	withDelay: 0.5,
+																	fullScreen: true)
+				}
+			}
+		}
 	}
 	
 	override func viewWillAppear(_ animated: Bool) {
@@ -104,7 +135,6 @@ final class HomeViewController: UIViewController {
 		// inset content by our scrollingNavView height
 		collectionView.contentInset = UIEdgeInsets(top: Self.navMaxHeight, left: 0.0, bottom: 0.0, right: 0.0)
 		collectionView.contentInsetAdjustmentBehavior = .never // by default, behavior adjusts inset 20 pts for status bar
-		collectionView.scrollsToTop = true // ensure value is true
 		collectionView.showsVerticalScrollIndicator = false
 		collectionView.scrollsToTop = false // will implement our custom scrollsToTop behavior
 		collectionView.delegate = self
@@ -130,7 +160,40 @@ final class HomeViewController: UIViewController {
 		loginView.delegate = self // respond to button actions
 		view.addSubview(loginView) // this view on top of all
 		
-		layoutLoginViewForInitialAppearance()
+		layoutLoginViewForInitialAppearance() // layout loginView
+		
+		// we are adding & fully configuring
+		// each view as a subview to view
+		// configuring these in an extension
+		configureTrendingCollectionView()
+		configureLoadingViewAndIndicator()
+		configureSearchResultsCollectionView()
+		
+		// scroll to top
+		scrollToTopView.frame = CGRect(origin: .zero,
+																	 size: CGSize(width: view.bounds.width, height: Self.scrollToTopMargin))
+		view.addSubview(scrollToTopView)
+		view.bringSubviewToFront(scrollToTopView)
+	
+		let scrollToTopTapGesture = UITapGestureRecognizer(target: self, action: #selector(scrollToTopOnTap))
+		scrollToTopTapGesture.numberOfTapsRequired = 1
+		scrollToTopTapGesture.numberOfTouchesRequired = 1
+		scrollToTopView.addGestureRecognizer(scrollToTopTapGesture) // add tap gest to scrollToTopView
+	}
+	
+	private func setPhotoOfTheDayImage() {
+		// make sure we have photo of the day
+		guard let photoOfTheDay: Photo = NetworkingManager.shared.photoOfTheDay else { return }
+		
+		// attempt to set blurred image
+		if let blurredImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: photoOfTheDay.blurString) {
+			scrollingNavView.image = blurredImage
+		}
+		
+		// attempt to set actual image
+		if let image = NetworkingManager.shared.cachedImage(forImageUrlString: photoOfTheDay.imageUrl) {
+			scrollingNavView.image = image
+		}
 	}
 		
 }
@@ -278,18 +341,40 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 	}
 	
 	func didSearch(withTerm term: String, andFirstResponder firstResponder: UIView) {
-		firstResponder.resignFirstResponder()
+		firstResponder.resignFirstResponder() // resign first responder
 		
-		// do any loading here before presenting the searchResultsCollectionView
-		
-//		animateLoadingView(forAppearance: true, withDuration: Self.trendingAnimationDuration)
+		// begin loading
+		if !isShowingLoadingView {
+			animateLoadingView(forAppearance: true, withDuration: Self.trendingAnimationDuration)
+		}
+
+		// fetch search term results
+		NetworkingManager.shared.search(withSearchTerm: term) { [weak self] (photos, searchTerm, error) in
+			DispatchQueue.main.async {
+				guard let self = self else { return }
 				
-		animateSearchResultsCollectionView(forAppearance: true,
-																			 withDuration: Self.trendingAnimationDuration) { [weak self] in
-			guard let self = self else { return }
-			
-			if self.isShowingLoadingView {
-				self.animateLoadingView(forAppearance: false) // dismiss loading view
+				// stop loading
+				if self.isShowingLoadingView {
+					self.animateLoadingView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
+				}
+
+				// print error & return
+				if let error = error {
+					print("Search error - \(error)")
+					return
+				}
+				
+				if !photos.isEmpty {
+					// if we have photos, show search results
+					if !self.isShowingSearchResults {
+						self.applySearchResultsSnapshot() // apply snapshot, then show collectionView
+						
+						self.animateSearchResultsCollectionView(forAppearance: true, withDuration: Self.trendingAnimationDuration)
+					}
+				} else {
+					// TODO: SHOW NO SEARCH RESULTS STATE
+					print("NO RESULTS")
+				}
 			}
 		}
 		
@@ -331,6 +416,13 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 			animateSearchResultsCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
 		}
 	}
+
+	// when user clicks "x" within search bar and there is a first responder
+	func didClearSearchWithFirstResponder(_ firstResponder: UIView) {
+		if isShowingKeyboard {
+			firstResponder.endEditing(true)
+		}
+	}
 	
 }
 
@@ -342,14 +434,14 @@ extension HomeViewController {
 	
 	private func configureCompositionalLayout() -> UICollectionViewCompositionalLayout {
 		let layout = UICollectionViewCompositionalLayout { sectionIndex, _ -> NSCollectionLayoutSection? in
-			let currentSectionType = sampleData[sectionIndex].type
-			
+			let currentSectionType = NetworkingManager.shared.homeImagesSections[sectionIndex].type
+
 			switch currentSectionType {
-			case .orthogonal:
+			case .explore:
 				let section = self.sectionLayoutForHomeOrthogonalCell()
 				self.createSectionHeaderLayout(forSection: section)
 				return section
-			case .main:
+			case .new:
 				let section = self.sectionLayoutForHomeImageCell()
 				self.createSectionHeaderLayout(forSection: section)
 				return section
@@ -408,24 +500,27 @@ extension HomeViewController {
 	private func configureDatasource() {
 		datasource = UICollectionViewDiffableDataSource(collectionView: collectionView, cellProvider: {
 			(collectionView, indexPath, imagePlaceholder) -> UICollectionViewCell? in
-					
-			let currentSectionType = sampleData[indexPath.section].type
-			
-			switch currentSectionType {
-			case .orthogonal:
+						
+			let currentSection = NetworkingManager.shared.homeImagesSections[indexPath.section]
+
+			switch currentSection.type {
+			case .explore:
 				guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeOrthogonalCell.reuseIdentifier,
 																														for: indexPath) as? HomeOrthogonalCell else { return nil }
 				
-				cell.displayText = String(orthogonalPics[indexPath.row].height)
-				cell.displayBackgroundColor = orthogonalPics[indexPath.row].placeholderColor
-				
 				return cell
-			case .main:
+			case .new:
 				guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeImageCell.reuseIdentifier,
 																														for: indexPath) as? HomeImageCell else { return nil }
+
+				// get current photo
+				let photo = currentSection.items[indexPath.row]
 				
-				cell.displayText = String(samplePics[indexPath.row].height)
-				cell.displayBackgroundColor = samplePics[indexPath.row].placeholderColor
+				// determine & set cell height from photo dimensions
+				let cellWidth: CGFloat = collectionView.bounds.width
+				let product = cellWidth * CGFloat(photo.imageHeight)
+				let cellHeight: CGFloat = product / CGFloat(photo.imageWidth)
+				cell.imageHeight = Int(cellHeight)
 				
 				return cell
 			}
@@ -436,17 +531,17 @@ extension HomeViewController {
 	}
 	
 	private func configureHomeReusableViewForDatasource() {
-		datasource.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
+		datasource?.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
 			guard let self = self else { return nil }
 			
 			if kind == UICollectionView.elementKindSectionHeader {
-				let currentSection = self.datasource.snapshot().sectionIdentifiers[indexPath.section]
 				
-				guard let reusableView = collectionView.dequeueReusableSupplementaryView(ofKind: kind,
+				guard let currentSection = self.datasource?.snapshot().sectionIdentifiers[indexPath.section],
+							let reusableView = collectionView.dequeueReusableSupplementaryView(ofKind: kind,
 																																								 withReuseIdentifier: HomeCollectionReusableView.reuseIdentifier,
 																																								 for: indexPath) as? HomeCollectionReusableView else { return nil }
 				reusableView.displayText = currentSection.title
-				reusableView.displayStyle = currentSection.type == .orthogonal ? .large : .small
+				reusableView.displayStyle = currentSection.type == .explore ? .large : .small
 				return reusableView
 			}
 			
@@ -454,13 +549,35 @@ extension HomeViewController {
 		}
 	}
 	
-	private func applySnapshot() {
-		var snapshot = NSDiffableDataSourceSnapshot<SectionPlaceHolder, ImagePlaceholder>()
-		snapshot.appendSections(sampleData)
-		sampleData.forEach { sampleSection in
-			snapshot.appendItems(sampleSection.images, toSection: sampleSection)
+	private func applyInitialSnapshot() {
+		let homeSections = NetworkingManager.shared.homeImagesSections
+		
+		var snapshot = NSDiffableDataSourceSnapshot<PhotoSection, AnyHashable>()
+		snapshot.appendSections(homeSections)
+		homeSections.forEach { section in
+			switch section.type { // downcast since HomeImageProtocol doesn't inherit from Hashable
+			case .explore:
+				if let collections = section.items as? [Collection] {
+					snapshot.appendItems(collections, toSection: section)
+				}
+			case .new:
+				if let photos = section.items as? [Photo] {
+					snapshot.appendItems(photos, toSection: section)
+				}
+			}
 		}
-		datasource.apply(snapshot)
+
+		// applying a snapshot in the completion of another snapshot fixes
+		// a layout issue within our orthogonal cell section that only shows
+		// the first cell even though the section is groupPagingCentered so
+		// really we should see one full cell and the leading edge of the second
+		
+		// all in all, we delay the dismissing of the loadingView so that the
+		// user doesn't see any UI "jumps" - specifically the collectionView
+		// forcing the correct placement of the second orthogoncal cell
+		datasource?.apply(snapshot, animatingDifferences: true) {
+			self.datasource?.apply(snapshot, animatingDifferences: false)
+		}
 	}
 
 }
@@ -482,6 +599,90 @@ extension HomeViewController: UICollectionViewDelegate {
 		selectedCell = collectionView.cellForItem(at: indexPath) as? HomeImageCell
 		selectedCellImageSnapshot = selectedCell?.displayImageView.snapshotView(afterScreenUpdates: false)
 		presentDetailViewController(withImagePlaceholder: selectedImagePlaceholder)
+	}
+	
+	func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+		if collectionView == self.collectionView {
+			homeCollectionView(collectionView, willDisplay: cell, forItemAt: indexPath)
+		} else if collectionView == searchResultsCollectionView {
+			searchCollectionView(collectionView, willDisplay: cell, forItemAt: indexPath)
+		}
+	}
+	
+	private func homeCollectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+		// get section & photo for indexPath
+		let section = NetworkingManager.shared.homeImagesSections[indexPath.section]
+		let homeImage = section.items[indexPath.row]
+
+		switch section.type {
+		case .explore:
+			guard let exploreCell = cell as? HomeOrthogonalCell else { return }
+
+			// set blurredImage
+			exploreCell.displayImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: homeImage.blurHashString)
+
+			// fetch & set actual image
+			NetworkingManager.shared.downloadImage(forImageUrlString: homeImage.imageUrlString, forIndexPath: indexPath) { image, error, itemIndexPath in
+				DispatchQueue.main.async {
+					guard let exploreSectionCell = collectionView.cellForItem(at: itemIndexPath) as? HomeOrthogonalCell else { return }
+					exploreSectionCell.displayImage = image
+				}
+			}
+		case .new:
+			guard let newCell = cell as? HomeImageCell else { return }
+
+			// set blurredImage
+			newCell.displayImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: homeImage.blurHashString)
+
+			// fetch & set actual image
+			NetworkingManager.shared.downloadImage(forImageUrlString: homeImage.imageUrlString, forIndexPath: indexPath) { image, error, itemIndexPath in
+				DispatchQueue.main.async {
+					guard let newSectionCell = collectionView.cellForItem(at: itemIndexPath) as? HomeImageCell else { return }
+					newSectionCell.displayImage = image
+				}
+			}
+		}
+	}
+	
+	private func searchCollectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+		let photo = NetworkingManager.shared.searchResults.results[indexPath.row]
+		
+		guard let cell = cell as? HomeImageCell else { return }
+		
+		// set blurred image
+		cell.displayImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: photo.blurString)
+		
+		// fetch and set actual image for cell
+		NetworkingManager.shared.downloadImage(forImageUrlString: photo.imageUrl, forIndexPath: indexPath) { image, error, itemIndexPath in
+			DispatchQueue.main.async {
+				guard let searchResultsCell = collectionView.cellForItem(at: itemIndexPath) as? HomeImageCell else { return }
+				searchResultsCell.displayImage = image
+			}
+		}
+	}
+	
+	func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+		if collectionView == self.collectionView {
+			homeCollectionView(collectionView, didEndDisplaying: cell, forItemAt: indexPath)
+		} else if collectionView == searchResultsCollectionView {
+			searchCollectionView(collectionView, didEndDisplaying: cell, forItemAt: indexPath)
+		}
+	}
+		
+	private func homeCollectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+		// this is specifically for the workaround in
+		// applyInitialSnapshot() - we don't want to
+		// lower the queue priority of the first 1-2 cells
+		if indexPath.row == 0 { return }
+		
+		let sections = NetworkingManager.shared.homeImagesSections
+		let noLongerDisplayingHomeImage = sections[indexPath.section].items[indexPath.row]
+		NetworkingManager.shared.lowerQueuePriority(forImageUrlString: noLongerDisplayingHomeImage.imageUrlString)
+	}
+	
+	private func searchCollectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+		let noLongerDisplayingSearchImage = NetworkingManager.shared.searchResults.results[indexPath.row]
+		NetworkingManager.shared.lowerQueuePriority(forImageUrlString: noLongerDisplayingSearchImage.imageUrlString)
 	}
 	
 	private func presentDetailViewController(withImagePlaceholder imagePlaceholder: ImagePlaceholder) {
@@ -608,16 +809,45 @@ extension HomeViewController {
 	// allow passing of duration so we can
 	// time this animation with other ones
 	private func snapScrollViewContentToTop(_ scrollView: UIScrollView, withDuration duration: TimeInterval = 0.03) {
+		self.view.isUserInteractionEnabled = false // disable view interaction during animation
+		
 		UIView.animate(withDuration: duration,
 									 delay: 0.0,
-									 options: .curveEaseInOut,
-									 animations: {
-										// update contentOffset of collectionView
-										scrollView.contentOffset = CGPoint(x: 0.0, y: -Self.navMinHeight)
-										self.view.layoutIfNeeded() // force update view
-									 }, completion: nil)
+									 options: .curveEaseInOut) {
+			// update contentOffset of collectionView
+			scrollView.contentOffset = CGPoint(x: 0.0, y: -Self.navMinHeight)
+			self.view.layoutIfNeeded() // force update view
+		} completion: { _ in
+			self.view.isUserInteractionEnabled = true // enable view interaction after
+		}
 	}
 	
+	@objc private func scrollToTopOnTap(_ tapGesture: UITapGestureRecognizer) {
+		let offset = -collectionView.contentOffset.y
+		
+		if offset < Self.navMinHeight {
+			// our snapScrollViewContentToTop doesn't play
+			// well here because calling view.layoutIfNeeded
+			// while collectionView may be scrolling leads
+			// to cells not being drawn/removed and other glitches
+			collectionView.setContentOffset(CGPoint(x: 0.0, y: -Self.navMaxHeight), animated: true)
+		}
+	}
+	
+	// these overrides are relevant in this extension
+	// because they allow for interacting with the top
+	// edge of screen (where our tap gest is at for
+	// custom scrollToTop behavior) and the showing/hiding
+	// of status bar which is required to interact with
+	// that area
+	override var preferredScreenEdgesDeferringSystemGestures: UIRectEdge {
+		return [.top]
+	}
+	
+	override var prefersStatusBarHidden: Bool {
+		true
+	}
+
 }
 
 
@@ -658,10 +888,14 @@ extension HomeViewController {
 		}
 		
 		scrollingNavView.setShowsCancelButton(shows: true, animated: true)
+		
+		isShowingKeyboard = true
 	}
 	
 	@objc func keyboardWillHide(notification: NSNotification) {
 		scrollingNavView.setShowsCancelButton(shows: false, animated: true)
+		
+		isShowingKeyboard = false
 	}
 	
 }

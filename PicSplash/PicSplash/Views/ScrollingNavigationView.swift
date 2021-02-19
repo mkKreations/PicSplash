@@ -16,6 +16,7 @@ protocol ScrollingNavigationButtonsProvider: AnyObject {
 	func didBeginEditingSearchBar(_ searchBar: UISearchBar)
 	func didSearch(withTerm term: String, andFirstResponder firstResponder: UIView)
 	func didClearSearchWithNoFirstResponder()
+	func didClearSearchWithFirstResponder(_ firstResponder: UIView)
 }
 
 
@@ -60,6 +61,14 @@ class ScrollingNavigationView: UIView {
 	
 	func setShowsCancelButton(shows: Bool, animated: Bool) {
 		searchBar.setShowsCancelButton(shows, animated: animated)
+	}
+	
+	var image: UIImage? {
+		get { displayImageView.image }
+		
+		set {
+			displayImageView.image = newValue
+		}
 	}
 	
 	
@@ -116,6 +125,7 @@ class ScrollingNavigationView: UIView {
 		searchBar.searchBarStyle = .minimal
 		searchBar.tintColor = .white // set Cancel button tint color
 		searchBar.searchTextField.leftView?.tintColor = .white // set magnifying glass tintColor
+		searchBar.searchTextField.delegate = self // to receive textField should clear events
 	}
 	
 	private func constrainSubviews() {
@@ -195,4 +205,11 @@ extension ScrollingNavigationView: UISearchBarDelegate {
 		return returnValue
 	}
 	
+}
+
+extension ScrollingNavigationView: UITextFieldDelegate {
+	func textFieldShouldClear(_ textField: UITextField) -> Bool {
+		delegate?.didClearSearchWithFirstResponder(textField)
+		return true
+	}
 }
