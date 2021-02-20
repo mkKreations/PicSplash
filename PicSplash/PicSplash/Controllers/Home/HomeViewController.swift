@@ -346,8 +346,11 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 		firstResponder.resignFirstResponder() // resign first responder
 		
 		// make sure search collection isn't already/still showing
+		// as well as scroll it to top for any following searches
 		if isShowingSearchResults {
-			animateSearchResultsCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
+			animateSearchResultsCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration) {
+				self.searchResultsCollectionView.setContentOffset(.zero, animated: false)
+			}
 		}
 		
 		// begin loading and perform search in completion -
@@ -425,8 +428,12 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 		}
 		
 		// dismiss searchResults if showing
+		// and set contentOffset to 0 for any
+		// following searches
 		if isShowingSearchResults {
-			animateSearchResultsCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
+			animateSearchResultsCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration) {
+				self.searchResultsCollectionView.setContentOffset(.zero, animated: false) // animate search collection view to top
+			}
 		}
 	}
 
