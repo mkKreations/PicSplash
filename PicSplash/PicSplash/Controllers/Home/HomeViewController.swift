@@ -439,7 +439,13 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 
 	// when user clicks "x" within search bar and there is a first responder
 	func didClearSearchWithFirstResponder(_ firstResponder: UIView) {
-		// we receive this event for now but not doing anything
+		// animate away search results and
+		// scroll it to top for "following" requests
+		if isShowingSearchResults {
+			animateSearchResultsCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration) {
+				self.searchResultsCollectionView.setContentOffset(.zero, animated: true)
+			}
+		}
 	}
 	
 }
