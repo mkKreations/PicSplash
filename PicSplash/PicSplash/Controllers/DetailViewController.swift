@@ -128,7 +128,8 @@ class DetailViewController: UIViewController {
 	private func configureSubviews() {
 		detailImageView.translatesAutoresizingMaskIntoConstraints = false
 		detailImageView.image = NetworkingManager.shared.cachedImage(forImageUrlString: detailPhoto.imageUrl)
-		detailImageView.contentMode = .scaleAspectFit
+		detailImageView.contentMode = .scaleAspectFill
+		detailImageView.clipsToBounds = true
 		view.addSubview(detailImageView)
 		
 		navStackView.translatesAutoresizingMaskIntoConstraints = false
@@ -176,20 +177,7 @@ class DetailViewController: UIViewController {
 		detailImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
 		detailImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
 		detailImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
-		
-		// low priority on this constraint to set image height
-		let imageHeightConstraint = detailImageView.heightAnchor.constraint(equalToConstant: CGFloat(calculatedDetailPhotoHeight))
-		imageHeightConstraint.priority = UILayoutPriority(500)
-		imageHeightConstraint.isActive = true
-		
-		// if imageView is too tall - respect top & bottom constraints
-		let imageTopConstraint = detailImageView.topAnchor.constraint(greaterThanOrEqualTo: view.topAnchor, constant: 24.0)
-		imageTopConstraint.priority = UILayoutPriority(999)
-		imageTopConstraint.isActive = true
-
-		let imageBottomConstraint = view.bottomAnchor.constraint(greaterThanOrEqualTo: detailImageView.bottomAnchor, constant: 24.0)
-		imageBottomConstraint.priority = UILayoutPriority(999)
-		imageBottomConstraint.isActive = true
+		detailImageView.heightAnchor.constraint(equalToConstant: CGFloat(calculatedDetailPhotoHeight)).isActive = true
 		
 		navStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16.0).isActive = true
 		navStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16.0).isActive = true
