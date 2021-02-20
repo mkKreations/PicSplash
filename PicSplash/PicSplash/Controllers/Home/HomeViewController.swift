@@ -439,9 +439,7 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 
 	// when user clicks "x" within search bar and there is a first responder
 	func didClearSearchWithFirstResponder(_ firstResponder: UIView) {
-		if isShowingKeyboard {
-			firstResponder.endEditing(true)
-		}
+		// we receive this event for now but not doing anything
 	}
 	
 }
