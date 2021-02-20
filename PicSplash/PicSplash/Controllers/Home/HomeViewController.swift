@@ -341,13 +341,26 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 	}
 	
 	func didSearch(withTerm term: String, andFirstResponder firstResponder: UIView) {
+		print("term: \(term)")
+
 		firstResponder.resignFirstResponder() // resign first responder
 		
-		// begin loading
-		if !isShowingLoadingView {
-			animateLoadingView(forAppearance: true, withDuration: Self.trendingAnimationDuration)
+		// make sure search collection isn't already/still showing
+		if isShowingSearchResults {
+			animateSearchResultsCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
 		}
-
+		
+		// begin loading and perform search in completion -
+		// this is to prevent case that time to fetch search
+		// results takes less time than our animation
+		if !isShowingLoadingView {
+			animateLoadingView(forAppearance: true, withDuration: Self.trendingAnimationDuration) {
+				self.performSearch(withSearchTerm: term)
+			}
+		}
+	}
+	
+	private func performSearch(withSearchTerm term: String) {
 		// fetch search term results
 		NetworkingManager.shared.search(withSearchTerm: term) { [weak self] (photos, searchTerm, error) in
 			DispatchQueue.main.async {
@@ -369,7 +382,9 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 					if !self.isShowingSearchResults {
 						self.applySearchResultsSnapshot() // apply snapshot, then show collectionView
 						
-						self.animateSearchResultsCollectionView(forAppearance: true, withDuration: Self.trendingAnimationDuration)
+						if !self.isShowingSearchResults {
+							self.animateSearchResultsCollectionView(forAppearance: true, withDuration: Self.trendingAnimationDuration)
+						}
 					}
 				} else {
 					// TODO: SHOW NO SEARCH RESULTS STATE
@@ -377,8 +392,6 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 				}
 			}
 		}
-		
-		print("term: \(term)")
 	}
 	
 	// pass first responder so view controller
