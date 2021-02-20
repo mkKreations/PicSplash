@@ -523,7 +523,9 @@ extension HomeViewController {
 	
 	private func configureDatasource() {
 		datasource = UICollectionViewDiffableDataSource(collectionView: collectionView, cellProvider: {
-			(collectionView, indexPath, imagePlaceholder) -> UICollectionViewCell? in
+			[weak self] (collectionView, indexPath, imagePlaceholder) -> UICollectionViewCell? in
+			
+			guard let self = self else { return nil } // unpack self
 						
 			let currentSection = NetworkingManager.shared.homeImagesSections[indexPath.section]
 
@@ -534,17 +536,15 @@ extension HomeViewController {
 				
 				return cell
 			case .new:
+				// get cell and photo
 				guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeImageCell.reuseIdentifier,
 																														for: indexPath) as? HomeImageCell else { return nil }
-
-				// get current photo
-				let photo = currentSection.items[indexPath.row]
+				
+				guard let photo = currentSection.items[indexPath.row] as? Photo else { return nil }
+							
 				
 				// determine & set cell height from photo dimensions
-				let cellWidth: CGFloat = collectionView.bounds.width
-				let product = cellWidth * CGFloat(photo.imageHeight)
-				let cellHeight: CGFloat = product / CGFloat(photo.imageWidth)
-				cell.imageHeight = Int(cellHeight)
+				cell.imageHeight = self.calculatePhotoHeight(forPhoto: photo)
 				
 				return cell
 			}
@@ -603,6 +603,15 @@ extension HomeViewController {
 			self.datasource?.apply(snapshot, animatingDifferences: false)
 		}
 	}
+	
+	// these photos can be huge so we make them proportional in size
+	// to the collection view
+	private func calculatePhotoHeight(forPhoto photo: Photo) -> Int {
+		let cellWidth: CGFloat = collectionView.bounds.width
+		let product = cellWidth * CGFloat(photo.imageHeight)
+		let cellHeight: CGFloat = product / CGFloat(photo.imageWidth)
+		return Int(cellHeight)
+	}
 
 }
 
@@ -613,16 +622,19 @@ extension HomeViewController {
 extension HomeViewController: UICollectionViewDelegate {
 	
 	func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-		let selectedSectionPlaceholder = sampleData[indexPath.section]
+		let homeSection = NetworkingManager.shared.homeImagesSections[indexPath.section]
 		
-		// nothing to do for orthogonal cells for now
-		if selectedSectionPlaceholder.type == .orthogonal { return }
+		// nothing to do for explore section for now
+		if homeSection.type == .explore { return }
 		
-		let selectedImagePlaceholder = selectedSectionPlaceholder.images[indexPath.row]
+		guard let photo = homeSection.items[indexPath.row] as? Photo else { return }
+		
 		// capture vars for view controller transition
 		selectedCell = collectionView.cellForItem(at: indexPath) as? HomeImageCell
 		selectedCellImageSnapshot = selectedCell?.displayImageView.snapshotView(afterScreenUpdates: false)
-		presentDetailViewController(withImagePlaceholder: selectedImagePlaceholder)
+		
+		// present detail view controller
+		presentDetailViewController(withPhoto: photo)
 	}
 	
 	func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
@@ -709,8 +721,9 @@ extension HomeViewController: UICollectionViewDelegate {
 		NetworkingManager.shared.lowerQueuePriority(forImageUrlString: noLongerDisplayingSearchImage.imageUrlString)
 	}
 	
-	private func presentDetailViewController(withImagePlaceholder imagePlaceholder: ImagePlaceholder) {
-		let detailVC = DetailViewController(imagePlaceholder: imagePlaceholder)
+	private func presentDetailViewController(withPhoto photo: Photo) {
+		let detailVC = DetailViewController(photo: photo,
+																				withCalculatedHeight: CGFloat(calculatePhotoHeight(forPhoto: photo)))
 		detailVC.transitioningDelegate = self
 		detailVC.modalPresentationStyle = .fullScreen
 		present(detailVC, animated: true, completion: nil)

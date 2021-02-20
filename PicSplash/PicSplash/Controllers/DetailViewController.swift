@@ -19,7 +19,8 @@ class DetailViewController: UIViewController {
 	
 	// internal vars
 	let detailImageView: UIImageView = UIImageView(frame: .zero) // expose to public for view controller transition
-	private var imagePlaceholder: ImagePlaceholder
+	private let detailPhoto: Photo
+	private let calculatedDetailPhotoHeight: CGFloat
 	let closeButton: UIButton = UIButton(type: .system)
 	let titleLabel: UILabel = UILabel(frame: .zero)
 	let shareButton: UIButton = UIButton(type: .system)
@@ -36,8 +37,9 @@ class DetailViewController: UIViewController {
 	
 	// MARK: inits
 	
-	init(imagePlaceholder: ImagePlaceholder) {
-		self.imagePlaceholder = imagePlaceholder
+	init(photo: Photo, withCalculatedHeight height: CGFloat) {
+		self.detailPhoto = photo
+		self.calculatedDetailPhotoHeight = height
 		super.init(nibName: nil, bundle: nil)
 	}
 	
@@ -125,7 +127,7 @@ class DetailViewController: UIViewController {
 	
 	private func configureSubviews() {
 		detailImageView.translatesAutoresizingMaskIntoConstraints = false
-		detailImageView.backgroundColor = imagePlaceholder.placeholderColor
+		detailImageView.image = NetworkingManager.shared.cachedImage(forImageUrlString: detailPhoto.imageUrl)
 		detailImageView.contentMode = .scaleAspectFit
 		view.addSubview(detailImageView)
 		
@@ -152,7 +154,7 @@ class DetailViewController: UIViewController {
 		titleLabel.textColor = .white
 		titleLabel.numberOfLines = 1
 		titleLabel.textAlignment = .center
-		titleLabel.text = "\(imagePlaceholder.height)"
+		titleLabel.text = detailPhoto.author
 		
 		infoButton.translatesAutoresizingMaskIntoConstraints = false
 		infoButton.setBackgroundImage(UIImage(systemName: "info.circle"), for: .normal)
@@ -175,8 +177,8 @@ class DetailViewController: UIViewController {
 		detailImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
 		detailImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
 		
-		// low priority on this constraint to maintain image in view
-		let imageHeightConstraint = detailImageView.heightAnchor.constraint(equalToConstant: CGFloat(imagePlaceholder.height))
+		// low priority on this constraint to set image height
+		let imageHeightConstraint = detailImageView.heightAnchor.constraint(equalToConstant: CGFloat(calculatedDetailPhotoHeight))
 		imageHeightConstraint.priority = UILayoutPriority(500)
 		imageHeightConstraint.isActive = true
 		
