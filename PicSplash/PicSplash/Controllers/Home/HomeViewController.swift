@@ -388,12 +388,10 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 					if !self.isShowingSearchResults {
 						self.applySearchResultsSnapshot() // apply snapshot, then show collectionView
 						
-						if !self.isShowingSearchResults {
-							// show search results and animate in status bar
-							self.animateSearchResultsCollectionView(forAppearance: true, withDuration: Self.trendingAnimationDuration) { [weak self] in
-								guard let self = self else { return }
-								self.animateStatusBarForSearchResultsCollectionView(self.searchResultsCollectionView)
-							}
+						// show search results and animate in status bar
+						self.animateSearchResultsCollectionView(forAppearance: true, withDuration: Self.trendingAnimationDuration) { [weak self] in
+							guard let self = self else { return }
+							self.animateStatusBarForSearchResultsCollectionView(self.searchResultsCollectionView)
 						}
 					}
 				} else {
