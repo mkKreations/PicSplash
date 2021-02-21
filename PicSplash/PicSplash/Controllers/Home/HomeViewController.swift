@@ -670,7 +670,10 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
 			let section = NetworkingManager.shared.homeImagesSections[indexPath.section]
 			let homeImage = section.items[indexPath.row]
 
-			// make size
+			// make size -
+			// imageWidth for explore section is
+			// rough estimate, not exact as it
+			// doesn't factor in item content insets
 			let imageHeight: CGFloat = section.type == .explore ? 140.0 : CGFloat(self.calculateHomeImageHeight(forHomeImage: homeImage))
 			let imageWidth: CGFloat = section.type == .explore ? collectionView.bounds.width * 0.94 : collectionView.bounds.width
 			let imageDimensions: CGSize = CGSize(width: imageWidth,
@@ -686,7 +689,17 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
 	}
 	
 	func collectionView(_ collectionView: UICollectionView, cancelPrefetchingForItemsAt indexPaths: [IndexPath]) {
-		// nothing for now
+		indexPaths.forEach { indexPath in
+			// get section & photo for indexPath
+			let section = NetworkingManager.shared.homeImagesSections[indexPath.section]
+			let homeImage = section.items[indexPath.row]
+
+			// ensure we have valid url
+			guard let imageUrl = URL(string: homeImage.imageUrlString) else { return }
+			
+			// cancel operation
+			NetworkingManager.shared.cancelDownloadSampledImageOperation(forImageUrl: imageUrl)
+		}
 	}
 	
 	func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {

@@ -374,17 +374,16 @@ class NetworkingManager {
 			print("RETURNING CACHED IMAGE")
 			completion?(cachedImage, nil, indexPath)
 		} else {
-			// first see if the operation is currently running on
-			// imageDownloadQueue if so - raise its priority to top level
+			// we're using a serial queue with downsampled images so we check
+			// if the operation is sitting ready to go in the operation queue -
+			// if so, we don't want to re-add it to operation queue
 			if let operations = (imageDownsampleQueue.operations as? [DownSamplingImageOperation])?
-						.filter({ $0.imageUrl.absoluteString == imageUrlString && $0.isExecuting == true && $0.isFinished == false }),
+						.filter({ $0.imageUrl.absoluteString == imageUrlString && $0.isReady == true }),
 				 let _ = operations.first {
-//				currentOperation.queuePriority = .veryHigh
-				print("IMAGE OPERATION CURRENTLY RUNNING")
-				
+				print("IMAGE OPERATION IN QUEUE")
 			} else {
 				let downSamplingImageOperation = DownSamplingImageOperation(imageUrl: imageUrl, imagePointSize: imageDimensions, imageScale: imageScale)
-//				downSamplingImageOperation.queuePriority = .high
+				downSamplingImageOperation.queuePriority = .veryHigh // we're not lowering queue priority for these operations
 				downSamplingImageOperation.completionBlock = {
 					guard let downSampledImage = downSamplingImageOperation.downSampledImage else { return }
 					
@@ -399,7 +398,15 @@ class NetworkingManager {
 			}
 		}
 	}
-
+	
+	func cancelDownloadSampledImageOperation(forImageUrl imageUrl: URL) {
+		// check to see if the operation is currently running or waiting
+		// if so, cancel the operation
+		guard let operations = (imageDownsampleQueue.operations as? [DownSamplingImageOperation])?
+						.filter({ $0.imageUrl.absoluteString == imageUrl.absoluteString && ($0.isExecuting == true || $0.isReady == true) }),
+					let operationToCancel = operations.first else { return }
+		operationToCancel.cancel()
+	}
 		
 }
 
