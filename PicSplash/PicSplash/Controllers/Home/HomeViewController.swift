@@ -534,6 +534,10 @@ extension HomeViewController {
 				guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeOrthogonalCell.reuseIdentifier,
 																														for: indexPath) as? HomeOrthogonalCell else { return nil }
 				
+				guard let collection = currentSection.items[indexPath.row] as? Collection else { return nil }
+				
+				cell.displayText = collection.title
+				
 				return cell
 			case .new:
 				// get cell and photo
@@ -545,6 +549,7 @@ extension HomeViewController {
 				
 				// determine & set cell height from photo dimensions
 				cell.imageHeight = self.calculatePhotoHeight(forPhoto: photo)
+				cell.displayText = photo.author // set text
 				
 				return cell
 			}
