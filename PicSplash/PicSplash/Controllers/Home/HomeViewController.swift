@@ -44,6 +44,8 @@ final class HomeViewController: UIViewController {
 	private let scrollToTopView: UIView = UIView(frame: .zero)
 	var isShowingSearchResults: Bool = false
 	private(set) var isShowingKeyboard: Bool = false
+	private var isShowingStatusBar: Bool = true
+	private var preferredScreenEdges: UIRectEdge? = .top // for status bar appearance
 		
 	
 	// MARK: view life cycle
@@ -829,6 +831,15 @@ extension HomeViewController {
 		} else if offset >= Self.navMaxHeight {
 			scrollingNavView.animateSubviews(forScrollDelta: 1.0)
 		}
+		
+		
+		// logic to handle status bar showing/disappearing
+		
+		if offset < Self.navMinHeight {
+			animateStatusBarAppearance(forAppearance: false)
+		} else if offset >= Self.navMaxHeight {
+			animateStatusBarAppearance(forAppearance: true)
+		}
 	}
 		
 	func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
@@ -887,6 +898,17 @@ extension HomeViewController {
 		}
 	}
 	
+	private func animateStatusBarAppearance(forAppearance appearance: Bool) {
+		// set end states then force update
+		preferredScreenEdges = appearance ? .top : nil
+		isShowingStatusBar = appearance
+		
+		UIView.animate(withDuration: Self.trendingAnimationDuration,
+									 delay: 0.0, options: .curveEaseInOut, animations: {
+										self.setNeedsStatusBarAppearanceUpdate() // forces prefersStatusBarHidden to be read
+									 }, completion: nil)
+	}
+	
 	// these overrides are relevant in this extension
 	// because they allow for interacting with the top
 	// edge of screen (where our tap gest is at for
@@ -894,11 +916,14 @@ extension HomeViewController {
 	// of status bar which is required to interact with
 	// that area
 	override var preferredScreenEdgesDeferringSystemGestures: UIRectEdge {
-		return [.top]
+		if let screenEdges = self.preferredScreenEdges {
+			return screenEdges
+		}
+		return []
 	}
 	
 	override var prefersStatusBarHidden: Bool {
-		true
+		!isShowingStatusBar
 	}
 
 }
