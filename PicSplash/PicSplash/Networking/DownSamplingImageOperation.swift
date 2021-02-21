@@ -8,7 +8,7 @@
 import UIKit
 
 class DownSamplingImageOperation: Operation {
-	private let imageUrl: URL
+	let imageUrl: URL
 	private let imagePointSize: CGSize
 	private let imageScale: CGFloat
 	

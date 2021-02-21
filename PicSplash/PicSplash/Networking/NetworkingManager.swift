@@ -25,6 +25,7 @@ class NetworkingManager {
 	
 	// class vars
 	static private let baseUrlString: String = "https://api.unsplash.com"
+	static private let downsampleImageQueueId: String = UUID().uuidString
 	
 	
 	// singleton
@@ -42,6 +43,16 @@ class NetworkingManager {
 	private let searchQueue: OperationQueue = {
 		let operationQueue = OperationQueue()
 		operationQueue.qualityOfService = .userInteractive
+		return operationQueue
+	}()
+	private let imageDownsampleQueue: OperationQueue = {
+		// the serial dispatch queue to run our operations on
+		let serialDispatchQueue = DispatchQueue(label: NetworkingManager.downsampleImageQueueId, qos: .userInteractive)
+		
+		let operationQueue = OperationQueue()
+		operationQueue.underlyingQueue = serialDispatchQueue
+		operationQueue.qualityOfService = .userInteractive
+
 		return operationQueue
 	}()
 	private let imageDownloadCache: NSCache<NSString, UIImage> = NSCache()
@@ -348,6 +359,47 @@ class NetworkingManager {
 			}
 		}
 	}
+	
+	func downloadDownsampledImage(forImageUrlString imageUrlString: String,
+																forIndexPath indexPath: IndexPath,
+																withImageDimensions imageDimensions: CGSize,
+																withImageScale imageScale: CGFloat,
+																withCompletion completion: ((UIImage?, NetworkingError?, IndexPath) -> Void)?) {
+		guard let imageUrl = URL(string: imageUrlString) else {
+			completion?(nil, NetworkingError.invalidUrl, indexPath)
+			return
+		}
+		
+		if let cachedImage = imageDownloadCache.object(forKey: NSString(string: imageUrlString)) {
+			print("RETURNING CACHED IMAGE")
+			completion?(cachedImage, nil, indexPath)
+		} else {
+			// first see if the operation is currently running on
+			// imageDownloadQueue if so - raise its priority to top level
+			if let operations = (imageDownsampleQueue.operations as? [DownSamplingImageOperation])?
+						.filter({ $0.imageUrl.absoluteString == imageUrlString && $0.isExecuting == true && $0.isFinished == false }),
+				 let _ = operations.first {
+//				currentOperation.queuePriority = .veryHigh
+				print("IMAGE OPERATION CURRENTLY RUNNING")
+				
+			} else {
+				let downSamplingImageOperation = DownSamplingImageOperation(imageUrl: imageUrl, imagePointSize: imageDimensions, imageScale: imageScale)
+//				downSamplingImageOperation.queuePriority = .high
+				downSamplingImageOperation.completionBlock = {
+					guard let downSampledImage = downSamplingImageOperation.downSampledImage else { return }
+					
+					print("CACHING IMAGE")
+					
+					// cache the image using the url as the key
+					self.imageDownloadCache.setObject(downSampledImage, forKey: NSString(string: imageUrlString))
+					
+					completion?(downSampledImage, nil, indexPath)
+				}
+				imageDownsampleQueue.addOperation(downSamplingImageOperation)
+			}
+		}
+	}
+
 		
 }
 
