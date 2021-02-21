@@ -139,6 +139,7 @@ final class HomeViewController: UIViewController {
 		collectionView.contentInset = UIEdgeInsets(top: Self.navMaxHeight, left: 0.0, bottom: 0.0, right: 0.0)
 		collectionView.contentInsetAdjustmentBehavior = .never // by default, behavior adjusts inset 20 pts for status bar
 		collectionView.showsVerticalScrollIndicator = false
+		collectionView.prefetchDataSource = self
 		collectionView.scrollsToTop = false // will implement our custom scrollsToTop behavior
 		collectionView.delegate = self
 		collectionView.register(HomeOrthogonalCell.self, forCellWithReuseIdentifier: HomeOrthogonalCell.reuseIdentifier)
@@ -541,8 +542,23 @@ extension HomeViewController {
 				
 				guard let collection = currentSection.items[indexPath.row] as? Collection else { return nil }
 				
-				cell.displayText = collection.title
+				// set blurredImage
+				cell.displayImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: collection.blurHash)
+
+				// fetch & set actual image
+				NetworkingManager.shared.downloadDownsampledImage(forImageUrlString: collection.imageUrl,
+																													forIndexPath: indexPath,
+																													withImageDimensions: cell.bounds.size,
+																													withImageScale: collectionView.traitCollection.displayScale) {
+					(image, error, imageIndexPath) in
+					DispatchQueue.main.async {
+						guard let exploreSectionCell = collectionView.cellForItem(at: imageIndexPath) as? HomeOrthogonalCell else { return }
+						exploreSectionCell.displayImage = image
+					}
+				}
 				
+				cell.displayText = collection.title
+
 				return cell
 			case .new:
 				// get cell and photo
@@ -550,10 +566,27 @@ extension HomeViewController {
 																														for: indexPath) as? HomeImageCell else { return nil }
 				
 				guard let photo = currentSection.items[indexPath.row] as? Photo else { return nil }
-							
+				
+				// set blurredImage
+				cell.displayImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: photo.blurHashString)
+				let cellHeight = self.calculateHomeImageHeight(forHomeImage: photo)
+
+				// fetch & set actual image
+				NetworkingManager.shared.downloadDownsampledImage(forImageUrlString: photo.imageUrl,
+																													forIndexPath: indexPath,
+																													withImageDimensions: CGSize(width: collectionView.bounds.width, height: CGFloat(cellHeight)),
+																													withImageScale: collectionView.traitCollection.displayScale) {
+					(image, error, imageIndexPath) in
+					DispatchQueue.main.async {
+						guard let exploreSectionCell = collectionView.cellForItem(at: imageIndexPath) as? HomeImageCell else { return }
+						exploreSectionCell.displayImage = image
+					}
+				}
+
 				
 				// determine & set cell height from photo dimensions
-				cell.imageHeight = self.calculatePhotoHeight(forPhoto: photo)
+//				cell.imageHeight = self.calculateHomeImageHeight(forHomeImage: photo)
+				cell.imageHeight = cellHeight
 				cell.displayText = photo.author // set text
 				
 				return cell
@@ -616,10 +649,10 @@ extension HomeViewController {
 	
 	// these photos can be huge so we make them proportional in size
 	// to the collection view
-	func calculatePhotoHeight(forPhoto photo: Photo) -> Int {
+	func calculateHomeImageHeight(forHomeImage homeImage: HomeImageProtocol) -> Int {
 		let cellWidth: CGFloat = collectionView.bounds.width
-		let product = cellWidth * CGFloat(photo.imageHeight)
-		let cellHeight: CGFloat = product / CGFloat(photo.imageWidth)
+		let product = cellWidth * CGFloat(homeImage.imageHeight)
+		let cellHeight: CGFloat = product / CGFloat(homeImage.imageWidth)
 		return Int(cellHeight)
 	}
 
@@ -627,9 +660,34 @@ extension HomeViewController {
 
 
 
-// MARK: collectionView delegate & relevant methods
+// MARK: collectionView delegate & prefetch methods
 
-extension HomeViewController: UICollectionViewDelegate {
+extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSourcePrefetching {
+	
+	func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
+		indexPaths.forEach { indexPath in
+			// get section & photo for indexPath
+			let section = NetworkingManager.shared.homeImagesSections[indexPath.section]
+			let homeImage = section.items[indexPath.row]
+
+			// make size
+			let imageHeight: CGFloat = section.type == .explore ? 140.0 : CGFloat(self.calculateHomeImageHeight(forHomeImage: homeImage))
+			let imageWidth: CGFloat = section.type == .explore ? collectionView.bounds.width * 0.94 : collectionView.bounds.width
+			let imageDimensions: CGSize = CGSize(width: imageWidth,
+																					 height: imageHeight)
+
+			// fetch & cache downsampled image
+			NetworkingManager.shared.downloadDownsampledImage(forImageUrlString: homeImage.imageUrlString,
+																												forIndexPath: indexPath,
+																												withImageDimensions: imageDimensions,
+																												withImageScale: collectionView.traitCollection.displayScale,
+																												withCompletion: nil)
+		}
+	}
+	
+	func collectionView(_ collectionView: UICollectionView, cancelPrefetchingForItemsAt indexPaths: [IndexPath]) {
+		// nothing for now
+	}
 	
 	func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
 		let homeSection = NetworkingManager.shared.homeImagesSections[indexPath.section]
@@ -648,11 +706,11 @@ extension HomeViewController: UICollectionViewDelegate {
 	}
 	
 	func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-		if collectionView == self.collectionView {
-			homeCollectionView(collectionView, willDisplay: cell, forItemAt: indexPath)
-		} else if collectionView == searchResultsCollectionView {
-			searchCollectionView(collectionView, willDisplay: cell, forItemAt: indexPath)
-		}
+//		if collectionView == self.collectionView {
+//			homeCollectionView(collectionView, willDisplay: cell, forItemAt: indexPath)
+//		} else if collectionView == searchResultsCollectionView {
+//			searchCollectionView(collectionView, willDisplay: cell, forItemAt: indexPath)
+//		}
 	}
 	
 	private func homeCollectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
@@ -708,11 +766,11 @@ extension HomeViewController: UICollectionViewDelegate {
 	}
 	
 	func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-		if collectionView == self.collectionView {
-			homeCollectionView(collectionView, didEndDisplaying: cell, forItemAt: indexPath)
-		} else if collectionView == searchResultsCollectionView {
-			searchCollectionView(collectionView, didEndDisplaying: cell, forItemAt: indexPath)
-		}
+//		if collectionView == self.collectionView {
+//			homeCollectionView(collectionView, didEndDisplaying: cell, forItemAt: indexPath)
+//		} else if collectionView == searchResultsCollectionView {
+//			searchCollectionView(collectionView, didEndDisplaying: cell, forItemAt: indexPath)
+//		}
 	}
 		
 	private func homeCollectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
@@ -733,7 +791,7 @@ extension HomeViewController: UICollectionViewDelegate {
 	
 	private func presentDetailViewController(withPhoto photo: Photo) {
 		let detailVC = DetailViewController(photo: photo,
-																				withCalculatedHeight: CGFloat(calculatePhotoHeight(forPhoto: photo)))
+																				withCalculatedHeight: CGFloat(calculateHomeImageHeight(forHomeImage: photo)))
 		detailVC.transitioningDelegate = self
 		detailVC.modalPresentationStyle = .fullScreen
 		present(detailVC, animated: true, completion: nil)

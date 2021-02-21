@@ -225,7 +225,7 @@ extension HomeViewController {
 			let photo = NetworkingManager.shared.searchResults.results[indexPath.row]
 			
 			// determine & set cell height from photo dimensions
-			cell.imageHeight = self.calculatePhotoHeight(forPhoto: photo)
+			cell.imageHeight = self.calculateHomeImageHeight(forHomeImage: photo)
 			cell.displayText = photo.author // set text
 			
 			return cell
