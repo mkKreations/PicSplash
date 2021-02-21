@@ -14,6 +14,7 @@ final class HomeViewController: UIViewController {
 	private static let navSnapToTopBuffer: CGFloat = 150.0
 	static let trendingAnimationDuration: TimeInterval = 0.4
 	private static let scrollToTopMargin: CGFloat = 22.0
+	private static let searchResultsTopMargin: CGFloat = 100.0
 
 	
 	// instance vars
@@ -388,7 +389,11 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 						self.applySearchResultsSnapshot() // apply snapshot, then show collectionView
 						
 						if !self.isShowingSearchResults {
-							self.animateSearchResultsCollectionView(forAppearance: true, withDuration: Self.trendingAnimationDuration)
+							// show search results and animate in status bar
+							self.animateSearchResultsCollectionView(forAppearance: true, withDuration: Self.trendingAnimationDuration) { [weak self] in
+								guard let self = self else { return }
+								self.animateStatusBarForSearchResultsCollectionView(self.searchResultsCollectionView)
+							}
 						}
 					}
 				} else {
@@ -798,6 +803,9 @@ extension HomeViewController: DetailButtonActionsProvider {
 extension HomeViewController {
 	
 	func scrollViewDidScroll(_ scrollView: UIScrollView) {
+		// search results collection view logic
+		animateStatusBarForSearchResultsCollectionView(scrollView)
+		
 		// only do this logic for our home collection view
 		if scrollView != self.collectionView { return }
 		
@@ -895,6 +903,16 @@ extension HomeViewController {
 			// while collectionView may be scrolling leads
 			// to cells not being drawn/removed and other glitches
 			collectionView.setContentOffset(CGPoint(x: 0.0, y: -Self.navMaxHeight), animated: true)
+		}
+	}
+	
+	private func animateStatusBarForSearchResultsCollectionView(_ scrollView: UIScrollView) {
+		if scrollView == self.searchResultsCollectionView && self.isShowingSearchResults {
+			if scrollView.contentOffset.y <= 0.0 {
+				animateStatusBarAppearance(forAppearance: true)
+			} else if scrollView.contentOffset.y > Self.searchResultsTopMargin {
+				animateStatusBarAppearance(forAppearance: false)
+			}
 		}
 	}
 	
