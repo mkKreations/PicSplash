@@ -225,10 +225,8 @@ extension HomeViewController {
 			let photo = NetworkingManager.shared.searchResults.results[indexPath.row]
 			
 			// determine & set cell height from photo dimensions
-			let cellWidth: CGFloat = collectionView.bounds.width
-			let product = cellWidth * CGFloat(photo.imageHeight)
-			let cellHeight: CGFloat = product / CGFloat(photo.imageWidth)
-			cell.imageHeight = Int(cellHeight)
+			cell.imageHeight = self.calculatePhotoHeight(forPhoto: photo)
+			cell.displayText = photo.author // set text
 			
 			return cell
 		})

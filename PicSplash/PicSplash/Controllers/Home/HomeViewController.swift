@@ -611,7 +611,7 @@ extension HomeViewController {
 	
 	// these photos can be huge so we make them proportional in size
 	// to the collection view
-	private func calculatePhotoHeight(forPhoto photo: Photo) -> Int {
+	func calculatePhotoHeight(forPhoto photo: Photo) -> Int {
 		let cellWidth: CGFloat = collectionView.bounds.width
 		let product = cellWidth * CGFloat(photo.imageHeight)
 		let cellHeight: CGFloat = product / CGFloat(photo.imageWidth)
