@@ -21,24 +21,46 @@ class DownSamplingImageOperation: Operation {
 		super.init()
 	}
 	
-	override func main() {
-		self.downSampledImage = downsample(imageAt: imageUrl, to: imagePointSize, scale: imageScale)
-	}
-	
 	// https://developer.apple.com/videos/play/wwdc2018/219/ - 11:37
-	func downsample(imageAt imageUrl: URL, to pointSize: CGSize, scale: CGFloat) -> UIImage {
+	
+	// we're very strict about checking for operation cancellation!!
+	
+	override func main() {
 		let imageSourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
-		let imageSource = CGImageSourceCreateWithURL(imageUrl as CFURL, imageSourceOptions)!
 		
-		let maxDimensionsInPixels = max(pointSize.width, pointSize.height) * scale
+		guard !self.isCancelled else {
+			print(">>>> Cancelling DownSamplingImageOperation <<<<")
+			return
+		}
+
+		let imageSource = CGImageSourceCreateWithURL(imageUrl as CFURL, imageSourceOptions)!
+
+		guard !self.isCancelled else {
+			print(">>>> Cancelling DownSamplingImageOperation <<<<")
+			return
+		}
+
+		let maxDimensionsInPixels = max(imagePointSize.width, imagePointSize.height) * imageScale
 		let downsampleOptions = [
 			kCGImageSourceCreateThumbnailFromImageAlways: true,
 			kCGImageSourceShouldCacheImmediately: true,
 			kCGImageSourceCreateThumbnailWithTransform: true,
 			kCGImageSourceThumbnailMaxPixelSize: maxDimensionsInPixels
 		] as CFDictionary
-		
+
+		guard !self.isCancelled else {
+			print(">>>> Cancelling DownSamplingImageOperation <<<<")
+			return
+		}
+
 		let downSampledImage = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, downsampleOptions)!
-		return UIImage(cgImage: downSampledImage)
+		
+		guard !self.isCancelled else {
+			print(">>>> Cancelling DownSamplingImageOperation <<<<")
+			return
+		}
+
+		self.downSampledImage = UIImage(cgImage: downSampledImage)
 	}
+	
 }
