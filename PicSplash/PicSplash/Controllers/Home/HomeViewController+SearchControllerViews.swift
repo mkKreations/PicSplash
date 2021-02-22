@@ -199,6 +199,7 @@ extension HomeViewController {
 		searchResultsCollectionView.register(HomeImageCell.self, forCellWithReuseIdentifier: HomeImageCell.reuseIdentifier)
 		searchResultsCollectionView.alpha = 0.0
 		searchResultsCollectionView.delegate = self
+		searchResultsCollectionView.prefetchDataSource = self // prefetching data to spread tasks out over cpus
 		searchResultsCollectionView.isUserInteractionEnabled = false
 		view.addSubview(searchResultsCollectionView)
 		
@@ -223,9 +224,25 @@ extension HomeViewController {
 			
 			// get current photo
 			let photo = NetworkingManager.shared.searchResults.results[indexPath.row]
-			
+
+			// set blurredImage
+			cell.displayImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: photo.blurHashString)
+			let cellHeight = self.calculateHomeImageHeight(forHomeImage: photo)
+
+			// fetch & set actual image
+			NetworkingManager.shared.downloadDownsampledImage(forImageUrlString: photo.imageUrlString,
+																												forIndexPath: indexPath,
+																												withImageDimensions: CGSize(width: collectionView.bounds.width, height: CGFloat(cellHeight)),
+																												withImageScale: collectionView.traitCollection.displayScale) {
+				(image, error, imageIndexPath) in
+				DispatchQueue.main.async {
+					guard let exploreSectionCell = collectionView.cellForItem(at: imageIndexPath) as? HomeImageCell else { return }
+					exploreSectionCell.displayImage = image
+				}
+			}
+
 			// determine & set cell height from photo dimensions
-			cell.imageHeight = self.calculateHomeImageHeight(forHomeImage: photo)
+			cell.imageHeight = cellHeight
 			cell.displayText = photo.author // set text
 			
 			return cell

@@ -425,6 +425,11 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 	
 	// when user clicks "x" within search bar and there is no first responder
 	func didClearSearchWithNoFirstResponder() {
+		// hide away scroll to top button
+		if isShowingScrollToTopButton {
+			animateScrollToTopButtonAppearance(forAppearance: false)
+		}
+
 		// dismiss loading view if showing
 		if isShowingLoadingView {
 			animateLoadingView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
@@ -442,6 +447,11 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 
 	// when user clicks "x" within search bar and there is a first responder
 	func didClearSearchWithFirstResponder(_ firstResponder: UIView) {
+		// hide away scroll to top button
+		if isShowingScrollToTopButton {
+			animateScrollToTopButtonAppearance(forAppearance: false)
+		}
+		
 		// animate away search results and
 		// scroll it to top for "following" requests
 		if isShowingSearchResults {
@@ -886,9 +896,9 @@ extension HomeViewController: DetailActionButtonsProvider {
 	private func animateStatusBarForSearchResultsCollectionView(_ scrollView: UIScrollView) {
 		if scrollView == self.searchResultsCollectionView && self.isShowingSearchResults {
 			if scrollView.contentOffset.y <= 0.0 {
-				animateScrollToTopButtonAppearance(forAppearance: true)
-			} else if scrollView.contentOffset.y > Self.searchResultsTopMargin {
 				animateScrollToTopButtonAppearance(forAppearance: false)
+			} else if scrollView.contentOffset.y > Self.searchResultsTopMargin {
+				animateScrollToTopButtonAppearance(forAppearance: true)
 			}
 		}
 	}
