@@ -138,7 +138,7 @@ final class HomeViewController: UIViewController {
 		collectionView.contentInset = UIEdgeInsets(top: Self.navMaxHeight, left: 0.0, bottom: 0.0, right: 0.0)
 		collectionView.contentInsetAdjustmentBehavior = .never // by default, behavior adjusts inset 20 pts for status bar
 		collectionView.showsVerticalScrollIndicator = false
-		collectionView.prefetchDataSource = self
+		collectionView.prefetchDataSource = self // prefetching data to spread tasks out over cpus
 		collectionView.scrollsToTop = false // will implement our custom scrollsToTop behavior
 		collectionView.delegate = self
 		collectionView.register(HomeOrthogonalCell.self, forCellWithReuseIdentifier: HomeOrthogonalCell.reuseIdentifier)
@@ -531,19 +531,18 @@ extension HomeViewController {
 			guard let self = self else { return nil } // unpack self
 						
 			let currentSection = NetworkingManager.shared.homeImagesSections[indexPath.section]
+			let homeImage = currentSection.items[indexPath.item]
 
 			switch currentSection.type {
 			case .explore:
 				guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeOrthogonalCell.reuseIdentifier,
 																														for: indexPath) as? HomeOrthogonalCell else { return nil }
-				
-				guard let collection = currentSection.items[indexPath.row] as? Collection else { return nil }
-				
+								
 				// set blurredImage
-				cell.displayImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: collection.blurHash)
+				cell.displayImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: homeImage.blurHashString)
 
 				// fetch & set actual image
-				NetworkingManager.shared.downloadDownsampledImage(forImageUrlString: collection.imageUrl,
+				NetworkingManager.shared.downloadDownsampledImage(forImageUrlString: homeImage.imageUrlString,
 																													forIndexPath: indexPath,
 																													withImageDimensions: cell.bounds.size,
 																													withImageScale: collectionView.traitCollection.displayScale) {
@@ -554,22 +553,20 @@ extension HomeViewController {
 					}
 				}
 				
-				cell.displayText = collection.title
+				cell.displayText = homeImage.displayText
 
 				return cell
 			case .new:
 				// get cell and photo
 				guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeImageCell.reuseIdentifier,
 																														for: indexPath) as? HomeImageCell else { return nil }
-				
-				guard let photo = currentSection.items[indexPath.row] as? Photo else { return nil }
-				
+								
 				// set blurredImage
-				cell.displayImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: photo.blurHashString)
-				let cellHeight = self.calculateHomeImageHeight(forHomeImage: photo)
+				cell.displayImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: homeImage.blurHashString)
+				let cellHeight = self.calculateHomeImageHeight(forHomeImage: homeImage)
 
 				// fetch & set actual image
-				NetworkingManager.shared.downloadDownsampledImage(forImageUrlString: photo.imageUrl,
+				NetworkingManager.shared.downloadDownsampledImage(forImageUrlString: homeImage.imageUrlString,
 																													forIndexPath: indexPath,
 																													withImageDimensions: CGSize(width: collectionView.bounds.width, height: CGFloat(cellHeight)),
 																													withImageScale: collectionView.traitCollection.displayScale) {
@@ -580,11 +577,9 @@ extension HomeViewController {
 					}
 				}
 
-				
 				// determine & set cell height from photo dimensions
-//				cell.imageHeight = self.calculateHomeImageHeight(forHomeImage: photo)
 				cell.imageHeight = cellHeight
-				cell.displayText = photo.author // set text
+				cell.displayText = homeImage.displayText // set text
 				
 				return cell
 			}
