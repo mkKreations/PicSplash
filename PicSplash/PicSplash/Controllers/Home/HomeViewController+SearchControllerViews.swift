@@ -216,6 +216,24 @@ extension HomeViewController {
 	}
 	
 	private func configureSearchResultsDatasource() {
+		// TODO: REMOVE SAMPLE DATA
+		if showSampleData {
+			sampleSearchResultsDatasource = UICollectionViewDiffableDataSource(collectionView: searchResultsCollectionView, cellProvider: {
+				(collectionView, indexPath, _) -> UICollectionViewCell? in
+				
+				guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeImageCell.reuseIdentifier,
+																														for: indexPath) as? HomeImageCell else { return nil }
+				
+				let section = searchResultsSampleData[indexPath.section]
+				
+				cell.displayText = String(section.images[indexPath.row].height)
+				cell.displayBackgroundColor = section.images[indexPath.row].placeholderColor
+				
+				return cell
+			})
+			return
+		}
+		
 		searchResultsDatasource = UICollectionViewDiffableDataSource(collectionView: searchResultsCollectionView, cellProvider: {
 			(collectionView, indexPath, _) -> UICollectionViewCell? in
 			
@@ -250,6 +268,15 @@ extension HomeViewController {
 	}
 	
 	func applySearchResultsSnapshot() {
+		// TODO: REMOVE SAMPLE DATA
+		if showSampleData {
+			var searchResultsSnapshot = NSDiffableDataSourceSnapshot<SectionPlaceHolder, ImagePlaceholder>()
+			searchResultsSnapshot.appendSections(searchResultsSampleData)
+			searchResultsSampleData.forEach { searchResultsSnapshot.appendItems($0.images, toSection: $0) }
+			sampleSearchResultsDatasource?.apply(searchResultsSnapshot)
+			return
+		}
+		
 		let newSection: PhotoSectionType = PhotoSectionType.new
 		var searchResultsSnapshot = NSDiffableDataSourceSnapshot<PhotoSectionType, Photo>()
 		searchResultsSnapshot.appendSections([newSection]) // doesn't matter which section we pass - only displaying 1 section

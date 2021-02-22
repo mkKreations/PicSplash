@@ -7,6 +7,10 @@
 
 import UIKit
 
+// TODO: REMOVE SAMPLE DATA
+var showSampleData: Bool = true
+
+
 final class HomeViewController: UIViewController {
 	// class vars
 	private static let navMaxHeight: CGFloat = 320.0
@@ -22,6 +26,7 @@ final class HomeViewController: UIViewController {
 		UICollectionView(frame: view.frame, collectionViewLayout: configureCompositionalLayout())
 	}()
 	private var datasource: UICollectionViewDiffableDataSource<PhotoSection, AnyHashable>?
+	private var sampleDatasource: UICollectionViewDiffableDataSource<SectionPlaceHolder, ImagePlaceholder>! // TODO: REMOVE SAMPLE DATA
 	lazy var scrollingNavView: ScrollingNavigationView = { // expose to public for view controller transition
 		ScrollingNavigationView(frame: CGRect(origin: .zero,
 																					size: CGSize(width: view.frame.width, height: Self.navMaxHeight)))
@@ -42,6 +47,7 @@ final class HomeViewController: UIViewController {
 	var isShowingLoadingView: Bool = false
 	let searchResultsCollectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
 	var searchResultsDatasource: UICollectionViewDiffableDataSource<PhotoSectionType, Photo>?
+	var sampleSearchResultsDatasource: UICollectionViewDiffableDataSource<SectionPlaceHolder, ImagePlaceholder>? // TODO: REMOVE SAMPLE DATA
 	var isShowingSearchResults: Bool = false
 	private(set) var isShowingKeyboard: Bool = false
 	private let scrollToTopButton: DetailActionButton = DetailActionButton(detailAction: .scroll)
@@ -54,6 +60,14 @@ final class HomeViewController: UIViewController {
 		super.viewDidLoad()
 		
 		view.backgroundColor = .black
+		
+		// TODO: REMOVE SAMPLE DATA
+		if showSampleData {
+			configureSubviews()
+			configureDatasource()
+			applyInitialSnapshot()
+			return
+		}
 		
 		configureSubviews()
 		configureDatasource()
@@ -343,6 +357,50 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 	}
 	
 	func didSearch(withTerm term: String, andFirstResponder firstResponder: UIView) {
+		// TODO: REMOVE SAMPLE DATA
+		if showSampleData {
+			print("term: \(term)")
+
+			firstResponder.resignFirstResponder() // resign first responder
+			
+			// make sure search collection isn't already/still showing
+			// as well as scroll it to top for any following searches
+			if isShowingSearchResults {
+				animateSearchResultsCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration) {
+					self.searchResultsCollectionView.setContentOffset(.zero, animated: false)
+				}
+			}
+			
+			// begin loading and perform search in completion -
+			// this is to prevent case that time to fetch search
+			// results takes less time than our animation
+			if !isShowingLoadingView {
+				animateLoadingView(forAppearance: true, withDuration: Self.trendingAnimationDuration) {
+					sleep(1)
+					
+					// stop loading
+					if self.isShowingLoadingView {
+						self.animateLoadingView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
+					}
+					
+					// if we have photos, show search results
+					if !self.isShowingSearchResults {
+						self.applySearchResultsSnapshot() // apply snapshot, then show collectionView
+						
+						// show search results and animate in status bar
+						self.animateSearchResultsCollectionView(forAppearance: true, withDuration: Self.trendingAnimationDuration) { [weak self] in
+							guard let self = self else { return }
+							self.animateStatusBarForSearchResultsCollectionView(self.searchResultsCollectionView)
+						}
+					}
+					// TODO: SHOW NO SEARCH RESULTS STATE
+					print("NO RESULTS")
+				}
+			}
+
+			return
+		}
+		
 		print("term: \(term)")
 
 		firstResponder.resignFirstResponder() // resign first responder
@@ -536,6 +594,37 @@ extension HomeViewController {
 extension HomeViewController {
 	
 	private func configureDatasource() {
+		// TODO: REMOVE SAMPLE DATA
+		if showSampleData {
+			sampleDatasource = UICollectionViewDiffableDataSource(collectionView: collectionView, cellProvider: {
+						(collectionView, indexPath, imagePlaceholder) -> UICollectionViewCell? in
+								
+						let currentSectionType = sampleData[indexPath.section].type
+						
+						switch currentSectionType {
+						case .orthogonal:
+							guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeOrthogonalCell.reuseIdentifier,
+																																	for: indexPath) as? HomeOrthogonalCell else { return nil }
+							
+							cell.displayText = String(orthogonalPics[indexPath.row].height)
+							cell.displayBackgroundColor = orthogonalPics[indexPath.row].placeholderColor
+							
+							return cell
+						case .main:
+							guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeImageCell.reuseIdentifier,
+																																	for: indexPath) as? HomeImageCell else { return nil }
+							
+							cell.displayText = String(samplePics[indexPath.row].height)
+							cell.displayBackgroundColor = samplePics[indexPath.row].placeholderColor
+							
+							return cell
+						}
+						
+					})
+			configureHomeReusableViewForDatasource()
+			return
+		}
+		
 		datasource = UICollectionViewDiffableDataSource(collectionView: collectionView, cellProvider: {
 			[weak self] (collectionView, indexPath, imagePlaceholder) -> UICollectionViewCell? in
 			
@@ -601,6 +690,27 @@ extension HomeViewController {
 	}
 	
 	private func configureHomeReusableViewForDatasource() {
+		// TODO: REMOVE SAMPLE DATA
+		if showSampleData {
+			sampleDatasource.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
+				guard let self = self else { return nil }
+			 
+			 if kind == UICollectionView.elementKindSectionHeader {
+				 
+				 guard let currentSection = self.sampleDatasource?.snapshot().sectionIdentifiers[indexPath.section],
+							 let reusableView = collectionView.dequeueReusableSupplementaryView(ofKind: kind,
+																																									withReuseIdentifier: HomeCollectionReusableView.reuseIdentifier,
+																																									for: indexPath) as? HomeCollectionReusableView else { return nil }
+				 reusableView.displayText = currentSection.title
+				reusableView.displayStyle = currentSection.type == .orthogonal ? .large : .small
+				 return reusableView
+			 }
+			 
+			 return nil
+		 }
+			return
+		}
+		
 		datasource?.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
 			guard let self = self else { return nil }
 			
@@ -620,6 +730,17 @@ extension HomeViewController {
 	}
 	
 	private func applyInitialSnapshot() {
+		// TODO: REMOVE SAMPLE DATA
+		if showSampleData {
+			var snapshot = NSDiffableDataSourceSnapshot<SectionPlaceHolder, ImagePlaceholder>()
+			snapshot.appendSections(sampleData)
+			sampleData.forEach { sampleSection in
+				snapshot.appendItems(sampleSection.images, toSection: sampleSection)
+			}
+			sampleDatasource.apply(snapshot)
+			return
+		}
+		
 		let homeSections = NetworkingManager.shared.homeImagesSections
 		
 		var snapshot = NSDiffableDataSourceSnapshot<PhotoSection, AnyHashable>()
@@ -669,6 +790,9 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
 	
 	func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
 		indexPaths.forEach { indexPath in
+			// TODO: REMOVE SAMPLE DATA
+			if showSampleData { return }
+
 			// get section & photo for indexPath
 			let section = NetworkingManager.shared.homeImagesSections[indexPath.section]
 			let homeImage = section.items[indexPath.row]
@@ -692,6 +816,9 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
 	}
 	
 	func collectionView(_ collectionView: UICollectionView, cancelPrefetchingForItemsAt indexPaths: [IndexPath]) {
+		// TODO: REMOVE SAMPLE DATA
+		if showSampleData { return }
+		
 		indexPaths.forEach { indexPath in
 			// get section & photo for indexPath
 			let section = NetworkingManager.shared.homeImagesSections[indexPath.section]
@@ -706,6 +833,25 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
 	}
 	
 	func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+		// TODO: REMOVE SAMPLE DATA
+		if showSampleData {
+			let selectedSectionPlaceholder = sampleData[indexPath.section]
+			
+			// nothing to do for orthogonal cells for now
+			if selectedSectionPlaceholder.type == .orthogonal { return }
+			
+			let selectedImagePlaceholder = selectedSectionPlaceholder.images[indexPath.row]
+			// capture vars for view controller transition
+			selectedCell = collectionView.cellForItem(at: indexPath) as? HomeImageCell
+			selectedCellImageSnapshot = selectedCell?.displayImageView.snapshotView(afterScreenUpdates: false)
+			
+			let detailVC = DetailSampleViewController(imagePlaceholder: selectedImagePlaceholder)
+			detailVC.transitioningDelegate = self
+			detailVC.modalPresentationStyle = .fullScreen
+			present(detailVC, animated: true, completion: nil)
+			return
+		}
+		
 		let homeSection = NetworkingManager.shared.homeImagesSections[indexPath.section]
 		
 		// nothing to do for explore section for now

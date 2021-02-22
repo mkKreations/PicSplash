@@ -7,6 +7,8 @@
 
 import UIKit
 
+// TODO: REMOVE SAMPLE DATA
+
 class DetailSampleViewController: UIViewController {
 	// class vars
 	static private let tapFadeAnimationDuration: TimeInterval = 0.5
