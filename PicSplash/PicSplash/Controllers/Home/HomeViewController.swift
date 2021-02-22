@@ -287,15 +287,13 @@ extension HomeViewController: LoginViewButtonActionsProvider {
 		}
 	}
 	
-	private func animateLoginView(forKeyboardHeight keyboardHeight: CGFloat) {
-		let viewMidYConstant = (view.bounds.size.height / 2.0) - (loginView.bounds.size.height / 2.0)
-		
-		// make sure loginView is located where we set it at in animateLoginViewAppearance()
-		guard loginViewBottomConstraint?.constant == viewMidYConstant else { return }
-		
-		// subtracting a bit from keyboardHeight so there's a bit of overlap
-		loginViewBottomConstraint?.constant = keyboardHeight - 20.0
-		
+	private func animateLoginView(forKeyboardHeight keyboardHeight: CGFloat, willShow: Bool) {
+		let viewMidXConstant: CGFloat = (view.bounds.size.height / 2.0) - (loginView.bounds.size.height / 2.0)
+		let midXWithKeyboardHeight: CGFloat = keyboardHeight - 20.0 // subtracting a bit from keyboardHeight so there's a bit of overlap
+
+		// set constant based on if keyboard will show or not
+		loginViewBottomConstraint?.constant = willShow ? midXWithKeyboardHeight : viewMidXConstant
+				
 		// duration doesn't matter here because any animations that occur during
 		// keyboard appearance last for the same duration as the keyboard appearing
 		// even if I try to modify the duration - check the keyboard notification
@@ -1132,7 +1130,7 @@ extension HomeViewController {
 			
 			let keyboardHeight = keyboardHeightNSValue.cgRectValue.height
 			
-			animateLoginView(forKeyboardHeight: keyboardHeight)
+			animateLoginView(forKeyboardHeight: keyboardHeight, willShow: true)
 		}
 		
 		scrollingNavView.setShowsCancelButton(shows: true, animated: true)
@@ -1141,6 +1139,16 @@ extension HomeViewController {
 	}
 	
 	@objc func keyboardWillHide(notification: NSNotification) {
+		if isShowingLoginView {
+			// unpack keyboard height
+			guard let userInfoDict = notification.userInfo,
+						let keyboardHeightNSValue = userInfoDict[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else { return }
+			
+			let keyboardHeight = keyboardHeightNSValue.cgRectValue.height
+			
+			animateLoginView(forKeyboardHeight: keyboardHeight, willShow: false)
+		}
+		
 		scrollingNavView.setShowsCancelButton(shows: false, animated: true)
 		
 		isShowingKeyboard = false
