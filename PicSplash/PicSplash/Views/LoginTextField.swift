@@ -76,7 +76,9 @@ class LoginTextField: UIView {
 		
 		textField.placeholder = textFieldState.rawValue
 		textField.font = UIFont.systemFont(ofSize: 16.0)
+		textField.delegate = self
 		textField.returnKeyType = textFieldState == .email ? .next : .done
+		textField.tintColor = .white // for white cursor
 		
 		if textFieldState == .password { // add lock icon
 			textField.rightViewMode = .always
@@ -96,5 +98,28 @@ class LoginTextField: UIView {
 		stackView.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
 		
 		divider.heightAnchor.constraint(equalToConstant: 1.0).isActive = true
+	}
+}
+
+
+// MARK: textField delegate
+
+extension LoginTextField: UITextFieldDelegate {
+	func textFieldDidBeginEditing(_ textField: UITextField) {
+		// initial state
+		divider.backgroundColor = .darkGray
+		
+		UIView.animate(withDuration: 0.3) {
+			self.divider.backgroundColor = .white
+		}
+	}
+	
+	func textFieldDidEndEditing(_ textField: UITextField) {
+		// initial state
+		divider.backgroundColor = .white
+		
+		UIView.animate(withDuration: 0.3) {
+			self.divider.backgroundColor = .darkGray
+		}
 	}
 }
