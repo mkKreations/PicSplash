@@ -403,17 +403,32 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 
 		firstResponder.resignFirstResponder() // resign first responder
 		
-		// make sure search collection isn't already/still showing
-		// as well as scroll it to top for any following searches
-		if isShowingSearchResults {
-			animateSearchResultsCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration) {
-				self.searchResultsCollectionView.setContentOffset(.zero, animated: false)
-			}
+		// hide scroll to top button if showing
+		if isShowingScrollToTopButton {
+			animateScrollToTopButtonAppearance(forAppearance: false)
 		}
-		
-		// begin loading and perform search in completion -
-		// this is to prevent case that time to fetch search
-		// results takes less time than our animation
+
+		// if search results collection view is showing, we respect
+		// our view structure to make animation appear smooth
+		if isShowingSearchResults {
+			// because of our view structure, animate loading appearearance
+			// instantly and then animate search results away
+			animateLoadingView(forAppearance: true, withDuration: 0.0) { [weak self] in
+				guard let self = self else { return }
+
+				// now that loading is showing, we can animate away
+				// our search results and scroll it to top - after
+				// scrolling to top, perform search
+				self.animateSearchResultsCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration) {
+					self.searchResultsCollectionView.setContentOffset(.zero, animated: false)
+					
+					self.performSearch(withSearchTerm: term) // perform search
+				}
+			}
+			
+		}
+
+		// when trending is the only view showing
 		if !isShowingLoadingView {
 			animateLoadingView(forAppearance: true, withDuration: Self.trendingAnimationDuration) {
 				self.performSearch(withSearchTerm: term)
