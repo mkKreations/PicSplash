@@ -47,6 +47,8 @@ final class HomeViewController: UIViewController {
 	private(set) var isShowingKeyboard: Bool = false
 	private var isShowingStatusBar: Bool = true
 	private var preferredScreenEdges: UIRectEdge? = .top // for status bar appearance
+	private let scrollToTopButton: DetailActionButton = DetailActionButton(detailAction: .scroll)
+	private var isShowingScrollToTopButton: Bool = false
 		
 	
 	// MARK: view life cycle
@@ -183,6 +185,15 @@ final class HomeViewController: UIViewController {
 		scrollToTopTapGesture.numberOfTapsRequired = 1
 		scrollToTopTapGesture.numberOfTouchesRequired = 1
 		scrollToTopView.addGestureRecognizer(scrollToTopTapGesture) // add tap gest to scrollToTopView
+		
+		// scroll to top button
+		scrollToTopButton.frame = CGRect(x: view.bounds.width + DetailActionButton.buttonDimension, // right outside of view
+																		 y: view.bounds.height - DetailActionButton.buttonDimension - 50.0,
+																		 width: DetailActionButton.buttonDimension,
+																		 height: DetailActionButton.buttonDimension)
+		scrollToTopButton.isUserInteractionEnabled = false
+		scrollToTopButton.delegate = self
+		view.addSubview(scrollToTopButton)
 	}
 	
 	private func setPhotoOfTheDayImage() {
@@ -869,7 +880,7 @@ extension HomeViewController: DetailButtonActionsProvider {
 
 // MARK: scrollview delegate & relevant methods
 
-extension HomeViewController {
+extension HomeViewController: DetailActionButtonsProvider {
 	
 	func scrollViewDidScroll(_ scrollView: UIScrollView) {
 		// search results collection view logic
@@ -910,12 +921,12 @@ extension HomeViewController {
 		}
 		
 		
-		// logic to handle status bar showing/disappearing
+		// logic to scroll to top button showing/disappearing
 		
 		if offset < Self.navMinHeight {
-			animateStatusBarAppearance(forAppearance: false)
+			animateScrollToTopButtonAppearance(forAppearance: true)
 		} else if offset >= Self.navMaxHeight {
-			animateStatusBarAppearance(forAppearance: true)
+			animateScrollToTopButtonAppearance(forAppearance: false)
 		}
 	}
 		
@@ -978,22 +989,57 @@ extension HomeViewController {
 	private func animateStatusBarForSearchResultsCollectionView(_ scrollView: UIScrollView) {
 		if scrollView == self.searchResultsCollectionView && self.isShowingSearchResults {
 			if scrollView.contentOffset.y <= 0.0 {
-				animateStatusBarAppearance(forAppearance: true)
+				animateScrollToTopButtonAppearance(forAppearance: true)
 			} else if scrollView.contentOffset.y > Self.searchResultsTopMargin {
-				animateStatusBarAppearance(forAppearance: false)
+				animateScrollToTopButtonAppearance(forAppearance: false)
 			}
 		}
 	}
 	
-	private func animateStatusBarAppearance(forAppearance appearance: Bool) {
-		// set end states then force update
-		preferredScreenEdges = appearance ? .top : nil
-		isShowingStatusBar = appearance
+	private func animateScrollToTopButtonAppearance(forAppearance appearance: Bool) {
+		if isShowingScrollToTopButton == appearance { return }
 		
-		UIView.animate(withDuration: Self.trendingAnimationDuration,
-									 delay: 0.0, options: .curveEaseInOut, animations: {
-										self.setNeedsStatusBarAppearanceUpdate() // forces prefersStatusBarHidden to be read
-									 }, completion: nil)
+		// set initial states
+		let isShowingOriginX: CGFloat = view.bounds.width - DetailActionButton.buttonDimension - 16.0
+		let isHidingOriginX: CGFloat = view.bounds.width + DetailActionButton.buttonDimension
+		let buttonOriginX: CGFloat = appearance ? isHidingOriginX : isShowingOriginX
+		var buttonRect = CGRect(x: buttonOriginX,
+														y: view.bounds.height - DetailActionButton.buttonDimension - 50.0,
+														width: DetailActionButton.buttonDimension,
+														height: DetailActionButton.buttonDimension)
+		scrollToTopButton.frame = buttonRect
+		scrollToTopButton.alpha = appearance ? 0.0 : 1.0
+		
+		// perform animations
+		UIView.animateKeyframes(withDuration: Self.trendingAnimationDuration,
+														delay: 0.0, options: .calculationModeCubic) {
+			
+			UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 0.5) {
+				self.scrollToTopButton.alpha = appearance ? 1.0 : 0.0
+			}
+
+			UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 1.0) {
+				buttonRect.origin.x = appearance ? isShowingOriginX : isHidingOriginX
+				self.scrollToTopButton.frame = buttonRect
+			}
+
+		} completion: { _ in
+			// update user interaction for appearance
+			self.scrollToTopButton.isUserInteractionEnabled = appearance
+			
+			// update our state for appearance
+			self.isShowingScrollToTopButton = appearance
+		}
+	}
+	
+	func didPressDetailActionButton(_ detailAction: DetailAction) {
+		if detailAction == .scroll {
+			if isShowingSearchResults {
+				searchResultsCollectionView.setContentOffset(.zero, animated: true)
+			} else {
+				collectionView.setContentOffset(CGPoint(x: 0.0, y: -Self.navMaxHeight), animated: true)
+			}
+		}
 	}
 	
 	// these overrides are relevant in this extension

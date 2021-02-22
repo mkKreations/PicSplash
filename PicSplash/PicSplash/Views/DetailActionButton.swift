@@ -23,7 +23,7 @@ enum DetailAction {
 
 class DetailActionButton: UIView {
 	// class vars
-	static private let buttonDimension: CGFloat = 60.0
+	static let buttonDimension: CGFloat = 60.0
 	
 	
 	// instance vars
