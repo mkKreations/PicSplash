@@ -45,8 +45,6 @@ final class HomeViewController: UIViewController {
 	private let scrollToTopView: UIView = UIView(frame: .zero)
 	var isShowingSearchResults: Bool = false
 	private(set) var isShowingKeyboard: Bool = false
-	private var isShowingStatusBar: Bool = true
-	private var preferredScreenEdges: UIRectEdge? = .top // for status bar appearance
 	private let scrollToTopButton: DetailActionButton = DetailActionButton(detailAction: .scroll)
 	private var isShowingScrollToTopButton: Bool = false
 		
@@ -1042,23 +1040,6 @@ extension HomeViewController: DetailActionButtonsProvider {
 		}
 	}
 	
-	// these overrides are relevant in this extension
-	// because they allow for interacting with the top
-	// edge of screen (where our tap gest is at for
-	// custom scrollToTop behavior) and the showing/hiding
-	// of status bar which is required to interact with
-	// that area
-	override var preferredScreenEdgesDeferringSystemGestures: UIRectEdge {
-		if let screenEdges = self.preferredScreenEdges {
-			return screenEdges
-		}
-		return []
-	}
-	
-	override var prefersStatusBarHidden: Bool {
-		!isShowingStatusBar
-	}
-
 }
 
 
