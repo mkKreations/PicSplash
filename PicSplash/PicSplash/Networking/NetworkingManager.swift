@@ -35,12 +35,9 @@ class NetworkingManager {
 	
 	// MARK: instance vars
 	
-	private let imageDownloadQueue: OperationQueue = {
-		let operationQueue = OperationQueue()
-		operationQueue.qualityOfService = .userInteractive
-		return operationQueue
-	}()
-	private let searchQueue: OperationQueue = {
+	private let defaultQueue: OperationQueue = {
+		// concurrent queue will be used as default,
+		// default doesn't correspond to the qos
 		let operationQueue = OperationQueue()
 		operationQueue.qualityOfService = .userInteractive
 		return operationQueue
@@ -229,7 +226,7 @@ class NetworkingManager {
 		// NewSectionOperation
 		let newSectionOperation = NewSectionOperation(initialDataToLoadUrl: newSectionFetchUrl)
 		newSectionOperation.delegate = self
-		self.imageDownloadQueue.addOperation(newSectionOperation)
+		self.defaultQueue.addOperation(newSectionOperation)
 		
 		// PhotoOfTheDay - 2 separate operations
 		
@@ -250,20 +247,20 @@ class NetworkingManager {
 		}
 
 		// add PhotoOfTheDay operations
-		self.imageDownloadQueue.addOperation(photoOfTheDayOperation)
-		self.imageDownloadQueue.addOperation(photoOfTheDayImageDownloadOperation)
+		self.defaultQueue.addOperation(photoOfTheDayOperation)
+		self.defaultQueue.addOperation(photoOfTheDayImageDownloadOperation)
 		
 		// ExploreCollections
 		let exploreCollectionsOperation = ExploreCollectionsOperation(url: exploreCollectionsFetchUrl)
 		exploreCollectionsOperation.delegate = self
-		self.imageDownloadQueue.addOperation(exploreCollectionsOperation)
+		self.defaultQueue.addOperation(exploreCollectionsOperation)
 		
 		// once all data fetching Operations have been added to queue
 		// add this BarrierBlock to the queue which requires
 		// that all previously added tasks must be completed
 		// in order for this task to be executed - we're simply
 		// handing control back over to the UI
-		self.imageDownloadQueue.addBarrierBlock {
+		self.defaultQueue.addBarrierBlock {
 			completion(nil)
 		}
 	}
@@ -336,12 +333,12 @@ class NetworkingManager {
 		let searchOperation = SearchOperation(requestUrl: searchUrl, searchTerm: searchTerm)
 		searchOperation.delegate = self
 		searchOperation.queuePriority = .veryHigh
-		searchQueue.addOperation(searchOperation) // adding to our searchQueue
+		defaultQueue.addOperation(searchOperation) // adding to our defaultQueue
 		
 		// adding barrier block task requires
 		// this operation to wait until all
 		// previous operations have completed
-		searchQueue.addBarrierBlock { [weak self] in
+		defaultQueue.addBarrierBlock { [weak self] in
 			guard let self = self else { return }
 			
 			completion(self.searchResults.results, self.searchResults.searchTerm, nil)
