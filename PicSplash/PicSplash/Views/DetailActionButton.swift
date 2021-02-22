@@ -18,6 +18,7 @@ enum DetailAction {
 	case like
 	case add
 	case download
+	case scroll
 }
 
 class DetailActionButton: UIView {
@@ -42,6 +43,8 @@ class DetailActionButton: UIView {
 			return UIImage(systemName: "plus", withConfiguration: largeConfig)
 		case .download:
 			return UIImage(systemName: "arrow.down", withConfiguration: largeConfig)
+		case .scroll:
+			return UIImage(systemName: "arrow.up", withConfiguration: largeConfig)
 		}
 	}
 	
@@ -55,6 +58,8 @@ class DetailActionButton: UIView {
 		backgroundColor = detailAction == .download ? .white : .picSplashLightBlack
 		layer.cornerRadius = Self.buttonDimension / 2.0
 		layer.masksToBounds = true
+		layer.borderColor = detailAction == .scroll ? UIColor.white.withAlphaComponent(0.8).cgColor : nil
+		layer.borderWidth = detailAction == .scroll ? 2.0 : 0.0
 		
 		configureSubviews()
 		constrainSubviews()
