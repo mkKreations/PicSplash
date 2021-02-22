@@ -42,7 +42,6 @@ final class HomeViewController: UIViewController {
 	var isShowingLoadingView: Bool = false
 	let searchResultsCollectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
 	var searchResultsDatasource: UICollectionViewDiffableDataSource<PhotoSectionType, Photo>?
-	private let scrollToTopView: UIView = UIView(frame: .zero)
 	var isShowingSearchResults: Bool = false
 	private(set) var isShowingKeyboard: Bool = false
 	private let scrollToTopButton: DetailActionButton = DetailActionButton(detailAction: .scroll)
@@ -172,18 +171,7 @@ final class HomeViewController: UIViewController {
 		configureTrendingCollectionView()
 		configureLoadingViewAndIndicator()
 		configureSearchResultsCollectionView()
-		
-		// scroll to top
-		scrollToTopView.frame = CGRect(origin: .zero,
-																	 size: CGSize(width: view.bounds.width, height: Self.scrollToTopMargin))
-		view.addSubview(scrollToTopView)
-		view.bringSubviewToFront(scrollToTopView)
-	
-		let scrollToTopTapGesture = UITapGestureRecognizer(target: self, action: #selector(scrollToTopOnTap))
-		scrollToTopTapGesture.numberOfTapsRequired = 1
-		scrollToTopTapGesture.numberOfTouchesRequired = 1
-		scrollToTopView.addGestureRecognizer(scrollToTopTapGesture) // add tap gest to scrollToTopView
-		
+				
 		// scroll to top button
 		scrollToTopButton.frame = CGRect(x: view.bounds.width + DetailActionButton.buttonDimension, // right outside of view
 																		 y: view.bounds.height - DetailActionButton.buttonDimension - 50.0,
