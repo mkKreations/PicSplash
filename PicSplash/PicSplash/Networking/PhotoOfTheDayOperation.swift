@@ -91,7 +91,7 @@ class PhotoOfTheDayOperation: AsyncOperation {
 		
 		// unpack necessary vars
 		guard let urlsDict = json["urls"] as? [String: String],
-					let imageUrl = urlsDict["small"],
+					let imageUrl = urlsDict["regular"],
 					let userDict = json["user"] as? [String: Any],
 					let username = userDict["username"] as? String,
 					let blurHash = json["blur_hash"] as? String,

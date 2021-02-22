@@ -236,7 +236,9 @@ class NetworkingManager {
 	
 	// MARK: asynchronous tasks
 	
-	func downloadHomeInitialData(withCompletion completion: @escaping (NetworkingError?) -> ()) {
+	func downloadHomeInitialData(withPhotoOfTheDayDimensions imageDimensions: CGSize,
+															 withPhotoOfTheDayScale imageScale: CGFloat,
+															 withCompletion completion: @escaping (NetworkingError?) -> ()) {
 		// construct all urls necessary to load initial data for home
 		let newSectionFetchUrlTuple = constructNewSectionFetchUrl()
 		let photoOfTheDayUrlTuple = constructPhotoOfTheDayUrl()
@@ -279,20 +281,15 @@ class NetworkingManager {
 		photoOfTheDayOperation.delegate = self
 		
 		// this operation fetches & caches the image for the Photo of the Day object
-		let photoOfTheDayImageDownloadOperation = ImageDownloadOperation()
+		let photoOfTheDayImageDownloadOperation = DownSamplingImageOperation(imagePointSize: imageDimensions, imageScale: imageScale)
 		photoOfTheDayImageDownloadOperation.addDependency(photoOfTheDayOperation) // image download waits until object fetch finishes before executing
-		photoOfTheDayImageDownloadOperation.imageHandler = { image, error in
-			if let error = error {
-				print("Photo of the day image download error: \(error)")
-				return
-			}
-			
-			guard let image = image else { return }
+		photoOfTheDayImageDownloadOperation.completionBlock = {
+			guard let downsampledImage = photoOfTheDayImageDownloadOperation.downSampledImage else { return }
 			
 			print("CACHING PHOTO OF THE DAY IMAGE")
 			
 			// cache the image using the url as the key
-			self.imageDownloadCache.setObject(image, forKey: NSString(string: photoOfTheDayImageDownloadOperation.imageUrl.absoluteString))
+			self.imageDownloadCache.setObject(downsampledImage, forKey: NSString(string: photoOfTheDayImageDownloadOperation.imageUrl.absoluteString))
 		}
 
 		// add PhotoOfTheDay operations

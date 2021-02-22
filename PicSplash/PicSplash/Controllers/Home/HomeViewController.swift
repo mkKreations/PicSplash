@@ -66,7 +66,8 @@ final class HomeViewController: UIViewController {
 			animateLoadingView(forAppearance: true, withDuration: 0.0, fullScreen: true)
 		}
 		
-		NetworkingManager.shared.downloadHomeInitialData { error in
+		NetworkingManager.shared.downloadHomeInitialData(withPhotoOfTheDayDimensions: CGSize(width: collectionView.bounds.width, height: Self.navMaxHeight),
+																										 withPhotoOfTheDayScale: collectionView.traitCollection.displayScale) { error in
 			DispatchQueue.main.async {
 				// print error & return
 				if let error = error {
