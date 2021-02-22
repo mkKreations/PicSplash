@@ -29,6 +29,7 @@ class LoginView: UIView {
 	private let forgotPasswordButton: UIButton = UIButton(type: .system)
 	private let noAccountJoinButton: UIButton = UIButton(type: .system)
 	weak var delegate: LoginViewButtonActionsProvider?
+	private var passwordLoginTextField: LoginTextField? // just to capture reference
 	
 	
 	// inits
@@ -79,7 +80,14 @@ class LoginView: UIView {
 		
 		// instantiate textFields
 		let textFieldStates: [LoginTextFieldState] = [.email, .password]
-		let textFields: [LoginTextField] = textFieldStates.map { LoginTextField(textFieldState: $0) }
+		let textFields: [LoginTextField] = textFieldStates.map { state in
+			let loginTextField = LoginTextField(textFieldState: state)
+			loginTextField.delegate = self
+			if state == .password {
+				passwordLoginTextField = loginTextField // capture reference
+			}
+			return loginTextField
+		}
 		
 		// bottomStackView and its subviews
 		bottomStackView.translatesAutoresizingMaskIntoConstraints = false
@@ -185,4 +193,21 @@ class LoginView: UIView {
 		delegate?.didPressNoAccountJoinButton(sender)
 	}
 	
+}
+
+
+// MARK: LoginTextFieldActionsProvider conformance
+
+extension LoginView: LoginTextFieldActionsProvider {
+	func userDidPressReturn(withTextFieldState textFieldState: LoginTextFieldState) {
+		// make sure we have passwordLoginTextField
+		guard let passwordLoginTextField = self.passwordLoginTextField else { return }
+		
+		switch textFieldState {
+		case .email:
+			passwordLoginTextField.makeFirstResponder()
+		case .password:
+			passwordLoginTextField.endFirstResponder()
+		}
+	}
 }

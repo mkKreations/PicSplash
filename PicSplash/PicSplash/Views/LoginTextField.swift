@@ -15,6 +15,12 @@ enum LoginTextFieldState: String {
 }
 
 
+// protocol to pass work to delegate(s)
+protocol LoginTextFieldActionsProvider: AnyObject {
+	func userDidPressReturn(withTextFieldState textFieldState: LoginTextFieldState)
+}
+
+
 // subclassing UITextField to reposition its
 // rightView's property bounds manually
 
@@ -40,6 +46,7 @@ class LoginTextField: UIView {
 	private let textField: RightImageTextField = RightImageTextField(frame: .zero)
 	private let divider: UIView = UIView(frame: .zero)
 	let textFieldState: LoginTextFieldState
+	weak var delegate: LoginTextFieldActionsProvider?
 	
 	
 	// computed vars
@@ -65,7 +72,17 @@ class LoginTextField: UIView {
 	}
 	
 	
-	// helpers
+	// public helpers
+	func makeFirstResponder() {
+		textField.becomeFirstResponder()
+	}
+	
+	func endFirstResponder() {
+		textField.resignFirstResponder()
+	}
+	
+	
+	// private helpers
 	private func configureSubviews() {
 		stackView.translatesAutoresizingMaskIntoConstraints = false
 		[textField, divider].forEach { stackView.addArrangedSubview($0) }
@@ -121,5 +138,10 @@ extension LoginTextField: UITextFieldDelegate {
 		UIView.animate(withDuration: 0.3) {
 			self.divider.backgroundColor = .darkGray
 		}
+	}
+	
+	func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+		delegate?.userDidPressReturn(withTextFieldState: textFieldState)
+		return true
 	}
 }
