@@ -140,13 +140,13 @@ class DetailViewController: UIViewController {
 		view.addSubview(navStackView)
 		
 		closeButton.translatesAutoresizingMaskIntoConstraints = false
-		closeButton.setBackgroundImage(UIImage(systemName: "xmark"), for: .normal)
+		closeButton.setImage(UIImage(systemName: "xmark"), for: .normal) // set foreground image
 		closeButton.tintColor = .white
 		closeButton.addTarget(self, action: #selector(closeButtonPressed), for: .touchUpInside)
 		closeButton.setContentHuggingPriority(.required, for: .horizontal)
 
 		shareButton.translatesAutoresizingMaskIntoConstraints = false
-		shareButton.setBackgroundImage(UIImage(systemName: "square.and.arrow.up"), for: .normal)
+		shareButton.setImage(UIImage(systemName: "square.and.arrow.up"), for: .normal) // set foreground image
 		shareButton.tintColor = .white
 		shareButton.addTarget(self, action: #selector(shareButtonPressed), for: .touchUpInside)
 		shareButton.setContentHuggingPriority(.required, for: .horizontal)
@@ -184,10 +184,12 @@ class DetailViewController: UIViewController {
 		navStackViewTopConstraint = navStackView.topAnchor.constraint(equalTo: view.topAnchor, constant: Self.navStackViewTopMargin)
 		navStackViewTopConstraint?.isActive = true
 		
-		closeButton.widthAnchor.constraint(equalToConstant: 20.0).isActive = true
+		closeButton.widthAnchor.constraint(equalToConstant: 26.0).isActive = true
+		closeButton.heightAnchor.constraint(equalToConstant: 27.5).isActive = true
 
-		shareButton.widthAnchor.constraint(equalToConstant: 22.0).isActive = true
-		
+		shareButton.widthAnchor.constraint(equalToConstant: 27.0).isActive = true
+		shareButton.heightAnchor.constraint(equalToConstant: 27.5).isActive = true
+
 		infoButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16.0).isActive = true
 		infoButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -50.0).isActive = true
 		infoButton.heightAnchor.constraint(equalToConstant: 22.0).isActive = true
