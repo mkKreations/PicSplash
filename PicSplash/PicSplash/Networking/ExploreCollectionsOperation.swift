@@ -106,7 +106,7 @@ class ExploreCollectionsOperation: AsyncOperation {
 						let title = coverPhotoDict["description"] as? String,
 						let blurHash = coverPhotoDict["blur_hash"] as? String,
 						let urlsDict = coverPhotoDict["urls"] as? [String: Any],
-						let imageUrl = urlsDict["small"] as? String else { return	}
+						let imageUrl = urlsDict["regular"] as? String else { return	}
 			
 			collections.append(Collection(id: id,
 																		title: title,

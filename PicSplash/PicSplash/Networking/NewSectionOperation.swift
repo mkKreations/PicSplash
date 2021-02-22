@@ -112,7 +112,7 @@ class NewSectionOperation: AsyncOperation {
 						let userDict: [String: Any] = item["user"] as? [String: Any],
 						let userName: String = userDict["username"] as? String,
 						let urlsDict: [String: String] = item["urls"] as? [String: String],
-						let imageUrl: String = urlsDict["small"]
+						let imageUrl: String = urlsDict["regular"]
 			else { return } // should I throw NetworkError here?
 			
 			newSectionPhotos.append(Photo(id: id,
