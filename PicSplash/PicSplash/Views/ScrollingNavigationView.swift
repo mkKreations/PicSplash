@@ -104,7 +104,7 @@ class ScrollingNavigationView: UIView {
 		loginButton.addTarget(self, action: #selector(loginButtonPressed), for: .touchUpInside)
 
 		vertStackView.translatesAutoresizingMaskIntoConstraints = false
-		vertStackView.spacing = 0.0
+		vertStackView.spacing = 8.0
 		[displayLabel, searchBar].forEach { vertStackView.addArrangedSubview($0) }
 		vertStackView.axis = .vertical
 		vertStackView.distribution = .fill
@@ -125,6 +125,7 @@ class ScrollingNavigationView: UIView {
 		searchBar.searchBarStyle = .minimal
 		searchBar.tintColor = .white // set Cancel button tint color
 		searchBar.searchTextField.leftView?.tintColor = .white // set magnifying glass tintColor
+		searchBar.searchTextField.backgroundColor = UIColor.picSplashBlack.withAlphaComponent(0.2)
 		searchBar.searchTextField.delegate = self // to receive textField should clear events
 	}
 	
@@ -140,16 +141,16 @@ class ScrollingNavigationView: UIView {
 		gradientOverlayView.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
 		
 		buttonsStackView.topAnchor.constraint(equalTo: topAnchor, constant: 20.0).isActive = true
-		buttonsStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20.0).isActive = true
-		buttonsStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20.0).isActive = true
+		buttonsStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16.0).isActive = true
+		buttonsStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16.0).isActive = true
 		buttonsStackView.heightAnchor.constraint(equalToConstant: Self.buttonDimension).isActive = true
 		
 		menuButton.widthAnchor.constraint(equalTo: buttonsStackView.heightAnchor).isActive = true
 
 		loginButton.widthAnchor.constraint(equalTo: menuButton.widthAnchor).isActive = true
 
-		vertStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20.0).isActive = true
-		vertStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20.0).isActive = true
+		vertStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16.0).isActive = true
+		vertStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16.0).isActive = true
 		vertStackView.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
 				
 		// willing to break this constraint to satisfy bottom constraint
