@@ -211,6 +211,16 @@ final class HomeViewController: UIViewController {
 			featuredView.image = image
 		}
 	}
+	
+	
+	// MARK: helpers
+	
+	private func presentCancelAlert(withMessage message: String) {
+		let alert = UIAlertController(title: "PicSplash", message: message, preferredStyle: .alert)
+		let okAction = UIAlertAction(title: "OK", style: .cancel, handler: nil)
+		alert.addAction(okAction)
+		present(alert, animated: true, completion: nil)
+	}
 		
 }
 
@@ -455,16 +465,17 @@ extension HomeViewController: FeaturedViewButtonsProvider {
 			DispatchQueue.main.async {
 				guard let self = self else { return }
 				
-				// print error, stop loading, & return
+				// stop loading, present error alert, & return
 				if let error = error {
-					print("Search error - \(error)")
-					
 					// stop loading
 					if self.isShowingLoadingView {
 						self.animateLoadingView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
 					}
 
-					return
+					// present alert with message
+					self.presentCancelAlert(withMessage: "Search error with term: \(searchTerm)\n\(error)")
+
+					return // we're done here
 				}
 				
 				if !photos.isEmpty { // if we have photos, show search results
@@ -483,16 +494,13 @@ extension HomeViewController: FeaturedViewButtonsProvider {
 						}
 					}
 				} else {
-					// TODO: SHOW NO SEARCH RESULTS STATE
-					
-					// just dismissing loading for now
-					
 					// stop loading
 					if self.isShowingLoadingView {
 						self.animateLoadingView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
 					}
 
-					print("NO RESULTS")
+					// present alert with message
+					self.presentCancelAlert(withMessage: "Sorry! No results found for \(searchTerm)")
 				}
 			}
 		}
