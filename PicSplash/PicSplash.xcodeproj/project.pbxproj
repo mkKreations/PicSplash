@@ -23,6 +23,7 @@
 		2C6B964F25DC80160048C4AF /* Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C6B964E25DC80160048C4AF /* Collection.swift */; };
 		2C6B965225DC8A080048C4AF /* ExploreCollectionsOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C6B965125DC8A080048C4AF /* ExploreCollectionsOperation.swift */; };
 		2C7006E225DF3B3F00D5BBA5 /* SearchOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C7006E125DF3B3F00D5BBA5 /* SearchOperation.swift */; };
+		2CA739C125E5CD5100AECE09 /* HomeDetailAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CA739C025E5CD5100AECE09 /* HomeDetailAnimator.swift */; };
 		2CAE2F6825D88F8E00DCC243 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAE2F6725D88F8E00DCC243 /* HomeViewController.swift */; };
 		2CAE2F7325D895AB00DCC243 /* HomeViewController+SearchControllerViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAE2F7225D895AB00DCC243 /* HomeViewController+SearchControllerViews.swift */; };
 		2CAE645725D37788009A31F6 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAE645625D37788009A31F6 /* LoginView.swift */; };
@@ -68,6 +69,7 @@
 		2C6B964E25DC80160048C4AF /* Collection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Collection.swift; sourceTree = "<group>"; };
 		2C6B965125DC8A080048C4AF /* ExploreCollectionsOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreCollectionsOperation.swift; sourceTree = "<group>"; };
 		2C7006E125DF3B3F00D5BBA5 /* SearchOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchOperation.swift; sourceTree = "<group>"; };
+		2CA739C025E5CD5100AECE09 /* HomeDetailAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeDetailAnimator.swift; sourceTree = "<group>"; };
 		2CAE2F6725D88F8E00DCC243 /* HomeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
 		2CAE2F7225D895AB00DCC243 /* HomeViewController+SearchControllerViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HomeViewController+SearchControllerViews.swift"; sourceTree = "<group>"; };
 		2CAE645625D37788009A31F6 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
@@ -142,6 +144,7 @@
 				2C1F919625D9C3A800BCCD87 /* HomeImageProtocol.swift */,
 				2CF378C125DB5DDC00617878 /* NetworkingOperationsProtocol.swift */,
 				2C6B964B25DC64290048C4AF /* ImageDownloadUrlProvider.swift */,
+				2CA739C025E5CD5100AECE09 /* HomeDetailAnimator.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -335,6 +338,7 @@
 				2CAF5EF025D60095000322B9 /* DetailAnimator.swift in Sources */,
 				2CF378C225DB5DDC00617878 /* NetworkingOperationsProtocol.swift in Sources */,
 				2C1F919725D9C3A800BCCD87 /* HomeImageProtocol.swift in Sources */,
+				2CA739C125E5CD5100AECE09 /* HomeDetailAnimator.swift in Sources */,
 				2C6B965225DC8A080048C4AF /* ExploreCollectionsOperation.swift in Sources */,
 				2CAE2F6825D88F8E00DCC243 /* HomeViewController.swift in Sources */,
 				2CF14EDD25D31F7A000F1210 /* UIColor+extensions.swift in Sources */,
