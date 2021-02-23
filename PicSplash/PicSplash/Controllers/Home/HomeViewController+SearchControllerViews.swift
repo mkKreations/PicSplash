@@ -106,7 +106,9 @@ extension HomeViewController {
 		trendingDatasource?.apply(trendingSnapshot, animatingDifferences: true)
 	}
 	
-	func animateTrendingCollectionView(forAppearance willAppear: Bool, withDuration duration: TimeInterval = 0.03) {
+	func animateTrendingCollectionView(forAppearance willAppear: Bool,
+																		 withDuration duration: TimeInterval = 0.03,
+																		 withCompletion completion: (() -> ())? = nil) {
 		UIView.animate(withDuration: duration,
 									 delay: 0.0, options: .curveEaseInOut) {
 			self.trendingCollectionView.alpha = willAppear ? 1.0 : 0.0
@@ -116,6 +118,8 @@ extension HomeViewController {
 						
 			// manage state
 			self.isShowingTrending = willAppear
+			
+			completion?()
 		}
 	}
 	

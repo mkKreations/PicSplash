@@ -430,7 +430,7 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 		}
 
 		// when trending is the only view showing
-		if !isShowingLoadingView {
+		if !isShowingLoadingView && isShowingTrending {
 			animateLoadingView(forAppearance: true, withDuration: Self.trendingAnimationDuration) { [weak self] in
 				guard let self = self else { return }
 				
@@ -505,9 +505,31 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 	func didPressSearchCancelButton(withFirstResponder firstResponder: UIView) {
 		firstResponder.resignFirstResponder() // resign first responder
 		
+		// hide away scroll to top button
+		if isShowingScrollToTopButton {
+			animateScrollToTopButtonAppearance(forAppearance: false)
+		}
+		
 		// dismiss trending collectionView if showing
 		if isShowingTrending {
-			animateTrendingCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
+			// we're taking advantage of the fact that
+			// trending collection view is always showing
+			// during "search" flow, so when user presses
+			// cancel, we check after we dismiss this view
+			// to see if we should be showing the scroll to
+			// to top button for the home collection view
+			animateTrendingCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration) { [weak self] in
+				guard let self = self else { return }
+				
+				// check if we should be presenting
+				// scroll to top button now that
+				// home collection view is showing
+				if -(self.collectionView.contentOffset.y) < Self.navMinHeight {
+					self.animateScrollToTopButtonAppearance(forAppearance: true)
+				} else if -(self.collectionView.contentOffset.y) >= Self.navMaxHeight {
+					self.animateScrollToTopButtonAppearance(forAppearance: false)
+				}
+			}
 		}
 		
 		// dismiss loadingView if showing
@@ -1085,7 +1107,8 @@ extension HomeViewController: DetailActionButtonsProvider {
 		}
 	}
 	
-	private func animateScrollToTopButtonAppearance(forAppearance appearance: Bool) {
+	private func animateScrollToTopButtonAppearance(forAppearance appearance: Bool,
+																									withCompletion completion: (() -> ())? = nil) {
 		if isShowingScrollToTopButton == appearance { return }
 		
 		// set initial states
@@ -1118,6 +1141,8 @@ extension HomeViewController: DetailActionButtonsProvider {
 			
 			// update our state for appearance
 			self.isShowingScrollToTopButton = appearance
+	
+			completion?()
 		}
 	}
 	
