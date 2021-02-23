@@ -913,8 +913,13 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
 		
 		// nothing to do for explore section for now
 		if homeSection.type == .explore { return }
-		
+				
+		// get our photo
 		guard let photo = homeSection.items[indexPath.row] as? Photo else { return }
+		
+		// if the photo image has yet to load, do not
+		// allow user to go to detail view controller
+		guard let _ = NetworkingManager.shared.cachedImage(forImageUrlString: photo.imageUrl) else { return }
 		
 		// capture vars for view controller transition
 		selectedCell = collectionView.cellForItem(at: indexPath) as? HomeImageCell
