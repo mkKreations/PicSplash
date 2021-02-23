@@ -70,6 +70,8 @@ class HomeImageCell: UICollectionViewCell {
 	override init(frame: CGRect) {
 		super.init(frame: frame)
 		
+		contentView.backgroundColor = .picSplashBlack
+		
 		configureSubviews()
 		constrainSubviews()
 	}
@@ -98,18 +100,18 @@ class HomeImageCell: UICollectionViewCell {
 	
 	private func constrainSubviews() {
 		displayImageView.topAnchor.constraint(equalTo: contentView.topAnchor).isActive = true
-		displayImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
+		displayImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -1.0).isActive = true
 		displayImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor).isActive = true
 		displayImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor).isActive = true
 		imageViewHeightConstraint = displayImageView.heightAnchor.constraint(equalToConstant: 0.0)
 		imageViewHeightConstraint.isActive = true
 
 		gradientOverlayView.topAnchor.constraint(equalTo: contentView.topAnchor).isActive = true
-		gradientOverlayView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
+		gradientOverlayView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -1.0).isActive = true
 		gradientOverlayView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor).isActive = true
 		gradientOverlayView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor).isActive = true
 
-		displayLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -5.0).isActive = true
+		displayLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -6.0).isActive = true
 		displayLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -5.0).isActive = true
 		displayLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 5.0).isActive = true
 		
