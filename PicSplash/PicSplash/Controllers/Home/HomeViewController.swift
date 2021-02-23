@@ -966,10 +966,10 @@ extension HomeViewController: UIViewControllerTransitioningDelegate {
 					let detailViewController = presented as? DetailViewController,
 					let selectedCellImageSnapshot = selectedCellImageSnapshot else { return nil }
 		
-		let detailAnimator = DetailAnimator(presentationType: .present,
-																				homeViewController: homeViewController,
-																				detailViewController: detailViewController,
-																				selectedImageViewSnapshot: selectedCellImageSnapshot)
+		let detailAnimator = HomeDetailAnimator(presentationType: .present,
+																						homeViewController: homeViewController,
+																						detailViewController: detailViewController,
+																						selectedImageViewSnapshot: selectedCellImageSnapshot)
 		return detailAnimator
 	}
 	
@@ -978,10 +978,10 @@ extension HomeViewController: UIViewControllerTransitioningDelegate {
 		guard let detailViewController = dismissed as? DetailViewController,
 					let selectedCellImageSnapshot = selectedCellImageSnapshot else { return nil }
 		
-		let detailAnimator = DetailAnimator(presentationType: .dismiss,
-																				homeViewController: self,
-																				detailViewController: detailViewController,
-																				selectedImageViewSnapshot: selectedCellImageSnapshot)
+		let detailAnimator = HomeDetailAnimator(presentationType: .dismiss,
+																						homeViewController: self,
+																						detailViewController: detailViewController,
+																						selectedImageViewSnapshot: selectedCellImageSnapshot)
 		return detailAnimator
 	}
 	
