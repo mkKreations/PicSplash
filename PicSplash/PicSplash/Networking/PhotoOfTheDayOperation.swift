@@ -93,7 +93,7 @@ class PhotoOfTheDayOperation: AsyncOperation {
 		guard let urlsDict = json["urls"] as? [String: String],
 					let imageUrl = urlsDict["regular"],
 					let userDict = json["user"] as? [String: Any],
-					let username = userDict["username"] as? String,
+					let username = userDict["name"] as? String,
 					let blurHash = json["blur_hash"] as? String,
 					let id = json["id"] as? String,
 					let width = json["width"] as? Int,

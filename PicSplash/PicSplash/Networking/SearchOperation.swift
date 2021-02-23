@@ -110,7 +110,7 @@ class SearchOperation: AsyncOperation {
 						let urlsDict = resultsDict["urls"] as? [String: Any],
 						let imageUrl = urlsDict["regular"] as? String,
 						let userDict = resultsDict["user"] as? [String: Any],
-						let username = userDict["username"] as? String
+						let username = userDict["name"] as? String
 			else { return } // should I throw NetworkError here?
 			
 			results.append(Photo(id: id,
