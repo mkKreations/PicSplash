@@ -205,7 +205,7 @@ extension HomeViewController {
 		
 		constrainSearchResultsCollectionView()
 		configureSearchResultsDatasource()
-		applySearchResultsSnapshot()
+		applySearchResultsSnapshot(animating: true)
 	}
 	
 	private func constrainSearchResultsCollectionView() {
@@ -267,7 +267,7 @@ extension HomeViewController {
 		})
 	}
 	
-	func applySearchResultsSnapshot() {
+	func applySearchResultsSnapshot(animating: Bool) {
 		// TODO: REMOVE SAMPLE DATA
 		if showSampleData {
 			var searchResultsSnapshot = NSDiffableDataSourceSnapshot<SectionPlaceHolder, ImagePlaceholder>()
@@ -281,7 +281,7 @@ extension HomeViewController {
 		var searchResultsSnapshot = NSDiffableDataSourceSnapshot<PhotoSectionType, Photo>()
 		searchResultsSnapshot.appendSections([newSection]) // doesn't matter which section we pass - only displaying 1 section
 		searchResultsSnapshot.appendItems(NetworkingManager.shared.searchResults.results, toSection: newSection)
-		searchResultsDatasource?.apply(searchResultsSnapshot, animatingDifferences: true, completion: nil)
+		searchResultsDatasource?.apply(searchResultsSnapshot, animatingDifferences: animating, completion: nil)
 	}
 	
 	func animateSearchResultsCollectionView(forAppearance willAppear: Bool,

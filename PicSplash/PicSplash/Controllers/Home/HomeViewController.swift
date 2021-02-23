@@ -8,7 +8,7 @@
 import UIKit
 
 // TODO: REMOVE SAMPLE DATA
-var showSampleData: Bool = true
+var showSampleData: Bool = false
 
 
 final class HomeViewController: UIViewController {
@@ -383,12 +383,12 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 					
 					// if we have photos, show search results
 					if !self.isShowingSearchResults {
-						self.applySearchResultsSnapshot() // apply snapshot, then show collectionView
+						self.applySearchResultsSnapshot(animating: false) // apply snapshot, then show collectionView
 						
 						// show search results and animate in status bar
 						self.animateSearchResultsCollectionView(forAppearance: true, withDuration: Self.trendingAnimationDuration) { [weak self] in
 							guard let self = self else { return }
-							self.animateStatusBarForSearchResultsCollectionView(self.searchResultsCollectionView)
+							self.animateScrollToTopButtonForSearchResultsCollectionView(self.searchResultsCollectionView)
 						}
 					}
 					// TODO: SHOW NO SEARCH RESULTS STATE
@@ -403,10 +403,6 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 
 		firstResponder.resignFirstResponder() // resign first responder
 		
-		// hide scroll to top button if showing
-		if isShowingScrollToTopButton {
-			animateScrollToTopButtonAppearance(forAppearance: false)
-		}
 
 		// if search results collection view is showing, we respect
 		// our view structure to make animation appear smooth
@@ -422,15 +418,33 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 				self.animateSearchResultsCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration) {
 					self.searchResultsCollectionView.setContentOffset(.zero, animated: false)
 					
+					// hide scroll to top button if showing
+					// make sure to do this after manually
+					// setting the collection view content offset
+					if self.isShowingScrollToTopButton {
+						self.animateScrollToTopButtonAppearance(forAppearance: false)
+					}
+					
 					self.performSearch(withSearchTerm: term) // perform search
 				}
 			}
-			
 		}
 
 		// when trending is the only view showing
 		if !isShowingLoadingView {
-			animateLoadingView(forAppearance: true, withDuration: Self.trendingAnimationDuration) {
+			animateLoadingView(forAppearance: true, withDuration: Self.trendingAnimationDuration) { [weak self] in
+				guard let self = self else { return }
+				
+				// make sure search results collection view is scrolled to top
+				self.searchResultsCollectionView.setContentOffset(.zero, animated: false)
+				
+				// hide scroll to top button if showing
+				// make sure to do this after manually
+				// setting the collection view content offset
+				if self.isShowingScrollToTopButton {
+					self.animateScrollToTopButtonAppearance(forAppearance: false)
+				}
+
 				self.performSearch(withSearchTerm: term)
 			}
 		}
@@ -442,30 +456,43 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 			DispatchQueue.main.async {
 				guard let self = self else { return }
 				
-				// stop loading
-				if self.isShowingLoadingView {
-					self.animateLoadingView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
-				}
-
-				// print error & return
+				// print error, stop loading, & return
 				if let error = error {
 					print("Search error - \(error)")
+					
+					// stop loading
+					if self.isShowingLoadingView {
+						self.animateLoadingView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
+					}
+
 					return
 				}
 				
-				if !photos.isEmpty {
-					// if we have photos, show search results
+				if !photos.isEmpty { // if we have photos, show search results
 					if !self.isShowingSearchResults {
-						self.applySearchResultsSnapshot() // apply snapshot, then show collectionView
+						self.applySearchResultsSnapshot(animating: false) // apply snapshot immediately
 						
-						// show search results and animate in status bar
+						// due to our view hierarchy,
+						// show search results with animation
+						// and then hide loading view immediately
 						self.animateSearchResultsCollectionView(forAppearance: true, withDuration: Self.trendingAnimationDuration) { [weak self] in
 							guard let self = self else { return }
-							self.animateStatusBarForSearchResultsCollectionView(self.searchResultsCollectionView)
+							
+							if self.isShowingLoadingView {
+								self.animateLoadingView(forAppearance: false, withDuration: 0.0)
+							}
 						}
 					}
 				} else {
 					// TODO: SHOW NO SEARCH RESULTS STATE
+					
+					// just dismissing loading for now
+					
+					// stop loading
+					if self.isShowingLoadingView {
+						self.animateLoadingView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
+					}
+
 					print("NO RESULTS")
 				}
 			}
@@ -951,7 +978,7 @@ extension HomeViewController: DetailActionButtonsProvider {
 	
 	func scrollViewDidScroll(_ scrollView: UIScrollView) {
 		// search results collection view logic
-		animateStatusBarForSearchResultsCollectionView(scrollView)
+		animateScrollToTopButtonForSearchResultsCollectionView(scrollView)
 		
 		// only do this logic for our home collection view
 		if scrollView != self.collectionView { return }
@@ -1053,7 +1080,7 @@ extension HomeViewController: DetailActionButtonsProvider {
 		}
 	}
 	
-	private func animateStatusBarForSearchResultsCollectionView(_ scrollView: UIScrollView) {
+	private func animateScrollToTopButtonForSearchResultsCollectionView(_ scrollView: UIScrollView) {
 		if scrollView == self.searchResultsCollectionView && self.isShowingSearchResults {
 			if scrollView.contentOffset.y <= 0.0 {
 				animateScrollToTopButtonAppearance(forAppearance: false)
