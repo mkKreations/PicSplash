@@ -920,6 +920,9 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
 		selectedCell = collectionView.cellForItem(at: indexPath) as? HomeImageCell
 		selectedCellImageSnapshot = selectedCell?.displayImageView.snapshotView(afterScreenUpdates: false)
 		
+		// hide scroll to top button before presenting
+		animateScrollToTopButtonFade(forPresenting: true)
+		
 		// present detail view controller
 		presentDetailViewController(withPhoto: photo)
 	}
@@ -927,6 +930,7 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
 	private func presentDetailViewController(withPhoto photo: Photo) {
 		let detailVC = DetailViewController(photo: photo,
 																				withCalculatedHeight: CGFloat(calculateHomeImageHeight(forHomeImage: photo)))
+		detailVC.delegate = self
 		detailVC.transitioningDelegate = self
 		detailVC.modalPresentationStyle = .fullScreen
 		present(detailVC, animated: true, completion: nil)
@@ -978,7 +982,7 @@ extension HomeViewController: DetailButtonActionsProvider {
 	
 	func didPressCloseButton(_ sender: UIButton) {
 		// detailVC closes itself but we still receive action
-		print("CLOSE")
+		self.animateScrollToTopButtonFade(forPresenting: false)
 	}
 	
 	func didPressShareButton(_ sender: UIButton) {
@@ -1143,6 +1147,18 @@ extension HomeViewController: DetailActionButtonsProvider {
 			self.isShowingScrollToTopButton = appearance
 	
 			completion?()
+		}
+	}
+	
+	// only use this method when presenting/dismissing a view controller
+	// from the view controller that uses scroll to top button - in our
+	// case, we're calling this method to fade in/out scrollToTop button
+	// from home view controller when presenting/dismissing detail view controller
+	private func animateScrollToTopButtonFade(forPresenting isPresenting: Bool) {
+		scrollToTopButton.alpha = isPresenting ? 1.0 : 0.0
+		
+		UIView.animate(withDuration: 0.25) {
+			self.scrollToTopButton.alpha = isPresenting ? 0.0 : 1.0
 		}
 	}
 	
