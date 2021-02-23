@@ -14,7 +14,7 @@ class HomeOrthogonalCell: UICollectionViewCell {
 	
 	// instance vars
 	private let displayImageView: UIImageView = UIImageView(frame: .zero)
-	private let gradientOverlayView: ImageShadowOverlayView = ImageShadowOverlayView(overlayStyle: .full)
+	private let gradientOverlayView: ImageShadowOverlayView = ImageShadowOverlayView(overlayStyle: .full(nil))
 	private let displayLabel: UILabel = UILabel(frame: .zero)
 	private let loader: UIActivityIndicatorView = UIActivityIndicatorView(style: .large)
 

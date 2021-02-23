@@ -10,7 +10,7 @@ import UIKit
 class HomeImageCell: UICollectionViewCell {
 	// class vars
 	static let reuseIdentifier: String = UUID().uuidString
-	static let imageShadowOverlayStyle: ImageShadowOverlayView.OverlayStyle = .base
+	static let imageShadowOverlayStyle: ImageShadowOverlayView.OverlayStyle = .base(nil, nil)
 	
 	
 	// instance vars - exposed to public for view controller transition

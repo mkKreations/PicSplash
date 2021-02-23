@@ -30,7 +30,7 @@ class FeaturedView: UIView {
 	private let displayLabel: UILabel = UILabel(frame: .zero)
 	private let searchBar: UISearchBar = UISearchBar(frame: .zero)
 	private let displayImageView: UIImageView = UIImageView(frame: .zero)
-	private let gradientOverlayView: ImageShadowOverlayView = ImageShadowOverlayView(overlayStyle: .full)
+	private let gradientOverlayView: ImageShadowOverlayView = ImageShadowOverlayView(overlayStyle: .full(nil))
 	private let buttonsStackView: UIStackView = UIStackView(frame: .zero)
 	private let loginButton: UIButton = UIButton(type: .system)
 	private let menuButton: UIButton = UIButton(type: .system)
