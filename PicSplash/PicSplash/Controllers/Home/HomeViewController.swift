@@ -402,7 +402,6 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 		print("term: \(term)")
 
 		firstResponder.resignFirstResponder() // resign first responder
-		
 
 		// if search results collection view is showing, we respect
 		// our view structure to make animation appear smooth
@@ -538,9 +537,7 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 		// and set contentOffset to 0 for any
 		// following searches
 		if isShowingSearchResults {
-			animateSearchResultsCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration) {
-				self.searchResultsCollectionView.setContentOffset(.zero, animated: false) // animate search collection view to top
-			}
+			animateSearchResultsCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
 		}
 	}
 
@@ -554,9 +551,7 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 		// animate away search results and
 		// scroll it to top for "following" requests
 		if isShowingSearchResults {
-			animateSearchResultsCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration) {
-				self.searchResultsCollectionView.setContentOffset(.zero, animated: true)
-			}
+			animateSearchResultsCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
 		}
 	}
 	
