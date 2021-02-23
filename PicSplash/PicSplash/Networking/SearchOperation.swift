@@ -91,7 +91,7 @@ class SearchOperation: AsyncOperation {
 		}
 		
 		// only 50/hr
-		print("REQUESTS REMAINING: \(httpResponse.allHeaderFields["x-ratelimit-remaining"]) :(")
+		print("REQUESTS REMAINING: \(httpResponse.allHeaderFields["x-ratelimit-remaining"] ?? "") :(")
 
 		guard let data = data,
 					let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],

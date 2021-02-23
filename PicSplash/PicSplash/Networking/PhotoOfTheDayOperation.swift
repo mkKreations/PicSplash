@@ -80,7 +80,7 @@ class PhotoOfTheDayOperation: AsyncOperation {
 		}
 
 		// only 50/hr
-		print("REQUESTS REMAINING: \(httpResponse.allHeaderFields["x-ratelimit-remaining"]) :(")
+		print("REQUESTS REMAINING: \(httpResponse.allHeaderFields["x-ratelimit-remaining"] ?? "") :(")
 
 		// unpack data & deserialize response data into JSON
 		guard let data = data,
