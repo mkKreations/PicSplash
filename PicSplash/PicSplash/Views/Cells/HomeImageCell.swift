@@ -92,6 +92,7 @@ class HomeImageCell: UICollectionViewCell {
 		
 		displayLabel.translatesAutoresizingMaskIntoConstraints = false
 		displayLabel.textColor = .white
+		displayLabel.font = UIFont.systemFont(ofSize: 14.0, weight: .semibold)
 		contentView.addSubview(displayLabel)
 		
 		loader.translatesAutoresizingMaskIntoConstraints = false
@@ -111,9 +112,10 @@ class HomeImageCell: UICollectionViewCell {
 		gradientOverlayView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor).isActive = true
 		gradientOverlayView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor).isActive = true
 
-		displayLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -6.0).isActive = true
-		displayLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -5.0).isActive = true
-		displayLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 5.0).isActive = true
+		// add 1 point to bottom anchor constant for display label for faux separator
+		displayLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -17.0).isActive = true
+		displayLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16.0).isActive = true
+		displayLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16.0).isActive = true
 		
 		loader.centerYAnchor.constraint(equalTo: contentView.centerYAnchor).isActive = true
 		loader.centerXAnchor.constraint(equalTo: contentView.centerXAnchor).isActive = true
