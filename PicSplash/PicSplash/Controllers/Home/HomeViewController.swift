@@ -331,7 +331,7 @@ extension HomeViewController: LoginViewButtonActionsProvider {
 	
 // MARK: scrollNavView/search button actions/delegate methods
 
-extension HomeViewController: ScrollingNavigationButtonsProvider {
+extension HomeViewController: FeaturedViewButtonsProvider {
 	
 	func didPressMenuButton(_ button: UIButton) {
 		// present fresh instance of menu VC modally via sheet

@@ -34,7 +34,7 @@ class FeaturedView: UIView {
 	private let buttonsStackView: UIStackView = UIStackView(frame: .zero)
 	private let loginButton: UIButton = UIButton(type: .system)
 	private let menuButton: UIButton = UIButton(type: .system)
-	weak var delegate: ScrollingNavigationButtonsProvider?
+	weak var delegate: FeaturedViewButtonsProvider?
 	private var shouldBeginEditing: Bool = true // to receive calls from user clicking x within search bar - see below
 
 	
