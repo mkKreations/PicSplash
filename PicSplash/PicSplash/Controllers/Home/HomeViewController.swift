@@ -27,9 +27,9 @@ final class HomeViewController: UIViewController {
 	}()
 	private var datasource: UICollectionViewDiffableDataSource<PhotoSection, AnyHashable>?
 	private var sampleDatasource: UICollectionViewDiffableDataSource<SectionPlaceHolder, ImagePlaceholder>! // TODO: REMOVE SAMPLE DATA
-	lazy var scrollingNavView: ScrollingNavigationView = { // expose to public for view controller transition
-		ScrollingNavigationView(frame: CGRect(origin: .zero,
-																					size: CGSize(width: view.frame.width, height: Self.navMaxHeight)))
+	lazy var featuredView: FeaturedView = { // expose to public for view controller transition
+		FeaturedView(frame: CGRect(origin: .zero,
+															 size: CGSize(width: view.frame.width, height: Self.navMaxHeight)))
 	}()
 	private let loginFadeView: UIView = UIView(frame: .zero)
 	private let loginView: LoginView = LoginView(frame: .zero)
@@ -163,8 +163,8 @@ final class HomeViewController: UIViewController {
 														withReuseIdentifier: HomeCollectionReusableView.reuseIdentifier)
 		view.addSubview(collectionView)
 		
-		scrollingNavView.delegate = self // respond to button actions
-		view.addSubview(scrollingNavView) // add after collectionView so it's on top
+		featuredView.delegate = self // respond to button actions
+		view.addSubview(featuredView) // add after collectionView so it's on top
 		
 		// using frames for this view
 		// configure loginFadeView but
@@ -203,12 +203,12 @@ final class HomeViewController: UIViewController {
 		
 		// attempt to set blurred image
 		if let blurredImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: photoOfTheDay.blurString) {
-			scrollingNavView.image = blurredImage
+			featuredView.image = blurredImage
 		}
 		
 		// attempt to set actual image
 		if let image = NetworkingManager.shared.cachedImage(forImageUrlString: photoOfTheDay.imageUrl) {
-			scrollingNavView.image = image
+			featuredView.image = image
 		}
 	}
 		
@@ -1012,9 +1012,9 @@ extension HomeViewController: DetailActionButtonsProvider {
 		let height: CGFloat = max(offset, Self.navMinHeight)
 		
 		// update frames
-		var scrollNavViewFrame: CGRect = scrollingNavView.frame
+		var scrollNavViewFrame: CGRect = featuredView.frame
 		scrollNavViewFrame.size.height = height
-		scrollingNavView.frame = scrollNavViewFrame
+		featuredView.frame = scrollNavViewFrame
 		
 		
 		// logic to handle setting alphas on scrollingNavView subviews
@@ -1024,11 +1024,11 @@ extension HomeViewController: DetailActionButtonsProvider {
 			let absoluteHeight = abs(height - Self.navMaxHeight) // represents new number
 			let difference = desiredScrollRange - absoluteHeight
 			let percentDifference = difference / desiredScrollRange
-			scrollingNavView.animateSubviews(forScrollDelta: percentDifference)
+			featuredView.animateSubviews(forScrollDelta: percentDifference)
 		} else if offset <= Self.navMinHeight {
-			scrollingNavView.animateSubviews(forScrollDelta: 0.0)
+			featuredView.animateSubviews(forScrollDelta: 0.0)
 		} else if offset >= Self.navMaxHeight {
-			scrollingNavView.animateSubviews(forScrollDelta: 1.0)
+			featuredView.animateSubviews(forScrollDelta: 1.0)
 		}
 		
 		
@@ -1195,7 +1195,7 @@ extension HomeViewController {
 			animateLoginView(forKeyboardHeight: keyboardHeight, willShow: true)
 		}
 		
-		scrollingNavView.setShowsCancelButton(shows: true, animated: true)
+		featuredView.setShowsCancelButton(shows: true, animated: true)
 		
 		isShowingKeyboard = true
 	}
@@ -1211,7 +1211,7 @@ extension HomeViewController {
 			animateLoginView(forKeyboardHeight: keyboardHeight, willShow: false)
 		}
 		
-		scrollingNavView.setShowsCancelButton(shows: false, animated: true)
+		featuredView.setShowsCancelButton(shows: false, animated: true)
 		
 		isShowingKeyboard = false
 	}

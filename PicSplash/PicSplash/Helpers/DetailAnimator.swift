@@ -90,7 +90,7 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 					let cellImageViewSnapshot = selectedCell.displayImageView.snapshotView(afterScreenUpdates: true),
 					let cellDisplayLabelSnapshot = selectedCell.displayLabel.snapshotView(afterScreenUpdates: true),
 					var cellGradientOverlaySnapshot = selectedCell.gradientOverlayView.snapshotView(afterScreenUpdates: true),
-					let scrollingNavViewSnapshot = homeViewController.scrollingNavView.snapshotView(afterScreenUpdates: true),
+					let scrollingNavViewSnapshot = homeViewController.featuredView.snapshotView(afterScreenUpdates: true),
 					let detailCloseButtonSnapshot = detailViewController.closeButton.snapshotView(afterScreenUpdates: true),
 					let detailTitleLabelSnapshot = detailViewController.titleLabel.snapshotView(afterScreenUpdates: true),
 					let detailShareButtonSnapshot = detailViewController.shareButton.snapshotView(afterScreenUpdates: true),
@@ -166,7 +166,7 @@ class DetailAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 		let detailVCLikeButtonRect = detailViewController.likeButton.convert(detailViewController.likeButton.bounds, to: window)
 		let detailVCAddButtonRect = detailViewController.addButton.convert(detailViewController.addButton.bounds, to: window)
 		let detailVCDownloadButtonRect = detailViewController.downloadButton.convert(detailViewController.downloadButton.bounds, to: window)
-		let homeVCscrollingNavRect = homeViewController.scrollingNavView.convert(homeViewController.scrollingNavView.bounds, to: window)
+		let homeVCscrollingNavRect = homeViewController.featuredView.convert(homeViewController.featuredView.bounds, to: window)
 		
 		// set starting frames on snapshots based on PresentationType
 		[selectedCellImageViewSnapshot, cellGradientOverlaySnapshot].forEach { $0.frame = isPresenting ? cellImageViewRect : detailVCImageViewRect }
