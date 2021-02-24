@@ -917,25 +917,41 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
 			return
 		}
 		
-		let homeSection = NetworkingManager.shared.homeImagesSections[indexPath.section]
+		if collectionView == searchResultsCollectionView {
+			// get our photo
+			let photo = NetworkingManager.shared.searchResults.results[indexPath.row]
+
+			// handle photo selection
+			handleSelectedPhoto(photo, atIndexPath: indexPath, withCollectionView: collectionView)
+
+			return
+		}
 		
+		let homeSection = NetworkingManager.shared.homeImagesSections[indexPath.section]
+
 		// nothing to do for explore section for now
 		if homeSection.type == .explore { return }
 				
 		// get our photo
 		guard let photo = homeSection.items[indexPath.row] as? Photo else { return }
 		
+		handleSelectedPhoto(photo, atIndexPath: indexPath, withCollectionView: collectionView)
+	}
+	
+	private func handleSelectedPhoto(_ photo: Photo,
+																	 atIndexPath indexPath: IndexPath,
+																	 withCollectionView collectionView: UICollectionView) {
 		// if the photo image has yet to load, do not
 		// allow user to go to detail view controller
 		guard let _ = NetworkingManager.shared.cachedImage(forImageUrlString: photo.imageUrl) else { return }
-		
+
 		// capture vars for view controller transition
 		selectedCell = collectionView.cellForItem(at: indexPath) as? HomeImageCell
 		selectedCellImageSnapshot = selectedCell?.displayImageView.snapshotView(afterScreenUpdates: false)
-		
+
 		// hide scroll to top button before presenting
 		animateScrollToTopButtonFade(forPresenting: true)
-		
+
 		// present detail view controller
 		presentDetailViewController(withPhoto: photo)
 	}
