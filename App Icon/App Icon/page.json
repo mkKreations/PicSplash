@@ -105,15 +105,11 @@
     },
     {
       "class": "bitmap",
-      "id": "6466C50A-22AA-4898-946F-BF58CC8BBB35"
-    },
-    {
-      "class": "bitmap",
       "id": "2AAB8C6A-B345-49E4-A924-101163C7E6E9"
     },
     {
-      "class": "symbolInstance",
-      "id": "FBB8F931-3459-417B-B907-0F6D207BDFC1"
+      "class": "bitmap",
+      "id": "6466C50A-22AA-4898-946F-BF58CC8BBB35"
     }
   ],
   "maintainScrollPosition": false,
