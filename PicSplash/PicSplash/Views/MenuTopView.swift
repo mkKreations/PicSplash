@@ -8,10 +8,6 @@
 import UIKit
 
 class MenuTopView: UIView {
-	// class vars
-	private static let imageDimension: CGFloat = 30.0
-	
-	
 	// instance vars
 	private let stackView: UIStackView = UIStackView(frame: .zero)
 	private let displayImageView: UIImageView = UIImageView(frame: .zero)
@@ -39,12 +35,12 @@ class MenuTopView: UIView {
 		stackView.distribution = .fill
 		stackView.alignment = .center
 		stackView.spacing = 8.0
-		stackView.setCustomSpacing(10.0, after: displayImageView) // keep it pretty
+		stackView.setCustomSpacing(8.0, after: displayImageView) // keep it pretty
 		addSubview(stackView)
 		
 		displayImageView.translatesAutoresizingMaskIntoConstraints = false
 		displayImageView.contentMode = .scaleAspectFit
-		displayImageView.backgroundColor = UIColor.systemYellow
+		displayImageView.image = UIImage(named: "PicSplash Icon")
 		
 		titleLabel.text = "PicSplash"
 		titleLabel.textColor = .white
@@ -56,8 +52,8 @@ class MenuTopView: UIView {
 	}
 	
 	private func constrainSubviews() {
-		displayImageView.heightAnchor.constraint(equalToConstant: Self.imageDimension).isActive = true
-		displayImageView.widthAnchor.constraint(equalTo: displayImageView.heightAnchor).isActive = true
+		displayImageView.heightAnchor.constraint(equalToConstant: 26.0).isActive = true
+		displayImageView.widthAnchor.constraint(equalToConstant: 30.0).isActive = true
 
 		stackView.topAnchor.constraint(equalTo: topAnchor).isActive = true
 		stackView.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
