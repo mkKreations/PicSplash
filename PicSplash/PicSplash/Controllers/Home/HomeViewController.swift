@@ -15,7 +15,7 @@ final class HomeViewController: UIViewController {
 	// class vars
 	private static let navMaxHeight: CGFloat = 320.0
 	static let navMinHeight: CGFloat = 70.0
-	private static let navSnapToTopBuffer: CGFloat = 150.0
+	private static let navSnapToTopBuffer: CGFloat = 162.0
 	static let trendingAnimationDuration: TimeInterval = 0.4
 	private static let scrollToTopMargin: CGFloat = 22.0
 	private static let searchResultsTopMargin: CGFloat = 100.0
