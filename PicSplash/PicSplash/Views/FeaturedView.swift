@@ -31,7 +31,6 @@ class FeaturedView: UIView {
 	private let searchBar: UISearchBar = UISearchBar(frame: .zero)
 	private let displayImageView: UIImageView = UIImageView(frame: .zero)
 	private let gradientOverlayView: ImageShadowOverlayView = ImageShadowOverlayView(overlayStyle: .full(nil))
-	private let buttonsStackView: UIStackView = UIStackView(frame: .zero)
 	private let loginButton: UIButton = UIButton(type: .system)
 	private let menuButton: UIButton = UIButton(type: .system)
 	weak var delegate: FeaturedViewButtonsProvider?
@@ -55,7 +54,8 @@ class FeaturedView: UIView {
 	// public
 	func animateSubviews(forScrollDelta scrollDelta: CGFloat) {
 		displayLabel.alpha = scrollDelta
-		buttonsStackView.alpha = scrollDelta
+		menuButton.alpha = scrollDelta
+		loginButton.alpha = scrollDelta
 		displayImageView.alpha = scrollDelta
 	}
 	
@@ -82,26 +82,21 @@ class FeaturedView: UIView {
 		
 		gradientOverlayView.translatesAutoresizingMaskIntoConstraints = false
 		addSubview(gradientOverlayView)
-		
-		buttonsStackView.translatesAutoresizingMaskIntoConstraints = false
-		[menuButton, loginButton].forEach { buttonsStackView.addArrangedSubview($0) }
-		buttonsStackView.axis = .horizontal
-		buttonsStackView.distribution = .fill
-		addSubview(buttonsStackView)
-		
-		// symbol config to set point size for SF symbol image for buttons
-		let menuButtonSymbolConfig = UIImage.SymbolConfiguration(pointSize: 18.0)
-		let loginButtonSymbolConfig = UIImage.SymbolConfiguration(pointSize: 22.0)
-
+				
 		menuButton.translatesAutoresizingMaskIntoConstraints = false
-		menuButton.setImage(UIImage(systemName: "text.justify", withConfiguration: menuButtonSymbolConfig), for: .normal)
+		menuButton.setImage(UIImage(named: "PicSplash Icon"), for: .normal)
+		menuButton.imageView?.contentMode = .scaleAspectFit // maintain aspect ratio
 		menuButton.tintColor = .white
 		menuButton.addTarget(self, action: #selector(menuButtonPressed), for: .touchUpInside)
+		menuButton.contentEdgeInsets = UIEdgeInsets(top: 6.0, left: 6.0, bottom: 6.0, right: 6.0)
+		addSubview(menuButton)
 
 		loginButton.translatesAutoresizingMaskIntoConstraints = false
+		let loginButtonSymbolConfig = UIImage.SymbolConfiguration(pointSize: 22.0)
 		loginButton.setImage(UIImage(systemName: "person.circle", withConfiguration: loginButtonSymbolConfig), for: .normal)
 		loginButton.tintColor = .white
 		loginButton.addTarget(self, action: #selector(loginButtonPressed), for: .touchUpInside)
+		addSubview(loginButton)
 
 		vertStackView.translatesAutoresizingMaskIntoConstraints = false
 		vertStackView.spacing = 8.0
@@ -140,14 +135,15 @@ class FeaturedView: UIView {
 		gradientOverlayView.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
 		gradientOverlayView.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
 		
-		buttonsStackView.topAnchor.constraint(equalTo: topAnchor, constant: 20.0).isActive = true
-		buttonsStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16.0).isActive = true
-		buttonsStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16.0).isActive = true
-		buttonsStackView.heightAnchor.constraint(equalToConstant: Self.buttonDimension).isActive = true
-		
-		menuButton.widthAnchor.constraint(equalTo: buttonsStackView.heightAnchor).isActive = true
+		menuButton.topAnchor.constraint(equalTo: topAnchor, constant: 20.0).isActive = true
+		menuButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16.0).isActive = true
+		menuButton.widthAnchor.constraint(equalToConstant: Self.buttonDimension).isActive = true
+		menuButton.heightAnchor.constraint(equalToConstant: Self.buttonDimension).isActive = true
 
-		loginButton.widthAnchor.constraint(equalTo: menuButton.widthAnchor).isActive = true
+		loginButton.topAnchor.constraint(equalTo: topAnchor, constant: 20.0).isActive = true
+		loginButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16.0).isActive = true
+		loginButton.widthAnchor.constraint(equalToConstant: Self.buttonDimension).isActive = true
+		loginButton.heightAnchor.constraint(equalToConstant: Self.buttonDimension).isActive = true
 
 		vertStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16.0).isActive = true
 		vertStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16.0).isActive = true
