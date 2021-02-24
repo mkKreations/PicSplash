@@ -91,7 +91,7 @@ class SearchOperation: AsyncOperation {
 		}
 		
 		// only 50/hr
-		print("REQUESTS REMAINING: \(httpResponse.allHeaderFields["x-ratelimit-remaining"]) :(")
+		print("REQUESTS REMAINING: \(httpResponse.allHeaderFields["x-ratelimit-remaining"] ?? "") :(")
 
 		guard let data = data,
 					let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
@@ -108,9 +108,9 @@ class SearchOperation: AsyncOperation {
 						let height = resultsDict["height"] as? Int,
 						let blurHash = resultsDict["blur_hash"] as? String,
 						let urlsDict = resultsDict["urls"] as? [String: Any],
-						let imageUrl = urlsDict["small"] as? String,
+						let imageUrl = urlsDict["regular"] as? String,
 						let userDict = resultsDict["user"] as? [String: Any],
-						let username = userDict["username"] as? String
+						let username = userDict["name"] as? String
 			else { return } // should I throw NetworkError here?
 			
 			results.append(Photo(id: id,

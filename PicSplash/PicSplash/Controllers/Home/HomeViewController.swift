@@ -7,6 +7,10 @@
 
 import UIKit
 
+// TODO: REMOVE SAMPLE DATA
+var showSampleData: Bool = false
+
+
 final class HomeViewController: UIViewController {
 	// class vars
 	private static let navMaxHeight: CGFloat = 320.0
@@ -14,6 +18,7 @@ final class HomeViewController: UIViewController {
 	private static let navSnapToTopBuffer: CGFloat = 150.0
 	static let trendingAnimationDuration: TimeInterval = 0.4
 	private static let scrollToTopMargin: CGFloat = 22.0
+	private static let searchResultsTopMargin: CGFloat = 100.0
 
 	
 	// instance vars
@@ -21,9 +26,10 @@ final class HomeViewController: UIViewController {
 		UICollectionView(frame: view.frame, collectionViewLayout: configureCompositionalLayout())
 	}()
 	private var datasource: UICollectionViewDiffableDataSource<PhotoSection, AnyHashable>?
-	lazy var scrollingNavView: ScrollingNavigationView = { // expose to public for view controller transition
-		ScrollingNavigationView(frame: CGRect(origin: .zero,
-																					size: CGSize(width: view.frame.width, height: Self.navMaxHeight)))
+	private var sampleDatasource: UICollectionViewDiffableDataSource<SectionPlaceHolder, ImagePlaceholder>! // TODO: REMOVE SAMPLE DATA
+	lazy var featuredView: FeaturedView = { // expose to public for view controller transition
+		FeaturedView(frame: CGRect(origin: .zero,
+															 size: CGSize(width: view.frame.width, height: Self.navMaxHeight)))
 	}()
 	private let loginFadeView: UIView = UIView(frame: .zero)
 	private let loginView: LoginView = LoginView(frame: .zero)
@@ -41,9 +47,11 @@ final class HomeViewController: UIViewController {
 	var isShowingLoadingView: Bool = false
 	let searchResultsCollectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
 	var searchResultsDatasource: UICollectionViewDiffableDataSource<PhotoSectionType, Photo>?
-	private let scrollToTopView: UIView = UIView(frame: .zero)
+	var sampleSearchResultsDatasource: UICollectionViewDiffableDataSource<SectionPlaceHolder, ImagePlaceholder>? // TODO: REMOVE SAMPLE DATA
 	var isShowingSearchResults: Bool = false
 	private(set) var isShowingKeyboard: Bool = false
+	private let scrollToTopButton: DetailActionButton = DetailActionButton(detailAction: .scroll)
+	private var isShowingScrollToTopButton: Bool = false
 		
 	
 	// MARK: view life cycle
@@ -52,6 +60,14 @@ final class HomeViewController: UIViewController {
 		super.viewDidLoad()
 		
 		view.backgroundColor = .black
+		
+		// TODO: REMOVE SAMPLE DATA
+		if showSampleData {
+			configureSubviews()
+			configureDatasource()
+			applyInitialSnapshot()
+			return
+		}
 		
 		configureSubviews()
 		configureDatasource()
@@ -64,7 +80,8 @@ final class HomeViewController: UIViewController {
 			animateLoadingView(forAppearance: true, withDuration: 0.0, fullScreen: true)
 		}
 		
-		NetworkingManager.shared.downloadHomeInitialData { error in
+		NetworkingManager.shared.downloadHomeInitialData(withPhotoOfTheDayDimensions: CGSize(width: collectionView.bounds.width, height: Self.navMaxHeight),
+																										 withPhotoOfTheDayScale: collectionView.traitCollection.displayScale) { error in
 			DispatchQueue.main.async {
 				// print error & return
 				if let error = error {
@@ -136,6 +153,7 @@ final class HomeViewController: UIViewController {
 		collectionView.contentInset = UIEdgeInsets(top: Self.navMaxHeight, left: 0.0, bottom: 0.0, right: 0.0)
 		collectionView.contentInsetAdjustmentBehavior = .never // by default, behavior adjusts inset 20 pts for status bar
 		collectionView.showsVerticalScrollIndicator = false
+		collectionView.prefetchDataSource = self // prefetching data to spread tasks out over cpus
 		collectionView.scrollsToTop = false // will implement our custom scrollsToTop behavior
 		collectionView.delegate = self
 		collectionView.register(HomeOrthogonalCell.self, forCellWithReuseIdentifier: HomeOrthogonalCell.reuseIdentifier)
@@ -145,8 +163,8 @@ final class HomeViewController: UIViewController {
 														withReuseIdentifier: HomeCollectionReusableView.reuseIdentifier)
 		view.addSubview(collectionView)
 		
-		scrollingNavView.delegate = self // respond to button actions
-		view.addSubview(scrollingNavView) // add after collectionView so it's on top
+		featuredView.delegate = self // respond to button actions
+		view.addSubview(featuredView) // add after collectionView so it's on top
 		
 		// using frames for this view
 		// configure loginFadeView but
@@ -168,17 +186,15 @@ final class HomeViewController: UIViewController {
 		configureTrendingCollectionView()
 		configureLoadingViewAndIndicator()
 		configureSearchResultsCollectionView()
-		
-		// scroll to top
-		scrollToTopView.frame = CGRect(origin: .zero,
-																	 size: CGSize(width: view.bounds.width, height: Self.scrollToTopMargin))
-		view.addSubview(scrollToTopView)
-		view.bringSubviewToFront(scrollToTopView)
-	
-		let scrollToTopTapGesture = UITapGestureRecognizer(target: self, action: #selector(scrollToTopOnTap))
-		scrollToTopTapGesture.numberOfTapsRequired = 1
-		scrollToTopTapGesture.numberOfTouchesRequired = 1
-		scrollToTopView.addGestureRecognizer(scrollToTopTapGesture) // add tap gest to scrollToTopView
+				
+		// scroll to top button
+		scrollToTopButton.frame = CGRect(x: view.bounds.width + DetailActionButton.buttonDimension, // right outside of view
+																		 y: view.bounds.height - DetailActionButton.buttonDimension - 50.0,
+																		 width: DetailActionButton.buttonDimension,
+																		 height: DetailActionButton.buttonDimension)
+		scrollToTopButton.isUserInteractionEnabled = false
+		scrollToTopButton.delegate = self
+		view.addSubview(scrollToTopButton)
 	}
 	
 	private func setPhotoOfTheDayImage() {
@@ -187,13 +203,23 @@ final class HomeViewController: UIViewController {
 		
 		// attempt to set blurred image
 		if let blurredImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: photoOfTheDay.blurString) {
-			scrollingNavView.image = blurredImage
+			featuredView.image = blurredImage
 		}
 		
 		// attempt to set actual image
 		if let image = NetworkingManager.shared.cachedImage(forImageUrlString: photoOfTheDay.imageUrl) {
-			scrollingNavView.image = image
+			featuredView.image = image
 		}
+	}
+	
+	
+	// MARK: helpers
+	
+	private func presentCancelAlert(withMessage message: String) {
+		let alert = UIAlertController(title: "PicSplash", message: message, preferredStyle: .alert)
+		let okAction = UIAlertAction(title: "OK", style: .cancel, handler: nil)
+		alert.addAction(okAction)
+		present(alert, animated: true, completion: nil)
 	}
 		
 }
@@ -271,15 +297,13 @@ extension HomeViewController: LoginViewButtonActionsProvider {
 		}
 	}
 	
-	private func animateLoginView(forKeyboardHeight keyboardHeight: CGFloat) {
-		let viewMidYConstant = (view.bounds.size.height / 2.0) - (loginView.bounds.size.height / 2.0)
-		
-		// make sure loginView is located where we set it at in animateLoginViewAppearance()
-		guard loginViewBottomConstraint?.constant == viewMidYConstant else { return }
-		
-		// subtracting a bit from keyboardHeight so there's a bit of overlap
-		loginViewBottomConstraint?.constant = keyboardHeight - 20.0
-		
+	private func animateLoginView(forKeyboardHeight keyboardHeight: CGFloat, willShow: Bool) {
+		let viewMidXConstant: CGFloat = (view.bounds.size.height / 2.0) - (loginView.bounds.size.height / 2.0)
+		let midXWithKeyboardHeight: CGFloat = keyboardHeight - 20.0 // subtracting a bit from keyboardHeight so there's a bit of overlap
+
+		// set constant based on if keyboard will show or not
+		loginViewBottomConstraint?.constant = willShow ? midXWithKeyboardHeight : viewMidXConstant
+				
 		// duration doesn't matter here because any animations that occur during
 		// keyboard appearance last for the same duration as the keyboard appearing
 		// even if I try to modify the duration - check the keyboard notification
@@ -317,7 +341,7 @@ extension HomeViewController: LoginViewButtonActionsProvider {
 	
 // MARK: scrollNavView/search button actions/delegate methods
 
-extension HomeViewController: ScrollingNavigationButtonsProvider {
+extension HomeViewController: FeaturedViewButtonsProvider {
 	
 	func didPressMenuButton(_ button: UIButton) {
 		// present fresh instance of menu VC modally via sheet
@@ -341,44 +365,145 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 	}
 	
 	func didSearch(withTerm term: String, andFirstResponder firstResponder: UIView) {
-		firstResponder.resignFirstResponder() // resign first responder
+		// TODO: REMOVE SAMPLE DATA
+		if showSampleData {
+			print("term: \(term)")
+
+			firstResponder.resignFirstResponder() // resign first responder
+			
+			// make sure search collection isn't already/still showing
+			// as well as scroll it to top for any following searches
+			if isShowingSearchResults {
+				animateSearchResultsCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration) {
+					self.searchResultsCollectionView.setContentOffset(.zero, animated: false)
+				}
+			}
+			
+			// begin loading and perform search in completion -
+			// this is to prevent case that time to fetch search
+			// results takes less time than our animation
+			if !isShowingLoadingView {
+				animateLoadingView(forAppearance: true, withDuration: Self.trendingAnimationDuration) {
+					sleep(1)
+					
+					// stop loading
+					if self.isShowingLoadingView {
+						self.animateLoadingView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
+					}
+					
+					// if we have photos, show search results
+					if !self.isShowingSearchResults {
+						self.applySearchResultsSnapshot(animating: false) // apply snapshot, then show collectionView
+						
+						// show search results and animate in status bar
+						self.animateSearchResultsCollectionView(forAppearance: true, withDuration: Self.trendingAnimationDuration) { [weak self] in
+							guard let self = self else { return }
+							self.animateScrollToTopButtonForSearchResultsCollectionView(self.searchResultsCollectionView)
+						}
+					}
+					// TODO: SHOW NO SEARCH RESULTS STATE
+					print("NO RESULTS")
+				}
+			}
+
+			return
+		}
 		
-		// begin loading
-		if !isShowingLoadingView {
-			animateLoadingView(forAppearance: true, withDuration: Self.trendingAnimationDuration)
+		print("term: \(term)")
+
+		firstResponder.resignFirstResponder() // resign first responder
+
+		// if search results collection view is showing, we respect
+		// our view structure to make animation appear smooth
+		if isShowingSearchResults {
+			// because of our view structure, animate loading appearearance
+			// instantly and then animate search results away
+			animateLoadingView(forAppearance: true, withDuration: 0.0) { [weak self] in
+				guard let self = self else { return }
+
+				// now that loading is showing, we can animate away
+				// our search results and scroll it to top - after
+				// scrolling to top, perform search
+				self.animateSearchResultsCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration) {
+					self.searchResultsCollectionView.setContentOffset(.zero, animated: false)
+					
+					// hide scroll to top button if showing
+					// make sure to do this after manually
+					// setting the collection view content offset
+					if self.isShowingScrollToTopButton {
+						self.animateScrollToTopButtonAppearance(forAppearance: false)
+					}
+					
+					self.performSearch(withSearchTerm: term) // perform search
+				}
+			}
 		}
 
+		// when trending is the only view showing
+		if !isShowingLoadingView && isShowingTrending {
+			animateLoadingView(forAppearance: true, withDuration: Self.trendingAnimationDuration) { [weak self] in
+				guard let self = self else { return }
+				
+				// make sure search results collection view is scrolled to top
+				self.searchResultsCollectionView.setContentOffset(.zero, animated: false)
+				
+				// hide scroll to top button if showing
+				// make sure to do this after manually
+				// setting the collection view content offset
+				if self.isShowingScrollToTopButton {
+					self.animateScrollToTopButtonAppearance(forAppearance: false)
+				}
+
+				self.performSearch(withSearchTerm: term)
+			}
+		}
+	}
+	
+	private func performSearch(withSearchTerm term: String) {
 		// fetch search term results
 		NetworkingManager.shared.search(withSearchTerm: term) { [weak self] (photos, searchTerm, error) in
 			DispatchQueue.main.async {
 				guard let self = self else { return }
 				
-				// stop loading
-				if self.isShowingLoadingView {
-					self.animateLoadingView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
-				}
-
-				// print error & return
+				// stop loading, present error alert, & return
 				if let error = error {
-					print("Search error - \(error)")
-					return
+					// stop loading
+					if self.isShowingLoadingView {
+						self.animateLoadingView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
+					}
+
+					// present alert with message
+					self.presentCancelAlert(withMessage: "Search error with term: \(searchTerm)\n\(error)")
+
+					return // we're done here
 				}
 				
-				if !photos.isEmpty {
-					// if we have photos, show search results
+				if !photos.isEmpty { // if we have photos, show search results
 					if !self.isShowingSearchResults {
-						self.applySearchResultsSnapshot() // apply snapshot, then show collectionView
+						self.applySearchResultsSnapshot(animating: false) // apply snapshot immediately
 						
-						self.animateSearchResultsCollectionView(forAppearance: true, withDuration: Self.trendingAnimationDuration)
+						// due to our view hierarchy,
+						// show search results with animation
+						// and then hide loading view immediately
+						self.animateSearchResultsCollectionView(forAppearance: true, withDuration: Self.trendingAnimationDuration) { [weak self] in
+							guard let self = self else { return }
+							
+							if self.isShowingLoadingView {
+								self.animateLoadingView(forAppearance: false, withDuration: 0.0)
+							}
+						}
 					}
 				} else {
-					// TODO: SHOW NO SEARCH RESULTS STATE
-					print("NO RESULTS")
+					// stop loading
+					if self.isShowingLoadingView {
+						self.animateLoadingView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
+					}
+
+					// present alert with message
+					self.presentCancelAlert(withMessage: "Sorry! No results found for \(searchTerm)")
 				}
 			}
 		}
-		
-		print("term: \(term)")
 	}
 	
 	// pass first responder so view controller
@@ -388,9 +513,31 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 	func didPressSearchCancelButton(withFirstResponder firstResponder: UIView) {
 		firstResponder.resignFirstResponder() // resign first responder
 		
+		// hide away scroll to top button
+		if isShowingScrollToTopButton {
+			animateScrollToTopButtonAppearance(forAppearance: false)
+		}
+		
 		// dismiss trending collectionView if showing
 		if isShowingTrending {
-			animateTrendingCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
+			// we're taking advantage of the fact that
+			// trending collection view is always showing
+			// during "search" flow, so when user presses
+			// cancel, we check after we dismiss this view
+			// to see if we should be showing the scroll to
+			// to top button for the home collection view
+			animateTrendingCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration) { [weak self] in
+				guard let self = self else { return }
+				
+				// check if we should be presenting
+				// scroll to top button now that
+				// home collection view is showing
+				if -(self.collectionView.contentOffset.y) < Self.navMinHeight {
+					self.animateScrollToTopButtonAppearance(forAppearance: true)
+				} else if -(self.collectionView.contentOffset.y) >= Self.navMaxHeight {
+					self.animateScrollToTopButtonAppearance(forAppearance: false)
+				}
+			}
 		}
 		
 		// dismiss loadingView if showing
@@ -406,12 +553,19 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 	
 	// when user clicks "x" within search bar and there is no first responder
 	func didClearSearchWithNoFirstResponder() {
+		// hide away scroll to top button
+		if isShowingScrollToTopButton {
+			animateScrollToTopButtonAppearance(forAppearance: false)
+		}
+
 		// dismiss loading view if showing
 		if isShowingLoadingView {
 			animateLoadingView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
 		}
 		
 		// dismiss searchResults if showing
+		// and set contentOffset to 0 for any
+		// following searches
 		if isShowingSearchResults {
 			animateSearchResultsCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
 		}
@@ -419,8 +573,15 @@ extension HomeViewController: ScrollingNavigationButtonsProvider {
 
 	// when user clicks "x" within search bar and there is a first responder
 	func didClearSearchWithFirstResponder(_ firstResponder: UIView) {
-		if isShowingKeyboard {
-			firstResponder.endEditing(true)
+		// hide away scroll to top button
+		if isShowingScrollToTopButton {
+			animateScrollToTopButtonAppearance(forAppearance: false)
+		}
+		
+		// animate away search results and
+		// scroll it to top for "following" requests
+		if isShowingSearchResults {
+			animateSearchResultsCollectionView(forAppearance: false, withDuration: Self.trendingAnimationDuration)
 		}
 	}
 	
@@ -498,29 +659,92 @@ extension HomeViewController {
 extension HomeViewController {
 	
 	private func configureDatasource() {
+		// TODO: REMOVE SAMPLE DATA
+		if showSampleData {
+			sampleDatasource = UICollectionViewDiffableDataSource(collectionView: collectionView, cellProvider: {
+						(collectionView, indexPath, imagePlaceholder) -> UICollectionViewCell? in
+								
+						let currentSectionType = sampleData[indexPath.section].type
+						
+						switch currentSectionType {
+						case .orthogonal:
+							guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeOrthogonalCell.reuseIdentifier,
+																																	for: indexPath) as? HomeOrthogonalCell else { return nil }
+							
+							cell.displayText = String(orthogonalPics[indexPath.row].height)
+							cell.displayBackgroundColor = orthogonalPics[indexPath.row].placeholderColor
+							
+							return cell
+						case .main:
+							guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeImageCell.reuseIdentifier,
+																																	for: indexPath) as? HomeImageCell else { return nil }
+							
+							cell.displayText = String(samplePics[indexPath.row].height)
+							cell.displayBackgroundColor = samplePics[indexPath.row].placeholderColor
+							
+							return cell
+						}
+						
+					})
+			configureHomeReusableViewForDatasource()
+			return
+		}
+		
 		datasource = UICollectionViewDiffableDataSource(collectionView: collectionView, cellProvider: {
-			(collectionView, indexPath, imagePlaceholder) -> UICollectionViewCell? in
+			[weak self] (collectionView, indexPath, imagePlaceholder) -> UICollectionViewCell? in
+			
+			guard let self = self else { return nil } // unpack self
 						
 			let currentSection = NetworkingManager.shared.homeImagesSections[indexPath.section]
+			let homeImage = currentSection.items[indexPath.item]
 
 			switch currentSection.type {
 			case .explore:
 				guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeOrthogonalCell.reuseIdentifier,
 																														for: indexPath) as? HomeOrthogonalCell else { return nil }
+								
+				// set blurredImage
+				cell.displayImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: homeImage.blurHashString)
+
+				// fetch & set actual image
+				NetworkingManager.shared.downloadDownsampledImage(forImageUrlString: homeImage.imageUrlString,
+																													forIndexPath: indexPath,
+																													withImageDimensions: cell.bounds.size,
+																													withImageScale: collectionView.traitCollection.displayScale) {
+					(image, error, imageIndexPath) in
+					DispatchQueue.main.async {
+						guard let exploreSectionCell = collectionView.cellForItem(at: imageIndexPath) as? HomeOrthogonalCell else { return }
+						exploreSectionCell.displayImage = image
+					}
+				}
 				
+				cell.displayText = homeImage.displayText
+
 				return cell
 			case .new:
+				// get cell and photo
 				guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeImageCell.reuseIdentifier,
 																														for: indexPath) as? HomeImageCell else { return nil }
+								
+				// set blurredImage
+				cell.displayImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: homeImage.blurHashString)
+				let cellHeight = self.calculateHomeImageHeight(forHomeImage: homeImage)
 
-				// get current photo
-				let photo = currentSection.items[indexPath.row]
-				
+				// fetch & set actual image
+				NetworkingManager.shared.downloadDownsampledImage(forImageUrlString: homeImage.imageUrlString,
+																													forIndexPath: indexPath,
+																													withImageDimensions: CGSize(width: collectionView.bounds.width, height: CGFloat(cellHeight)),
+																													withImageScale: collectionView.traitCollection.displayScale) {
+					(image, error, imageIndexPath) in
+					DispatchQueue.main.async {
+						guard let exploreSectionCell = collectionView.cellForItem(at: imageIndexPath) as? HomeImageCell else { return }
+						exploreSectionCell.displayImage = image
+					}
+				}
+
 				// determine & set cell height from photo dimensions
-				let cellWidth: CGFloat = collectionView.bounds.width
-				let product = cellWidth * CGFloat(photo.imageHeight)
-				let cellHeight: CGFloat = product / CGFloat(photo.imageWidth)
-				cell.imageHeight = Int(cellHeight)
+				cell.imageHeight = cellHeight
+				cell.displayText = homeImage.displayText // set text
 				
 				return cell
 			}
@@ -531,6 +755,27 @@ extension HomeViewController {
 	}
 	
 	private func configureHomeReusableViewForDatasource() {
+		// TODO: REMOVE SAMPLE DATA
+		if showSampleData {
+			sampleDatasource.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
+				guard let self = self else { return nil }
+			 
+			 if kind == UICollectionView.elementKindSectionHeader {
+				 
+				 guard let currentSection = self.sampleDatasource?.snapshot().sectionIdentifiers[indexPath.section],
+							 let reusableView = collectionView.dequeueReusableSupplementaryView(ofKind: kind,
+																																									withReuseIdentifier: HomeCollectionReusableView.reuseIdentifier,
+																																									for: indexPath) as? HomeCollectionReusableView else { return nil }
+				 reusableView.displayText = currentSection.title
+				reusableView.displayStyle = currentSection.type == .orthogonal ? .large : .small
+				 return reusableView
+			 }
+			 
+			 return nil
+		 }
+			return
+		}
+		
 		datasource?.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
 			guard let self = self else { return nil }
 			
@@ -550,6 +795,17 @@ extension HomeViewController {
 	}
 	
 	private func applyInitialSnapshot() {
+		// TODO: REMOVE SAMPLE DATA
+		if showSampleData {
+			var snapshot = NSDiffableDataSourceSnapshot<SectionPlaceHolder, ImagePlaceholder>()
+			snapshot.appendSections(sampleData)
+			sampleData.forEach { sampleSection in
+				snapshot.appendItems(sampleSection.images, toSection: sampleSection)
+			}
+			sampleDatasource.apply(snapshot)
+			return
+		}
+		
 		let homeSections = NetworkingManager.shared.homeImagesSections
 		
 		var snapshot = NSDiffableDataSourceSnapshot<PhotoSection, AnyHashable>()
@@ -579,114 +835,131 @@ extension HomeViewController {
 			self.datasource?.apply(snapshot, animatingDifferences: false)
 		}
 	}
+	
+	// these photos can be huge so we make them proportional in size
+	// to the collection view
+	func calculateHomeImageHeight(forHomeImage homeImage: HomeImageProtocol) -> Int {
+		let cellWidth: CGFloat = collectionView.bounds.width
+		let product = cellWidth * CGFloat(homeImage.imageHeight)
+		let cellHeight: CGFloat = product / CGFloat(homeImage.imageWidth)
+		return Int(cellHeight)
+	}
 
 }
 
 
 
-// MARK: collectionView delegate & relevant methods
+// MARK: collectionView delegate & prefetch methods
 
-extension HomeViewController: UICollectionViewDelegate {
+extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSourcePrefetching {
+	
+	func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
+		indexPaths.forEach { indexPath in
+			// TODO: REMOVE SAMPLE DATA
+			if showSampleData { return }
+
+			// get section & photo for indexPath
+			let section = NetworkingManager.shared.homeImagesSections[indexPath.section]
+			let homeImage = section.items[indexPath.row]
+
+			// make size -
+			// imageWidth for explore section is
+			// rough estimate, not exact as it
+			// doesn't factor in item content insets
+			let imageHeight: CGFloat = section.type == .explore ? 140.0 : CGFloat(self.calculateHomeImageHeight(forHomeImage: homeImage))
+			let imageWidth: CGFloat = section.type == .explore ? collectionView.bounds.width * 0.94 : collectionView.bounds.width
+			let imageDimensions: CGSize = CGSize(width: imageWidth,
+																					 height: imageHeight)
+
+			// fetch & cache downsampled image
+			NetworkingManager.shared.downloadDownsampledImage(forImageUrlString: homeImage.imageUrlString,
+																												forIndexPath: indexPath,
+																												withImageDimensions: imageDimensions,
+																												withImageScale: collectionView.traitCollection.displayScale,
+																												withCompletion: nil)
+		}
+	}
+	
+	func collectionView(_ collectionView: UICollectionView, cancelPrefetchingForItemsAt indexPaths: [IndexPath]) {
+		// TODO: REMOVE SAMPLE DATA
+		if showSampleData { return }
+		
+		indexPaths.forEach { indexPath in
+			// get section & photo for indexPath
+			let section = NetworkingManager.shared.homeImagesSections[indexPath.section]
+			let homeImage = section.items[indexPath.row]
+
+			// ensure we have valid url
+			guard let imageUrl = URL(string: homeImage.imageUrlString) else { return }
+			
+			// cancel operation
+			NetworkingManager.shared.cancelDownloadSampledImageOperation(forImageUrl: imageUrl)
+		}
+	}
 	
 	func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-		let selectedSectionPlaceholder = sampleData[indexPath.section]
+		// TODO: REMOVE SAMPLE DATA
+		if showSampleData {
+			let selectedSectionPlaceholder = sampleData[indexPath.section]
+			
+			// nothing to do for orthogonal cells for now
+			if selectedSectionPlaceholder.type == .orthogonal { return }
+			
+			let selectedImagePlaceholder = selectedSectionPlaceholder.images[indexPath.row]
+			// capture vars for view controller transition
+			selectedCell = collectionView.cellForItem(at: indexPath) as? HomeImageCell
+			selectedCellImageSnapshot = selectedCell?.displayImageView.snapshotView(afterScreenUpdates: false)
+			
+			let detailVC = DetailSampleViewController(imagePlaceholder: selectedImagePlaceholder)
+			detailVC.transitioningDelegate = self
+			detailVC.modalPresentationStyle = .fullScreen
+			present(detailVC, animated: true, completion: nil)
+			return
+		}
 		
-		// nothing to do for orthogonal cells for now
-		if selectedSectionPlaceholder.type == .orthogonal { return }
+		if collectionView == searchResultsCollectionView {
+			// get our photo
+			let photo = NetworkingManager.shared.searchResults.results[indexPath.row]
+
+			// handle photo selection
+			handleSelectedPhoto(photo, atIndexPath: indexPath, withCollectionView: collectionView)
+
+			return
+		}
 		
-		let selectedImagePlaceholder = selectedSectionPlaceholder.images[indexPath.row]
+		let homeSection = NetworkingManager.shared.homeImagesSections[indexPath.section]
+
+		// nothing to do for explore section for now
+		if homeSection.type == .explore { return }
+				
+		// get our photo
+		guard let photo = homeSection.items[indexPath.row] as? Photo else { return }
+		
+		handleSelectedPhoto(photo, atIndexPath: indexPath, withCollectionView: collectionView)
+	}
+	
+	private func handleSelectedPhoto(_ photo: Photo,
+																	 atIndexPath indexPath: IndexPath,
+																	 withCollectionView collectionView: UICollectionView) {
+		// if the photo image has yet to load, do not
+		// allow user to go to detail view controller
+		guard let _ = NetworkingManager.shared.cachedImage(forImageUrlString: photo.imageUrl) else { return }
+
 		// capture vars for view controller transition
 		selectedCell = collectionView.cellForItem(at: indexPath) as? HomeImageCell
 		selectedCellImageSnapshot = selectedCell?.displayImageView.snapshotView(afterScreenUpdates: false)
-		presentDetailViewController(withImagePlaceholder: selectedImagePlaceholder)
-	}
-	
-	func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-		if collectionView == self.collectionView {
-			homeCollectionView(collectionView, willDisplay: cell, forItemAt: indexPath)
-		} else if collectionView == searchResultsCollectionView {
-			searchCollectionView(collectionView, willDisplay: cell, forItemAt: indexPath)
-		}
-	}
-	
-	private func homeCollectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-		// get section & photo for indexPath
-		let section = NetworkingManager.shared.homeImagesSections[indexPath.section]
-		let homeImage = section.items[indexPath.row]
 
-		switch section.type {
-		case .explore:
-			guard let exploreCell = cell as? HomeOrthogonalCell else { return }
+		// hide scroll to top button before presenting
+		animateScrollToTopButtonFade(forPresenting: true)
 
-			// set blurredImage
-			exploreCell.displayImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: homeImage.blurHashString)
-
-			// fetch & set actual image
-			NetworkingManager.shared.downloadImage(forImageUrlString: homeImage.imageUrlString, forIndexPath: indexPath) { image, error, itemIndexPath in
-				DispatchQueue.main.async {
-					guard let exploreSectionCell = collectionView.cellForItem(at: itemIndexPath) as? HomeOrthogonalCell else { return }
-					exploreSectionCell.displayImage = image
-				}
-			}
-		case .new:
-			guard let newCell = cell as? HomeImageCell else { return }
-
-			// set blurredImage
-			newCell.displayImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: homeImage.blurHashString)
-
-			// fetch & set actual image
-			NetworkingManager.shared.downloadImage(forImageUrlString: homeImage.imageUrlString, forIndexPath: indexPath) { image, error, itemIndexPath in
-				DispatchQueue.main.async {
-					guard let newSectionCell = collectionView.cellForItem(at: itemIndexPath) as? HomeImageCell else { return }
-					newSectionCell.displayImage = image
-				}
-			}
-		}
-	}
-	
-	private func searchCollectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-		let photo = NetworkingManager.shared.searchResults.results[indexPath.row]
-		
-		guard let cell = cell as? HomeImageCell else { return }
-		
-		// set blurred image
-		cell.displayImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: photo.blurString)
-		
-		// fetch and set actual image for cell
-		NetworkingManager.shared.downloadImage(forImageUrlString: photo.imageUrl, forIndexPath: indexPath) { image, error, itemIndexPath in
-			DispatchQueue.main.async {
-				guard let searchResultsCell = collectionView.cellForItem(at: itemIndexPath) as? HomeImageCell else { return }
-				searchResultsCell.displayImage = image
-			}
-		}
-	}
-	
-	func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-		if collectionView == self.collectionView {
-			homeCollectionView(collectionView, didEndDisplaying: cell, forItemAt: indexPath)
-		} else if collectionView == searchResultsCollectionView {
-			searchCollectionView(collectionView, didEndDisplaying: cell, forItemAt: indexPath)
-		}
+		// present detail view controller
+		presentDetailViewController(withPhoto: photo)
 	}
 		
-	private func homeCollectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-		// this is specifically for the workaround in
-		// applyInitialSnapshot() - we don't want to
-		// lower the queue priority of the first 1-2 cells
-		if indexPath.row == 0 { return }
-		
-		let sections = NetworkingManager.shared.homeImagesSections
-		let noLongerDisplayingHomeImage = sections[indexPath.section].items[indexPath.row]
-		NetworkingManager.shared.lowerQueuePriority(forImageUrlString: noLongerDisplayingHomeImage.imageUrlString)
-	}
-	
-	private func searchCollectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-		let noLongerDisplayingSearchImage = NetworkingManager.shared.searchResults.results[indexPath.row]
-		NetworkingManager.shared.lowerQueuePriority(forImageUrlString: noLongerDisplayingSearchImage.imageUrlString)
-	}
-	
-	private func presentDetailViewController(withImagePlaceholder imagePlaceholder: ImagePlaceholder) {
-		let detailVC = DetailViewController(imagePlaceholder: imagePlaceholder)
+	private func presentDetailViewController(withPhoto photo: Photo) {
+		let detailVC = DetailViewController(photo: photo,
+																				withCalculatedHeight: CGFloat(calculateHomeImageHeight(forHomeImage: photo)))
+		detailVC.delegate = self
 		detailVC.transitioningDelegate = self
 		detailVC.modalPresentationStyle = .fullScreen
 		present(detailVC, animated: true, completion: nil)
@@ -709,10 +982,10 @@ extension HomeViewController: UIViewControllerTransitioningDelegate {
 					let detailViewController = presented as? DetailViewController,
 					let selectedCellImageSnapshot = selectedCellImageSnapshot else { return nil }
 		
-		let detailAnimator = DetailAnimator(presentationType: .present,
-																				homeViewController: homeViewController,
-																				detailViewController: detailViewController,
-																				selectedImageViewSnapshot: selectedCellImageSnapshot)
+		let detailAnimator = HomeDetailAnimator(presentationType: .present,
+																						homeViewController: homeViewController,
+																						detailViewController: detailViewController,
+																						selectedImageViewSnapshot: selectedCellImageSnapshot)
 		return detailAnimator
 	}
 	
@@ -721,10 +994,10 @@ extension HomeViewController: UIViewControllerTransitioningDelegate {
 		guard let detailViewController = dismissed as? DetailViewController,
 					let selectedCellImageSnapshot = selectedCellImageSnapshot else { return nil }
 		
-		let detailAnimator = DetailAnimator(presentationType: .dismiss,
-																				homeViewController: self,
-																				detailViewController: detailViewController,
-																				selectedImageViewSnapshot: selectedCellImageSnapshot)
+		let detailAnimator = HomeDetailAnimator(presentationType: .dismiss,
+																						homeViewController: self,
+																						detailViewController: detailViewController,
+																						selectedImageViewSnapshot: selectedCellImageSnapshot)
 		return detailAnimator
 	}
 	
@@ -738,7 +1011,7 @@ extension HomeViewController: DetailButtonActionsProvider {
 	
 	func didPressCloseButton(_ sender: UIButton) {
 		// detailVC closes itself but we still receive action
-		print("CLOSE")
+		self.animateScrollToTopButtonFade(forPresenting: false)
 	}
 	
 	func didPressShareButton(_ sender: UIButton) {
@@ -751,9 +1024,15 @@ extension HomeViewController: DetailButtonActionsProvider {
 
 // MARK: scrollview delegate & relevant methods
 
-extension HomeViewController {
+extension HomeViewController: DetailActionButtonsProvider {
 	
 	func scrollViewDidScroll(_ scrollView: UIScrollView) {
+		// search results collection view logic
+		animateScrollToTopButtonForSearchResultsCollectionView(scrollView)
+		
+		// only do this logic for our home collection view
+		if scrollView != self.collectionView { return }
+		
 		// offset will begin as negative from origin since
 		// we're using contentInsets on collectionView, so
 		// we'll negate it to work with positive values
@@ -766,9 +1045,9 @@ extension HomeViewController {
 		let height: CGFloat = max(offset, Self.navMinHeight)
 		
 		// update frames
-		var scrollNavViewFrame: CGRect = scrollingNavView.frame
+		var scrollNavViewFrame: CGRect = featuredView.frame
 		scrollNavViewFrame.size.height = height
-		scrollingNavView.frame = scrollNavViewFrame
+		featuredView.frame = scrollNavViewFrame
 		
 		
 		// logic to handle setting alphas on scrollingNavView subviews
@@ -778,11 +1057,20 @@ extension HomeViewController {
 			let absoluteHeight = abs(height - Self.navMaxHeight) // represents new number
 			let difference = desiredScrollRange - absoluteHeight
 			let percentDifference = difference / desiredScrollRange
-			scrollingNavView.animateSubviews(forScrollDelta: percentDifference)
+			featuredView.animateSubviews(forScrollDelta: percentDifference)
 		} else if offset <= Self.navMinHeight {
-			scrollingNavView.animateSubviews(forScrollDelta: 0.0)
+			featuredView.animateSubviews(forScrollDelta: 0.0)
 		} else if offset >= Self.navMaxHeight {
-			scrollingNavView.animateSubviews(forScrollDelta: 1.0)
+			featuredView.animateSubviews(forScrollDelta: 1.0)
+		}
+		
+		
+		// logic to scroll to top button showing/disappearing
+		
+		if offset < Self.navMinHeight {
+			animateScrollToTopButtonAppearance(forAppearance: true)
+		} else if offset >= Self.navMaxHeight {
+			animateScrollToTopButtonAppearance(forAppearance: false)
 		}
 	}
 		
@@ -823,6 +1111,14 @@ extension HomeViewController {
 	}
 	
 	@objc private func scrollToTopOnTap(_ tapGesture: UITapGestureRecognizer) {
+		// detect which collectionView is
+		// showing and handle accordingly
+		if isShowingSearchResults {
+			searchResultsCollectionView.setContentOffset(.zero, animated: true)
+			return
+		}
+		
+		// get offset
 		let offset = -collectionView.contentOffset.y
 		
 		if offset < Self.navMinHeight {
@@ -834,20 +1130,77 @@ extension HomeViewController {
 		}
 	}
 	
-	// these overrides are relevant in this extension
-	// because they allow for interacting with the top
-	// edge of screen (where our tap gest is at for
-	// custom scrollToTop behavior) and the showing/hiding
-	// of status bar which is required to interact with
-	// that area
-	override var preferredScreenEdgesDeferringSystemGestures: UIRectEdge {
-		return [.top]
+	private func animateScrollToTopButtonForSearchResultsCollectionView(_ scrollView: UIScrollView) {
+		if scrollView == self.searchResultsCollectionView && self.isShowingSearchResults {
+			if scrollView.contentOffset.y <= 0.0 {
+				animateScrollToTopButtonAppearance(forAppearance: false)
+			} else if scrollView.contentOffset.y > Self.searchResultsTopMargin {
+				animateScrollToTopButtonAppearance(forAppearance: true)
+			}
+		}
 	}
 	
-	override var prefersStatusBarHidden: Bool {
-		true
-	}
+	private func animateScrollToTopButtonAppearance(forAppearance appearance: Bool,
+																									withCompletion completion: (() -> ())? = nil) {
+		if isShowingScrollToTopButton == appearance { return }
+		
+		// set initial states
+		let isShowingOriginX: CGFloat = view.bounds.width - DetailActionButton.buttonDimension - 16.0
+		let isHidingOriginX: CGFloat = view.bounds.width + DetailActionButton.buttonDimension
+		let buttonOriginX: CGFloat = appearance ? isHidingOriginX : isShowingOriginX
+		var buttonRect = CGRect(x: buttonOriginX,
+														y: view.bounds.height - DetailActionButton.buttonDimension - 50.0,
+														width: DetailActionButton.buttonDimension,
+														height: DetailActionButton.buttonDimension)
+		scrollToTopButton.frame = buttonRect
+		scrollToTopButton.alpha = appearance ? 0.0 : 1.0
+		
+		// perform animations
+		UIView.animateKeyframes(withDuration: Self.trendingAnimationDuration,
+														delay: 0.0, options: .calculationModeCubic) {
+			
+			UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 0.5) {
+				self.scrollToTopButton.alpha = appearance ? 1.0 : 0.0
+			}
 
+			UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 1.0) {
+				buttonRect.origin.x = appearance ? isShowingOriginX : isHidingOriginX
+				self.scrollToTopButton.frame = buttonRect
+			}
+
+		} completion: { _ in
+			// update user interaction for appearance
+			self.scrollToTopButton.isUserInteractionEnabled = appearance
+			
+			// update our state for appearance
+			self.isShowingScrollToTopButton = appearance
+	
+			completion?()
+		}
+	}
+	
+	// only use this method when presenting/dismissing a view controller
+	// from the view controller that uses scroll to top button - in our
+	// case, we're calling this method to fade in/out scrollToTop button
+	// from home view controller when presenting/dismissing detail view controller
+	private func animateScrollToTopButtonFade(forPresenting isPresenting: Bool) {
+		scrollToTopButton.alpha = isPresenting ? 1.0 : 0.0
+		
+		UIView.animate(withDuration: 0.25) {
+			self.scrollToTopButton.alpha = isPresenting ? 0.0 : 1.0
+		}
+	}
+	
+	func didPressDetailActionButton(_ detailAction: DetailAction) {
+		if detailAction == .scroll {
+			if isShowingSearchResults {
+				searchResultsCollectionView.setContentOffset(.zero, animated: true)
+			} else {
+				collectionView.setContentOffset(CGPoint(x: 0.0, y: -Self.navMaxHeight), animated: true)
+			}
+		}
+	}
+	
 }
 
 
@@ -884,16 +1237,26 @@ extension HomeViewController {
 			
 			let keyboardHeight = keyboardHeightNSValue.cgRectValue.height
 			
-			animateLoginView(forKeyboardHeight: keyboardHeight)
+			animateLoginView(forKeyboardHeight: keyboardHeight, willShow: true)
 		}
 		
-		scrollingNavView.setShowsCancelButton(shows: true, animated: true)
+		featuredView.setShowsCancelButton(shows: true, animated: true)
 		
 		isShowingKeyboard = true
 	}
 	
 	@objc func keyboardWillHide(notification: NSNotification) {
-		scrollingNavView.setShowsCancelButton(shows: false, animated: true)
+		if isShowingLoginView {
+			// unpack keyboard height
+			guard let userInfoDict = notification.userInfo,
+						let keyboardHeightNSValue = userInfoDict[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else { return }
+			
+			let keyboardHeight = keyboardHeightNSValue.cgRectValue.height
+			
+			animateLoginView(forKeyboardHeight: keyboardHeight, willShow: false)
+		}
+		
+		featuredView.setShowsCancelButton(shows: false, animated: true)
 		
 		isShowingKeyboard = false
 	}

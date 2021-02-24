@@ -1,15 +1,15 @@
 //
-//  ScrollingNavigationView.swift
+//  FeaturedView.swift
 //  PicSplash
 //
-//  Created by Marcus on 2/7/21.
+//  Created by Marcus on 2/23/21.
 //
 
 import UIKit
 
 // delegating button press tasks
 
-protocol ScrollingNavigationButtonsProvider: AnyObject {
+protocol FeaturedViewButtonsProvider: AnyObject {
 	func didPressMenuButton(_ button: UIButton)
 	func didPressLogInButton(_ button: UIButton)
 	func didPressSearchCancelButton(withFirstResponder firstResponder: UIView)
@@ -20,7 +20,7 @@ protocol ScrollingNavigationButtonsProvider: AnyObject {
 }
 
 
-class ScrollingNavigationView: UIView {
+class FeaturedView: UIView {
 	// static vars
 	private static let buttonDimension: CGFloat = 40.0
 	
@@ -30,11 +30,11 @@ class ScrollingNavigationView: UIView {
 	private let displayLabel: UILabel = UILabel(frame: .zero)
 	private let searchBar: UISearchBar = UISearchBar(frame: .zero)
 	private let displayImageView: UIImageView = UIImageView(frame: .zero)
-	private let gradientOverlayView: ImageShadowOverlayView = ImageShadowOverlayView(overlayStyle: .full)
+	private let gradientOverlayView: ImageShadowOverlayView = ImageShadowOverlayView(overlayStyle: .full(nil))
 	private let buttonsStackView: UIStackView = UIStackView(frame: .zero)
 	private let loginButton: UIButton = UIButton(type: .system)
 	private let menuButton: UIButton = UIButton(type: .system)
-	weak var delegate: ScrollingNavigationButtonsProvider?
+	weak var delegate: FeaturedViewButtonsProvider?
 	private var shouldBeginEditing: Bool = true // to receive calls from user clicking x within search bar - see below
 
 	
@@ -104,7 +104,7 @@ class ScrollingNavigationView: UIView {
 		loginButton.addTarget(self, action: #selector(loginButtonPressed), for: .touchUpInside)
 
 		vertStackView.translatesAutoresizingMaskIntoConstraints = false
-		vertStackView.spacing = 0.0
+		vertStackView.spacing = 8.0
 		[displayLabel, searchBar].forEach { vertStackView.addArrangedSubview($0) }
 		vertStackView.axis = .vertical
 		vertStackView.distribution = .fill
@@ -125,6 +125,7 @@ class ScrollingNavigationView: UIView {
 		searchBar.searchBarStyle = .minimal
 		searchBar.tintColor = .white // set Cancel button tint color
 		searchBar.searchTextField.leftView?.tintColor = .white // set magnifying glass tintColor
+		searchBar.searchTextField.backgroundColor = UIColor.picSplashBlack.withAlphaComponent(0.2)
 		searchBar.searchTextField.delegate = self // to receive textField should clear events
 	}
 	
@@ -140,16 +141,16 @@ class ScrollingNavigationView: UIView {
 		gradientOverlayView.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
 		
 		buttonsStackView.topAnchor.constraint(equalTo: topAnchor, constant: 20.0).isActive = true
-		buttonsStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20.0).isActive = true
-		buttonsStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20.0).isActive = true
+		buttonsStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16.0).isActive = true
+		buttonsStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16.0).isActive = true
 		buttonsStackView.heightAnchor.constraint(equalToConstant: Self.buttonDimension).isActive = true
 		
 		menuButton.widthAnchor.constraint(equalTo: buttonsStackView.heightAnchor).isActive = true
 
 		loginButton.widthAnchor.constraint(equalTo: menuButton.widthAnchor).isActive = true
 
-		vertStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20.0).isActive = true
-		vertStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20.0).isActive = true
+		vertStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16.0).isActive = true
+		vertStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16.0).isActive = true
 		vertStackView.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
 				
 		// willing to break this constraint to satisfy bottom constraint
@@ -175,7 +176,7 @@ class ScrollingNavigationView: UIView {
 
 }
 
-extension ScrollingNavigationView: UISearchBarDelegate {
+extension FeaturedView: UISearchBarDelegate {
 	func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
 		searchBar.text = "" // reset text
 		delegate?.didPressSearchCancelButton(withFirstResponder: searchBar)
@@ -207,7 +208,7 @@ extension ScrollingNavigationView: UISearchBarDelegate {
 	
 }
 
-extension ScrollingNavigationView: UITextFieldDelegate {
+extension FeaturedView: UITextFieldDelegate {
 	func textFieldShouldClear(_ textField: UITextField) -> Bool {
 		delegate?.didClearSearchWithFirstResponder(textField)
 		return true

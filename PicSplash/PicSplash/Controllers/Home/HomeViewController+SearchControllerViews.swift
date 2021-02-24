@@ -106,7 +106,9 @@ extension HomeViewController {
 		trendingDatasource?.apply(trendingSnapshot, animatingDifferences: true)
 	}
 	
-	func animateTrendingCollectionView(forAppearance willAppear: Bool, withDuration duration: TimeInterval = 0.03) {
+	func animateTrendingCollectionView(forAppearance willAppear: Bool,
+																		 withDuration duration: TimeInterval = 0.03,
+																		 withCompletion completion: (() -> ())? = nil) {
 		UIView.animate(withDuration: duration,
 									 delay: 0.0, options: .curveEaseInOut) {
 			self.trendingCollectionView.alpha = willAppear ? 1.0 : 0.0
@@ -116,6 +118,8 @@ extension HomeViewController {
 						
 			// manage state
 			self.isShowingTrending = willAppear
+			
+			completion?()
 		}
 	}
 	
@@ -153,7 +157,8 @@ extension HomeViewController {
 	func animateLoadingView(forAppearance willAppear: Bool,
 													withDuration duration: TimeInterval = 0.03,
 													withDelay delay: TimeInterval = 0.0,
-													fullScreen: Bool = false) {
+													fullScreen: Bool = false,
+													completion: (() -> ())? = nil) {
 		loadingViewTopConstraint?.constant = fullScreen ? 0.0 : Self.navMinHeight // size loadingView correctly
 		loadingView.alpha = willAppear ? 0.0 : 1.0
 		loadingActivityActivator.alpha = willAppear ? 0.0 : 1.0
@@ -181,6 +186,8 @@ extension HomeViewController {
 			if !willAppear {				
 				self.loadingActivityActivator.stopAnimating()
 			}
+			
+			completion?()
 		}
 	}
 	
@@ -192,15 +199,17 @@ extension HomeViewController {
 		// use pre-existing cell & compositionalLayout section
 		searchResultsCollectionView.collectionViewLayout = UICollectionViewCompositionalLayout(section: sectionLayoutForHomeImageCell())
 		searchResultsCollectionView.translatesAutoresizingMaskIntoConstraints = false
+		searchResultsCollectionView.showsVerticalScrollIndicator = false
 		searchResultsCollectionView.register(HomeImageCell.self, forCellWithReuseIdentifier: HomeImageCell.reuseIdentifier)
 		searchResultsCollectionView.alpha = 0.0
 		searchResultsCollectionView.delegate = self
+		searchResultsCollectionView.prefetchDataSource = self // prefetching data to spread tasks out over cpus
 		searchResultsCollectionView.isUserInteractionEnabled = false
 		view.addSubview(searchResultsCollectionView)
 		
 		constrainSearchResultsCollectionView()
 		configureSearchResultsDatasource()
-		applySearchResultsSnapshot()
+		applySearchResultsSnapshot(animating: true)
 	}
 	
 	private func constrainSearchResultsCollectionView() {
@@ -211,6 +220,24 @@ extension HomeViewController {
 	}
 	
 	private func configureSearchResultsDatasource() {
+		// TODO: REMOVE SAMPLE DATA
+		if showSampleData {
+			sampleSearchResultsDatasource = UICollectionViewDiffableDataSource(collectionView: searchResultsCollectionView, cellProvider: {
+				(collectionView, indexPath, _) -> UICollectionViewCell? in
+				
+				guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeImageCell.reuseIdentifier,
+																														for: indexPath) as? HomeImageCell else { return nil }
+				
+				let section = searchResultsSampleData[indexPath.section]
+				
+				cell.displayText = String(section.images[indexPath.row].height)
+				cell.displayBackgroundColor = section.images[indexPath.row].placeholderColor
+				
+				return cell
+			})
+			return
+		}
+		
 		searchResultsDatasource = UICollectionViewDiffableDataSource(collectionView: searchResultsCollectionView, cellProvider: {
 			(collectionView, indexPath, _) -> UICollectionViewCell? in
 			
@@ -219,23 +246,46 @@ extension HomeViewController {
 			
 			// get current photo
 			let photo = NetworkingManager.shared.searchResults.results[indexPath.row]
-			
+
+			// set blurredImage
+			cell.displayImage = NetworkingManager.shared.cachedBlurredImage(forBlurHashString: photo.blurHashString)
+			let cellHeight = self.calculateHomeImageHeight(forHomeImage: photo)
+
+			// fetch & set actual image
+			NetworkingManager.shared.downloadDownsampledImage(forImageUrlString: photo.imageUrlString,
+																												forIndexPath: indexPath,
+																												withImageDimensions: CGSize(width: collectionView.bounds.width, height: CGFloat(cellHeight)),
+																												withImageScale: collectionView.traitCollection.displayScale) {
+				(image, error, imageIndexPath) in
+				DispatchQueue.main.async {
+					guard let exploreSectionCell = collectionView.cellForItem(at: imageIndexPath) as? HomeImageCell else { return }
+					exploreSectionCell.displayImage = image
+				}
+			}
+
 			// determine & set cell height from photo dimensions
-			let cellWidth: CGFloat = collectionView.bounds.width
-			let product = cellWidth * CGFloat(photo.imageHeight)
-			let cellHeight: CGFloat = product / CGFloat(photo.imageWidth)
-			cell.imageHeight = Int(cellHeight)
+			cell.imageHeight = cellHeight
+			cell.displayText = photo.author // set text
 			
 			return cell
 		})
 	}
 	
-	func applySearchResultsSnapshot() {
+	func applySearchResultsSnapshot(animating: Bool) {
+		// TODO: REMOVE SAMPLE DATA
+		if showSampleData {
+			var searchResultsSnapshot = NSDiffableDataSourceSnapshot<SectionPlaceHolder, ImagePlaceholder>()
+			searchResultsSnapshot.appendSections(searchResultsSampleData)
+			searchResultsSampleData.forEach { searchResultsSnapshot.appendItems($0.images, toSection: $0) }
+			sampleSearchResultsDatasource?.apply(searchResultsSnapshot)
+			return
+		}
+		
 		let newSection: PhotoSectionType = PhotoSectionType.new
 		var searchResultsSnapshot = NSDiffableDataSourceSnapshot<PhotoSectionType, Photo>()
 		searchResultsSnapshot.appendSections([newSection]) // doesn't matter which section we pass - only displaying 1 section
 		searchResultsSnapshot.appendItems(NetworkingManager.shared.searchResults.results, toSection: newSection)
-		searchResultsDatasource?.apply(searchResultsSnapshot, animatingDifferences: true, completion: nil)
+		searchResultsDatasource?.apply(searchResultsSnapshot, animatingDifferences: animating, completion: nil)
 	}
 	
 	func animateSearchResultsCollectionView(forAppearance willAppear: Bool,

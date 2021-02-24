@@ -91,7 +91,7 @@ class NewSectionOperation: AsyncOperation {
 		}
 		
 		// only 50/hr
-		print("REQUESTS REMAINING: \(httpResponse.allHeaderFields["x-ratelimit-remaining"]) :(")
+		print("REQUESTS REMAINING: \(httpResponse.allHeaderFields["x-ratelimit-remaining"] ?? "") :(")
 			
 		// unpack data & deserialize response data into JSON
 		guard let data = data,
@@ -110,9 +110,9 @@ class NewSectionOperation: AsyncOperation {
 						let height: Int = item["height"] as? Int,
 						let id: String = item["id"] as? String,
 						let userDict: [String: Any] = item["user"] as? [String: Any],
-						let userName: String = userDict["username"] as? String,
+						let userName: String = userDict["name"] as? String,
 						let urlsDict: [String: String] = item["urls"] as? [String: String],
-						let imageUrl: String = urlsDict["small"]
+						let imageUrl: String = urlsDict["regular"]
 			else { return } // should I throw NetworkError here?
 			
 			newSectionPhotos.append(Photo(id: id,

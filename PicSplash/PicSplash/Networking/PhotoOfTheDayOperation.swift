@@ -80,7 +80,7 @@ class PhotoOfTheDayOperation: AsyncOperation {
 		}
 
 		// only 50/hr
-		print("REQUESTS REMAINING: \(httpResponse.allHeaderFields["x-ratelimit-remaining"]) :(")
+		print("REQUESTS REMAINING: \(httpResponse.allHeaderFields["x-ratelimit-remaining"] ?? "") :(")
 
 		// unpack data & deserialize response data into JSON
 		guard let data = data,
@@ -91,9 +91,9 @@ class PhotoOfTheDayOperation: AsyncOperation {
 		
 		// unpack necessary vars
 		guard let urlsDict = json["urls"] as? [String: String],
-					let imageUrl = urlsDict["small"],
+					let imageUrl = urlsDict["regular"],
 					let userDict = json["user"] as? [String: Any],
-					let username = userDict["username"] as? String,
+					let username = userDict["name"] as? String,
 					let blurHash = json["blur_hash"] as? String,
 					let id = json["id"] as? String,
 					let width = json["width"] as? Int,

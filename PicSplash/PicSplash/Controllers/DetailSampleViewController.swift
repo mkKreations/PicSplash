@@ -1,26 +1,22 @@
 //
-//  DetailViewController.swift
+//  DetailSampleViewController.swift
 //  PicSplash
 //
-//  Created by Marcus on 2/11/21.
+//  Created by Marcus on 2/22/21.
 //
 
 import UIKit
 
-protocol DetailButtonActionsProvider: AnyObject {
-	func didPressCloseButton(_ sender: UIButton)
-	func didPressShareButton(_ sender: UIButton)
-}
+// TODO: REMOVE SAMPLE DATA
 
-class DetailViewController: UIViewController {
+class DetailSampleViewController: UIViewController {
 	// class vars
 	static private let tapFadeAnimationDuration: TimeInterval = 0.5
 	static private let navStackViewTopMargin: CGFloat = 30.0
 	
 	// internal vars
 	let detailImageView: UIImageView = UIImageView(frame: .zero) // expose to public for view controller transition
-	private let detailPhoto: Photo
-	private let calculatedDetailPhotoHeight: CGFloat
+	private var imagePlaceholder: ImagePlaceholder
 	let closeButton: UIButton = UIButton(type: .system)
 	let titleLabel: UILabel = UILabel(frame: .zero)
 	let shareButton: UIButton = UIButton(type: .system)
@@ -37,9 +33,8 @@ class DetailViewController: UIViewController {
 	
 	// MARK: inits
 	
-	init(photo: Photo, withCalculatedHeight height: CGFloat) {
-		self.detailPhoto = photo
-		self.calculatedDetailPhotoHeight = height
+	init(imagePlaceholder: ImagePlaceholder) {
+		self.imagePlaceholder = imagePlaceholder
 		super.init(nibName: nil, bundle: nil)
 	}
 	
@@ -127,9 +122,8 @@ class DetailViewController: UIViewController {
 	
 	private func configureSubviews() {
 		detailImageView.translatesAutoresizingMaskIntoConstraints = false
-		detailImageView.image = NetworkingManager.shared.cachedImage(forImageUrlString: detailPhoto.imageUrl)
-		detailImageView.contentMode = .scaleAspectFill
-		detailImageView.clipsToBounds = true
+		detailImageView.backgroundColor = imagePlaceholder.placeholderColor
+		detailImageView.contentMode = .scaleAspectFit
 		view.addSubview(detailImageView)
 		
 		navStackView.translatesAutoresizingMaskIntoConstraints = false
@@ -155,7 +149,7 @@ class DetailViewController: UIViewController {
 		titleLabel.textColor = .white
 		titleLabel.numberOfLines = 1
 		titleLabel.textAlignment = .center
-		titleLabel.text = detailPhoto.author
+		titleLabel.text = "\(imagePlaceholder.height)"
 		
 		infoButton.translatesAutoresizingMaskIntoConstraints = false
 		infoButton.setBackgroundImage(UIImage(systemName: "info.circle"), for: .normal)
@@ -177,7 +171,20 @@ class DetailViewController: UIViewController {
 		detailImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
 		detailImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
 		detailImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
-		detailImageView.heightAnchor.constraint(equalToConstant: CGFloat(calculatedDetailPhotoHeight)).isActive = true
+		
+		// low priority on this constraint to maintain image in view
+		let imageHeightConstraint = detailImageView.heightAnchor.constraint(equalToConstant: CGFloat(imagePlaceholder.height))
+		imageHeightConstraint.priority = UILayoutPriority(500)
+		imageHeightConstraint.isActive = true
+		
+		// if imageView is too tall - respect top & bottom constraints
+		let imageTopConstraint = detailImageView.topAnchor.constraint(greaterThanOrEqualTo: view.topAnchor, constant: 24.0)
+		imageTopConstraint.priority = UILayoutPriority(999)
+		imageTopConstraint.isActive = true
+
+		let imageBottomConstraint = view.bottomAnchor.constraint(greaterThanOrEqualTo: detailImageView.bottomAnchor, constant: 24.0)
+		imageBottomConstraint.priority = UILayoutPriority(999)
+		imageBottomConstraint.isActive = true
 		
 		navStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16.0).isActive = true
 		navStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16.0).isActive = true
@@ -218,8 +225,7 @@ class DetailViewController: UIViewController {
 
 
 // MARK: DetailActionButtonsProvider conformance
-
-extension DetailViewController: DetailActionButtonsProvider {
+extension DetailSampleViewController: DetailActionButtonsProvider {
 	func didPressDetailActionButton(_ detailAction: DetailAction) {
 		// TODO: implement
 		print(detailAction)

@@ -14,7 +14,7 @@ class HomeOrthogonalCell: UICollectionViewCell {
 	
 	// instance vars
 	private let displayImageView: UIImageView = UIImageView(frame: .zero)
-	private let gradientOverlayView: ImageShadowOverlayView = ImageShadowOverlayView(overlayStyle: .full)
+	private let gradientOverlayView: ImageShadowOverlayView = ImageShadowOverlayView(overlayStyle: .full(0.4))
 	private let displayLabel: UILabel = UILabel(frame: .zero)
 	private let loader: UIActivityIndicatorView = UIActivityIndicatorView(style: .large)
 
@@ -83,6 +83,7 @@ class HomeOrthogonalCell: UICollectionViewCell {
 		displayLabel.translatesAutoresizingMaskIntoConstraints = false
 		displayLabel.textColor = .white
 		displayLabel.textAlignment = .center
+		displayLabel.font = UIFont.systemFont(ofSize: 14.0, weight: .semibold)
 		contentView.addSubview(displayLabel)
 		
 		loader.translatesAutoresizingMaskIntoConstraints = false
@@ -102,8 +103,8 @@ class HomeOrthogonalCell: UICollectionViewCell {
 
 		displayLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor).isActive = true
 		displayLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor).isActive = true
-		displayLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 10.0).isActive = true
-		displayLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -10.0).isActive = true
+		displayLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16.0).isActive = true
+		displayLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16.0).isActive = true
 		
 		loader.centerYAnchor.constraint(equalTo: contentView.centerYAnchor).isActive = true
 		loader.centerXAnchor.constraint(equalTo: contentView.centerXAnchor).isActive = true

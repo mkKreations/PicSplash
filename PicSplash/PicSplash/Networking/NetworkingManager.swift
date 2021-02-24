@@ -25,6 +25,7 @@ class NetworkingManager {
 	
 	// class vars
 	static private let baseUrlString: String = "https://api.unsplash.com"
+	static private let downsampleImageQueueId: String = UUID().uuidString
 	
 	
 	// singleton
@@ -34,14 +35,21 @@ class NetworkingManager {
 	
 	// MARK: instance vars
 	
-	private let imageDownloadQueue: OperationQueue = {
+	private let defaultQueue: OperationQueue = {
+		// concurrent queue will be used as default,
+		// default doesn't correspond to the qos
 		let operationQueue = OperationQueue()
 		operationQueue.qualityOfService = .userInteractive
 		return operationQueue
 	}()
-	private let searchQueue: OperationQueue = {
+	private let imageDownsampleQueue: OperationQueue = {
+		// the serial dispatch queue to run our operations on
+		let serialDispatchQueue = DispatchQueue(label: NetworkingManager.downsampleImageQueueId, qos: .userInteractive)
+		
 		let operationQueue = OperationQueue()
+		operationQueue.underlyingQueue = serialDispatchQueue
 		operationQueue.qualityOfService = .userInteractive
+
 		return operationQueue
 	}()
 	private let imageDownloadCache: NSCache<NSString, UIImage> = NSCache()
@@ -60,17 +68,6 @@ class NetworkingManager {
 	
 	// MARK: helpers
 
-	// we're not cancelling operations - instead we're keeping track
-	// of all current operations and managing their queue priorities
-	func lowerQueuePriority(forImageUrlString imageUrlString: String) {
-		// ensure we have the operation running in the queue
-		guard let operations = (imageDownloadQueue.operations as? [ImageDownloadOperation])?
-						.filter({ $0.imageUrl.absoluteString == imageUrlString && $0.isExecuting == true && $0.isFinished == false }),
-					let currentOperation = operations.first else { return }
-		print("REDUCE THE QUEUE PRIORITY OF OPERATION \(imageUrlString)")
-		currentOperation.queuePriority = .low // if so, lower its priority
-	}
-
 	func cachedBlurredImage(forBlurHashString blurHash: String) -> UIImage? {
 		imageDownloadCache.object(forKey: NSString(string: blurHash))
 	}
@@ -78,39 +75,7 @@ class NetworkingManager {
 	func cachedImage(forImageUrlString imageUrlString: String) -> UIImage? {
 		imageDownloadCache.object(forKey: NSString(string: imageUrlString))
 	}
-	
-	func search(withSearchTerm searchTerm: String, withCompletion completion: @escaping ([Photo], String, NetworkingError?) -> ()) {
-		// check if search is empty
-		if searchTerm.isEmpty {
-			completion([], "", nil) // empty results for empty search
-			return
-		}
-		
-		// attempt to construct url
-		let searchUrlTuple = constructSearchUrl(withSearchTerm: searchTerm)
-
-		// get url
-		guard let searchUrl = searchUrlTuple.url else {
-			completion([], "", searchUrlTuple.error)
-			return
-		}
-		
-		// create search operation
-		let searchOperation = SearchOperation(requestUrl: searchUrl, searchTerm: searchTerm)
-		searchOperation.delegate = self
-		searchOperation.queuePriority = .veryHigh
-		searchQueue.addOperation(searchOperation) // adding to our searchQueue
-		
-		// adding barrier block task requires
-		// this operation to wait until all
-		// previous operations have completed
-		searchQueue.addBarrierBlock { [weak self] in
-			guard let self = self else { return }
 			
-			completion(self.searchResults.results, self.searchResults.searchTerm, nil)
-		}
-	}
-		
 	private func constructNewSectionFetchUrl() -> (url: URL?, error: NetworkingError?) {
 		// construct urlString
 		var requestUrlString: String = Self.baseUrlString
@@ -225,7 +190,9 @@ class NetworkingManager {
 	
 	// MARK: asynchronous tasks
 	
-	func downloadHomeInitialData(withCompletion completion: @escaping (NetworkingError?) -> ()) {
+	func downloadHomeInitialData(withPhotoOfTheDayDimensions imageDimensions: CGSize,
+															 withPhotoOfTheDayScale imageScale: CGFloat,
+															 withCompletion completion: @escaping (NetworkingError?) -> ()) {
 		// construct all urls necessary to load initial data for home
 		let newSectionFetchUrlTuple = constructNewSectionFetchUrl()
 		let photoOfTheDayUrlTuple = constructPhotoOfTheDayUrl()
@@ -259,7 +226,7 @@ class NetworkingManager {
 		// NewSectionOperation
 		let newSectionOperation = NewSectionOperation(initialDataToLoadUrl: newSectionFetchUrl)
 		newSectionOperation.delegate = self
-		self.imageDownloadQueue.addOperation(newSectionOperation)
+		self.defaultQueue.addOperation(newSectionOperation)
 		
 		// PhotoOfTheDay - 2 separate operations
 		
@@ -268,45 +235,41 @@ class NetworkingManager {
 		photoOfTheDayOperation.delegate = self
 		
 		// this operation fetches & caches the image for the Photo of the Day object
-		let photoOfTheDayImageDownloadOperation = ImageDownloadOperation()
+		let photoOfTheDayImageDownloadOperation = DownSamplingImageOperation(imagePointSize: imageDimensions, imageScale: imageScale)
 		photoOfTheDayImageDownloadOperation.addDependency(photoOfTheDayOperation) // image download waits until object fetch finishes before executing
-		photoOfTheDayImageDownloadOperation.imageHandler = { image, error in
-			if let error = error {
-				print("Photo of the day image download error: \(error)")
-				return
-			}
-			
-			guard let image = image else { return }
+		photoOfTheDayImageDownloadOperation.completionBlock = {
+			guard let downsampledImage = photoOfTheDayImageDownloadOperation.downSampledImage else { return }
 			
 			print("CACHING PHOTO OF THE DAY IMAGE")
 			
 			// cache the image using the url as the key
-			self.imageDownloadCache.setObject(image, forKey: NSString(string: photoOfTheDayImageDownloadOperation.imageUrl.absoluteString))
+			self.imageDownloadCache.setObject(downsampledImage, forKey: NSString(string: photoOfTheDayImageDownloadOperation.imageUrl.absoluteString))
 		}
 
 		// add PhotoOfTheDay operations
-		self.imageDownloadQueue.addOperation(photoOfTheDayOperation)
-		self.imageDownloadQueue.addOperation(photoOfTheDayImageDownloadOperation)
+		self.defaultQueue.addOperation(photoOfTheDayOperation)
+		self.defaultQueue.addOperation(photoOfTheDayImageDownloadOperation)
 		
 		// ExploreCollections
 		let exploreCollectionsOperation = ExploreCollectionsOperation(url: exploreCollectionsFetchUrl)
 		exploreCollectionsOperation.delegate = self
-		self.imageDownloadQueue.addOperation(exploreCollectionsOperation)
+		self.defaultQueue.addOperation(exploreCollectionsOperation)
 		
 		// once all data fetching Operations have been added to queue
 		// add this BarrierBlock to the queue which requires
 		// that all previously added tasks must be completed
 		// in order for this task to be executed - we're simply
 		// handing control back over to the UI
-		self.imageDownloadQueue.addBarrierBlock {
+		self.defaultQueue.addBarrierBlock {
 			completion(nil)
 		}
 	}
-			
-	// OJO: make sure to pass indexPath thru!!!
-	func downloadImage(forImageUrlString imageUrlString: String,
-										 forIndexPath indexPath: IndexPath,
-										 withCompletion completion: ((UIImage?, NetworkingError?, IndexPath) -> Void)?) {
+				
+	func downloadDownsampledImage(forImageUrlString imageUrlString: String,
+																forIndexPath indexPath: IndexPath,
+																withImageDimensions imageDimensions: CGSize,
+																withImageScale imageScale: CGFloat,
+																withCompletion completion: ((UIImage?, NetworkingError?, IndexPath) -> Void)?) {
 		guard let imageUrl = URL(string: imageUrlString) else {
 			completion?(nil, NetworkingError.invalidUrl, indexPath)
 			return
@@ -316,39 +279,72 @@ class NetworkingManager {
 			print("RETURNING CACHED IMAGE")
 			completion?(cachedImage, nil, indexPath)
 		} else {
-			// first see if the operation is currently running on
-			// imageDownloadQueue if so - raise its priority to top level
-			if let operations = (imageDownloadQueue.operations as? [ImageDownloadOperation])?
-						.filter({ $0.imageUrl.absoluteString == imageUrlString && $0.isExecuting == true && $0.isFinished == false }),
-				 let currentOperation = operations.first {
-				
-				currentOperation.queuePriority = .veryHigh
-				print("IMAGE OPERATION CURRENTLY RUNNING")
-				
+			// we're using a serial queue with downsampled images so we check
+			// if the operation is sitting ready to go in the operation queue -
+			// if so, we don't want to re-add it to operation queue
+			if let operations = (imageDownsampleQueue.operations as? [DownSamplingImageOperation])?
+						.filter({ $0.imageUrl.absoluteString == imageUrlString && $0.isReady == true }),
+				 let _ = operations.first {
+				print("IMAGE OPERATION IN QUEUE")
 			} else {
-				let imageDownloadOperation = ImageDownloadOperation(url: imageUrl)
-				imageDownloadOperation.queuePriority = .high
-				imageDownloadOperation.imageHandler = { image, error in
-					if let error = error {
-						completion?(nil, error, indexPath)
-						return
-					}
-					
-					guard let image = image else { return }
+				let downSamplingImageOperation = DownSamplingImageOperation(imageUrl: imageUrl, imagePointSize: imageDimensions, imageScale: imageScale)
+				downSamplingImageOperation.queuePriority = .veryHigh // we're not lowering queue priority for these operations
+				downSamplingImageOperation.completionBlock = {
+					guard let downSampledImage = downSamplingImageOperation.downSampledImage else { return }
 					
 					print("CACHING IMAGE")
 					
 					// cache the image using the url as the key
-					self.imageDownloadCache.setObject(image, forKey: NSString(string: imageUrlString))
+					self.imageDownloadCache.setObject(downSampledImage, forKey: NSString(string: imageUrlString))
 					
-					completion?(image, error, indexPath)
+					completion?(downSampledImage, nil, indexPath)
 				}
-				// add to image download queue
-				imageDownloadQueue.addOperation(imageDownloadOperation)
+				imageDownsampleQueue.addOperation(downSamplingImageOperation)
 			}
 		}
 	}
+	
+	func cancelDownloadSampledImageOperation(forImageUrl imageUrl: URL) {
+		// check to see if the operation is currently running or waiting
+		// if so, cancel the operation
+		guard let operations = (imageDownsampleQueue.operations as? [DownSamplingImageOperation])?
+						.filter({ $0.imageUrl.absoluteString == imageUrl.absoluteString && ($0.isExecuting == true || $0.isReady == true) }),
+					let operationToCancel = operations.first else { return }
+		operationToCancel.cancel()
+	}
+	
+	func search(withSearchTerm searchTerm: String, withCompletion completion: @escaping ([Photo], String, NetworkingError?) -> ()) {
+		// check if search is empty
+		if searchTerm.isEmpty {
+			completion([], "", nil) // empty results for empty search
+			return
+		}
 		
+		// attempt to construct url
+		let searchUrlTuple = constructSearchUrl(withSearchTerm: searchTerm)
+
+		// get url
+		guard let searchUrl = searchUrlTuple.url else {
+			completion([], "", searchUrlTuple.error)
+			return
+		}
+		
+		// create search operation
+		let searchOperation = SearchOperation(requestUrl: searchUrl, searchTerm: searchTerm)
+		searchOperation.delegate = self
+		searchOperation.queuePriority = .veryHigh
+		defaultQueue.addOperation(searchOperation) // adding to our defaultQueue
+		
+		// adding barrier block task requires
+		// this operation to wait until all
+		// previous operations have completed
+		defaultQueue.addBarrierBlock { [weak self] in
+			guard let self = self else { return }
+			
+			completion(self.searchResults.results, self.searchResults.searchTerm, nil)
+		}
+	}
+
 }
 
 

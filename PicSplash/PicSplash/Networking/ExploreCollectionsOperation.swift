@@ -89,7 +89,7 @@ class ExploreCollectionsOperation: AsyncOperation {
 		}
 
 		// only 50/hr
-		print("REQUESTS REMAINING: \(httpResponse.allHeaderFields["x-ratelimit-remaining"]) :(")
+		print("REQUESTS REMAINING: \(httpResponse.allHeaderFields["x-ratelimit-remaining"] ?? "") :(")
 
 		// unpack data & deserialize response data into JSON
 		guard let data = data,
@@ -101,12 +101,12 @@ class ExploreCollectionsOperation: AsyncOperation {
 		var collections: [Collection] = []
 
 		json.forEach { jsonDict in
-			guard let coverPhotoDict = jsonDict["cover_photo"] as? [String: Any],
+			guard let title = jsonDict["title"] as? String,
+						let coverPhotoDict = jsonDict["cover_photo"] as? [String: Any],
 						let id = coverPhotoDict["id"] as? String,
-						let title = coverPhotoDict["description"] as? String,
 						let blurHash = coverPhotoDict["blur_hash"] as? String,
 						let urlsDict = coverPhotoDict["urls"] as? [String: Any],
-						let imageUrl = urlsDict["small"] as? String else { return	}
+						let imageUrl = urlsDict["regular"] as? String else { return	}
 			
 			collections.append(Collection(id: id,
 																		title: title,
@@ -114,7 +114,7 @@ class ExploreCollectionsOperation: AsyncOperation {
 																		imageUrl: imageUrl))
 		}
 		
-		print("COLLECTIONS COUNT: \(collections.count)")
+//		print("COLLECTIONS COUNT: \(collections.count)")
 		
 		// pass collections to delegate
 		delegate?.loadedHomeImageSection(collections, forPhotoSectionType: self.exploreSection)

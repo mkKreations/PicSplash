@@ -10,7 +10,7 @@ import UIKit
 class HomeImageCell: UICollectionViewCell {
 	// class vars
 	static let reuseIdentifier: String = UUID().uuidString
-	static let imageShadowOverlayStyle: ImageShadowOverlayView.OverlayStyle = .base
+	static let imageShadowOverlayStyle: ImageShadowOverlayView.OverlayStyle = .base(nil, nil)
 	
 	
 	// instance vars - exposed to public for view controller transition
@@ -70,6 +70,8 @@ class HomeImageCell: UICollectionViewCell {
 	override init(frame: CGRect) {
 		super.init(frame: frame)
 		
+		contentView.backgroundColor = .picSplashBlack
+		
 		configureSubviews()
 		constrainSubviews()
 	}
@@ -90,6 +92,7 @@ class HomeImageCell: UICollectionViewCell {
 		
 		displayLabel.translatesAutoresizingMaskIntoConstraints = false
 		displayLabel.textColor = .white
+		displayLabel.font = UIFont.systemFont(ofSize: 14.0, weight: .semibold)
 		contentView.addSubview(displayLabel)
 		
 		loader.translatesAutoresizingMaskIntoConstraints = false
@@ -98,20 +101,21 @@ class HomeImageCell: UICollectionViewCell {
 	
 	private func constrainSubviews() {
 		displayImageView.topAnchor.constraint(equalTo: contentView.topAnchor).isActive = true
-		displayImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
+		displayImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -1.0).isActive = true
 		displayImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor).isActive = true
 		displayImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor).isActive = true
 		imageViewHeightConstraint = displayImageView.heightAnchor.constraint(equalToConstant: 0.0)
 		imageViewHeightConstraint.isActive = true
 
 		gradientOverlayView.topAnchor.constraint(equalTo: contentView.topAnchor).isActive = true
-		gradientOverlayView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
+		gradientOverlayView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -1.0).isActive = true
 		gradientOverlayView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor).isActive = true
 		gradientOverlayView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor).isActive = true
 
-		displayLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -5.0).isActive = true
-		displayLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -5.0).isActive = true
-		displayLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 5.0).isActive = true
+		// add 1 point to bottom anchor constant for display label for faux separator
+		displayLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -17.0).isActive = true
+		displayLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16.0).isActive = true
+		displayLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16.0).isActive = true
 		
 		loader.centerYAnchor.constraint(equalTo: contentView.centerYAnchor).isActive = true
 		loader.centerXAnchor.constraint(equalTo: contentView.centerXAnchor).isActive = true
