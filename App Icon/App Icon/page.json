@@ -102,11 +102,19 @@
     {
       "class": "artboard",
       "id": "3C5B9C58-693A-497A-962D-D8FC7010D82F"
+    },
+    {
+      "class": "bitmap",
+      "id": "6466C50A-22AA-4898-946F-BF58CC8BBB35"
+    },
+    {
+      "class": "bitmap",
+      "id": "2AAB8C6A-B345-49E4-A924-101163C7E6E9"
     }
   ],
   "maintainScrollPosition": false,
-  "name": "Page 1",
-  "nameIsFixed": false,
+  "name": "App Icon",
+  "nameIsFixed": true,
   "resizingConstraint": 63,
   "resizingType": 0,
   "rotation": 0,
