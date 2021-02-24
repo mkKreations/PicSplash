@@ -118,6 +118,7 @@ class FeaturedView: UIView {
 																																				 attributes: [NSAttributedString.Key.foregroundColor : UIColor.white])
 		searchBar.delegate = self // respond to search events
 		searchBar.searchBarStyle = .minimal
+		searchBar.searchTextField.textColor = .white
 		searchBar.tintColor = .white // set Cancel button tint color
 		searchBar.searchTextField.leftView?.tintColor = .white // set magnifying glass tintColor
 		searchBar.searchTextField.backgroundColor = UIColor.picSplashBlack.withAlphaComponent(0.2)

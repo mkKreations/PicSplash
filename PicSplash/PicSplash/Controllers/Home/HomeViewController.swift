@@ -222,6 +222,13 @@ final class HomeViewController: UIViewController {
 		present(alert, animated: true, completion: nil)
 	}
 		
+	
+	// MARK: overrides
+	
+	override var preferredStatusBarStyle: UIStatusBarStyle {
+		.lightContent
+	}
+	
 }
 
 

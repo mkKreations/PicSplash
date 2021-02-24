@@ -213,6 +213,14 @@ class DetailViewController: UIViewController {
 		delegate?.didPressShareButton(sender)
 	}
 	
+	
+	
+	// MARK: overrides
+	
+	override var preferredStatusBarStyle: UIStatusBarStyle {
+		.lightContent
+	}
+
 }
 
 
