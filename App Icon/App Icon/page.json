@@ -110,6 +110,10 @@
     {
       "class": "bitmap",
       "id": "2AAB8C6A-B345-49E4-A924-101163C7E6E9"
+    },
+    {
+      "class": "rectangle",
+      "id": "3DDE1629-7CD7-407A-B032-2A5D48DA8593"
     }
   ],
   "maintainScrollPosition": false,
