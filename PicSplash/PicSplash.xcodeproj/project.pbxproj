@@ -28,7 +28,6 @@
 		2CAE2F7325D895AB00DCC243 /* HomeViewController+SearchControllerViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAE2F7225D895AB00DCC243 /* HomeViewController+SearchControllerViews.swift */; };
 		2CAE645725D37788009A31F6 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAE645625D37788009A31F6 /* LoginView.swift */; };
 		2CAF5EEC25D5EA31000322B9 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAF5EEB25D5EA31000322B9 /* DetailViewController.swift */; };
-		2CAF5EF025D60095000322B9 /* DetailAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAF5EEF25D60095000322B9 /* DetailAnimator.swift */; };
 		2CAF5EF325D6D55A000322B9 /* DetailActionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAF5EF225D6D55A000322B9 /* DetailActionButton.swift */; };
 		2CBADA7525D897FC0049935C /* Trending.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CBADA7425D897FC0049935C /* Trending.swift */; };
 		2CBADA7825D89A330049935C /* TrendingCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CBADA7725D89A330049935C /* TrendingCell.swift */; };
@@ -74,7 +73,6 @@
 		2CAE2F7225D895AB00DCC243 /* HomeViewController+SearchControllerViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HomeViewController+SearchControllerViews.swift"; sourceTree = "<group>"; };
 		2CAE645625D37788009A31F6 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		2CAF5EEB25D5EA31000322B9 /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
-		2CAF5EEF25D60095000322B9 /* DetailAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailAnimator.swift; sourceTree = "<group>"; };
 		2CAF5EF225D6D55A000322B9 /* DetailActionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailActionButton.swift; sourceTree = "<group>"; };
 		2CBADA7425D897FC0049935C /* Trending.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Trending.swift; sourceTree = "<group>"; };
 		2CBADA7725D89A330049935C /* TrendingCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendingCell.swift; sourceTree = "<group>"; };
@@ -137,7 +135,6 @@
 		2CAF5EEE25D6008D000322B9 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
-				2CAF5EEF25D60095000322B9 /* DetailAnimator.swift */,
 				2C1F917A25D9762100BCCD87 /* AsyncOperation.swift */,
 				2C1F918A25D9945C00BCCD87 /* Secrets.swift */,
 				2C1F919025D9BF9800BCCD87 /* BlurHashDecode.swift */,
@@ -335,7 +332,6 @@
 				2CF14ED925D3192E000F1210 /* MenuTopView.swift in Sources */,
 				2C1F918E25D9ABBF00BCCD87 /* Photo.swift in Sources */,
 				2CD3C29D25CF04BB00BC0507 /* AppDelegate.swift in Sources */,
-				2CAF5EF025D60095000322B9 /* DetailAnimator.swift in Sources */,
 				2CF378C225DB5DDC00617878 /* NetworkingOperationsProtocol.swift in Sources */,
 				2C1F919725D9C3A800BCCD87 /* HomeImageProtocol.swift in Sources */,
 				2CA739C125E5CD5100AECE09 /* HomeDetailAnimator.swift in Sources */,
