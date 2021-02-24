@@ -38,7 +38,7 @@ PicSplash uses a custom app icon and custom assets - all created in the Sketch p
 2. Create an [Unsplash developer account](https://unsplash.com/developers) to receive a free API key
 3. Clone the repo and open the project
 4. Assign a development team under "Signing & Capabilities" section under project target
-5. Create a new Swift file called `Secrets` and store the file under the `Helpers` directory within the XCode project repo
+5. Create a new Swift file called `Secrets` and store it under the `Helpers` directory within the XCode project repo
 6. Copy and paste this code into the new `Secrets` file and insert your API key
 
 ```
@@ -53,8 +53,8 @@ final class Secrets {
 ## Disclaimer
 
 - The app is currently limited to 50 network requests per hour per API key
-- The app uses 3 network requests upon each run and one network request per each user search
-- Image downloads do not count against the 50 network request limit
+- The app uses 3 network requests upon each run and 1 network request per each user search
+- Image downloads do not count against the 50 network request per hour limit
 
 
 ## App Icon
