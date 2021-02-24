@@ -3,8 +3,26 @@
   "assets": {
     "_class": "assetCollection",
     "colorAssets": [
+      {
+        "_class": "MSImmutableColorAsset",
+        "color": {
+          "_class": "color",
+          "alpha": 1,
+          "blue": 1,
+          "green": 1,
+          "red": 1
+        },
+        "name": "PicSplash White"
+      }
     ],
     "colors": [
+      {
+        "_class": "color",
+        "alpha": 1,
+        "blue": 1,
+        "green": 1,
+        "red": 1
+      }
     ],
     "exportPresets": [
     ],

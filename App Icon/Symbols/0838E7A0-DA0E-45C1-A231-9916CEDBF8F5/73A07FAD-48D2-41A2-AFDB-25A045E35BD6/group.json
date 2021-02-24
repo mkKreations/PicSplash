@@ -1,8 +1,8 @@
 {
-  "_class": "page",
-  "booleanOperation": 0,
+  "_class": "group",
+  "booleanOperation": -1,
   "clippingMaskMode": 0,
-  "do_objectID": "13398760-C737-418E-B10F-C9EF49D8169A",
+  "do_objectID": "73A07FAD-48D2-41A2-AFDB-25A045E35BD6",
   "exportOptions": {
     "_class": "exportOptions",
     "exportFormats": [
@@ -15,41 +15,34 @@
   "frame": {
     "_class": "rect",
     "constrainProportions": false,
-    "height": 300,
-    "width": 300,
+    "height": 269,
+    "width": 269,
     "x": 0,
     "y": 0
   },
   "groupLayout": {
     "_class": "MSImmutableFreeformGroupLayout"
   },
-  "hasClickThrough": true,
+  "hasClickThrough": false,
   "hasClippingMask": false,
-  "horizontalRulerData": {
-    "_class": "rulerData",
-    "base": -371,
-    "guides": [
-    ]
-  },
-  "includeInCloudUpload": true,
   "isFixedToViewport": false,
   "isFlippedHorizontal": false,
   "isFlippedVertical": false,
-  "isLocked": false,
+  "isLocked": true,
   "isVisible": true,
-  "layerListExpandedType": 0,
+  "layerListExpandedType": 2,
   "layers": [
     {
-      "class": "symbolMaster",
-      "id": "BC438AD2-CB51-4AF1-BA34-1B66C109D3E6"
+      "class": "rectangle",
+      "id": "3DDE1629-7CD7-407A-B032-2A5D48DA8593"
     },
     {
-      "class": "symbolMaster",
-      "id": "0838E7A0-DA0E-45C1-A231-9916CEDBF8F5"
+      "class": "shapePath",
+      "id": "02C5AD46-CC02-4747-9120-66A33B6AEA60"
     }
   ],
   "maintainScrollPosition": false,
-  "name": "Symbols",
+  "name": "PicSplash Icon",
   "nameIsFixed": true,
   "resizingConstraint": 63,
   "resizingType": 0,
@@ -99,11 +92,5 @@
     ],
     "startMarkerType": 0,
     "windingRule": 1
-  },
-  "verticalRulerData": {
-    "_class": "rulerData",
-    "base": -223,
-    "guides": [
-    ]
   }
 }

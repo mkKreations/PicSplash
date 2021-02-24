@@ -1,8 +1,17 @@
 {
-  "_class": "group",
+  "_class": "symbolMaster",
+  "allowsOverrides": true,
+  "backgroundColor": {
+    "_class": "color",
+    "alpha": 1,
+    "blue": 1,
+    "green": 1,
+    "red": 1
+  },
   "booleanOperation": -1,
+  "changeIdentifier": 3,
   "clippingMaskMode": 0,
-  "do_objectID": "73A07FAD-48D2-41A2-AFDB-25A045E35BD6",
+  "do_objectID": "0838E7A0-DA0E-45C1-A231-9916CEDBF8F5",
   "exportOptions": {
     "_class": "exportOptions",
     "exportFormats": [
@@ -17,37 +26,49 @@
     "constrainProportions": false,
     "height": 269,
     "width": 269,
-    "x": 658.9906527733219,
-    "y": -732
+    "x": 505,
+    "y": -107
   },
   "groupLayout": {
     "_class": "MSImmutableFreeformGroupLayout"
   },
-  "hasClickThrough": false,
+  "hasBackgroundColor": false,
+  "hasClickThrough": true,
   "hasClippingMask": false,
+  "horizontalRulerData": {
+    "_class": "rulerData",
+    "base": 0,
+    "guides": [
+    ]
+  },
+  "includeBackgroundColorInExport": true,
+  "includeBackgroundColorInInstance": false,
+  "includeInCloudUpload": true,
   "isFixedToViewport": false,
   "isFlippedHorizontal": false,
   "isFlippedVertical": false,
+  "isFlowHome": false,
   "isLocked": false,
   "isVisible": true,
-  "layerListExpandedType": 2,
+  "layerListExpandedType": 0,
   "layers": [
     {
-      "class": "rectangle",
-      "id": "3DDE1629-7CD7-407A-B032-2A5D48DA8593"
-    },
-    {
-      "class": "shapePath",
-      "id": "02C5AD46-CC02-4747-9120-66A33B6AEA60"
+      "class": "group",
+      "id": "73A07FAD-48D2-41A2-AFDB-25A045E35BD6"
     }
   ],
   "maintainScrollPosition": false,
   "name": "PicSplash Icon",
-  "nameIsFixed": true,
+  "nameIsFixed": false,
+  "overrideProperties": [
+  ],
+  "presetDictionary": {
+  },
+  "resizesContent": false,
   "resizingConstraint": 63,
   "resizingType": 0,
   "rotation": 0,
-  "shouldBreakMaskChain": false,
+  "shouldBreakMaskChain": true,
   "style": {
     "_class": "style",
     "blur": {
@@ -92,5 +113,12 @@
     ],
     "startMarkerType": 0,
     "windingRule": 1
+  },
+  "symbolID": "E71D49E2-6A37-402C-A3DB-B87AF17F9EF3",
+  "verticalRulerData": {
+    "_class": "rulerData",
+    "base": 0,
+    "guides": [
+    ]
   }
 }
