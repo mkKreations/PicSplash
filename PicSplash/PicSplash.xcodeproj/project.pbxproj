@@ -23,6 +23,7 @@
 		2C6B964F25DC80160048C4AF /* Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C6B964E25DC80160048C4AF /* Collection.swift */; };
 		2C6B965225DC8A080048C4AF /* ExploreCollectionsOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C6B965125DC8A080048C4AF /* ExploreCollectionsOperation.swift */; };
 		2C7006E225DF3B3F00D5BBA5 /* SearchOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C7006E125DF3B3F00D5BBA5 /* SearchOperation.swift */; };
+		2C74C84325E705A800D5CA83 /* UIDevice+extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C74C84225E705A700D5CA83 /* UIDevice+extensions.swift */; };
 		2CA739C125E5CD5100AECE09 /* HomeDetailAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CA739C025E5CD5100AECE09 /* HomeDetailAnimator.swift */; };
 		2CAE2F6825D88F8E00DCC243 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAE2F6725D88F8E00DCC243 /* HomeViewController.swift */; };
 		2CAE2F7325D895AB00DCC243 /* HomeViewController+SearchControllerViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAE2F7225D895AB00DCC243 /* HomeViewController+SearchControllerViews.swift */; };
@@ -68,6 +69,7 @@
 		2C6B964E25DC80160048C4AF /* Collection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Collection.swift; sourceTree = "<group>"; };
 		2C6B965125DC8A080048C4AF /* ExploreCollectionsOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreCollectionsOperation.swift; sourceTree = "<group>"; };
 		2C7006E125DF3B3F00D5BBA5 /* SearchOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchOperation.swift; sourceTree = "<group>"; };
+		2C74C84225E705A700D5CA83 /* UIDevice+extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIDevice+extensions.swift"; sourceTree = "<group>"; };
 		2CA739C025E5CD5100AECE09 /* HomeDetailAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeDetailAnimator.swift; sourceTree = "<group>"; };
 		2CAE2F6725D88F8E00DCC243 /* HomeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
 		2CAE2F7225D895AB00DCC243 /* HomeViewController+SearchControllerViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HomeViewController+SearchControllerViews.swift"; sourceTree = "<group>"; };
@@ -251,6 +253,7 @@
 			children = (
 				2CF14EDC25D31F7A000F1210 /* UIColor+extensions.swift */,
 				2CF14EE525D33151000F1210 /* UIButton+extensions.swift */,
+				2C74C84225E705A700D5CA83 /* UIDevice+extensions.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -330,6 +333,7 @@
 				2CF378BF25DAD59300617878 /* BlurHashOperation.swift in Sources */,
 				2CF378C925DB618300617878 /* NewSectionOperation.swift in Sources */,
 				2CF14ED925D3192E000F1210 /* MenuTopView.swift in Sources */,
+				2C74C84325E705A800D5CA83 /* UIDevice+extensions.swift in Sources */,
 				2C1F918E25D9ABBF00BCCD87 /* Photo.swift in Sources */,
 				2CD3C29D25CF04BB00BC0507 /* AppDelegate.swift in Sources */,
 				2CF378C225DB5DDC00617878 /* NetworkingOperationsProtocol.swift in Sources */,
