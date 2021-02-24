@@ -25,14 +25,14 @@ PicSplash uses a custom app icon and custom assets - all created in the Sketch p
 - Lazily loads images using custom Operations/OperationQueues
 - Prefetching/Downsampling images via Apple guidelines for system/device efficacy
 - Custom view controller transitions and animations to enhance user experience
-- Provides [blurred image produced from unique hash](https://github.com/woltapp/blurhash)! while image loads in background
+- Provides [blurred image produced from unique hash](https://github.com/woltapp/blurhash) while image loads in background
 - Light/Dark mode compatible
 
 
 ## Install
 
-1. [Install git lfs](https://www.atlassian.com/git/tutorials/git-lfs#installing-git-lfs)!
-2. Create an [Unsplash developer account](https://unsplash.com/developers)! to receive a free API key
+1. Install [git lfs](https://www.atlassian.com/git/tutorials/git-lfs#installing-git-lfs)
+2. Create an [Unsplash developer account](https://unsplash.com/developers) to receive a free API key
 3. Clone the repo and open the project
 4. Assign a development team under "Signing & Capabilities" section under project target
 5. Create a new Swift file called `Secrets` and store the file under the `Helpers` directory within the XCode project repo
