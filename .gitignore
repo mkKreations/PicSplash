@@ -1,9 +1,6 @@
 # pesky xcuserstate file
 *.xcuserstate
 
-# since storyboard doesn't work well with git
-*.storyboard
-
 # macOS
 .DS_Store
 
