@@ -23,7 +23,16 @@ protocol FeaturedViewButtonsProvider: AnyObject {
 class FeaturedView: UIView {
 	// static vars
 	private static let buttonDimension: CGFloat = 40.0
-	
+	private static var buttonTopMargin: CGFloat {
+		// keyWindow is "deprecated" but as long as we know that
+		// we're not supporting iPad - we're fine
+		
+		// get the value from the window since accessing the
+		// safeAreaInset of the view in viewDidLoad returns 0
+		let safeAreaInset: CGFloat = UIApplication.shared.keyWindow?.safeAreaInsets.top ?? 0.0
+		return safeAreaInset
+	}
+
 	
 	// instance vars
 	private let vertStackView: UIStackView = UIStackView(frame: .zero)
@@ -33,6 +42,8 @@ class FeaturedView: UIView {
 	private let gradientOverlayView: ImageShadowOverlayView = ImageShadowOverlayView(overlayStyle: .full(nil))
 	private let loginButton: UIButton = UIButton(type: .system)
 	private let menuButton: UIButton = UIButton(type: .system)
+	private var loginButtonTopConstraint: NSLayoutConstraint?
+	private var menuButtonTopConstraint: NSLayoutConstraint?
 	weak var delegate: FeaturedViewButtonsProvider?
 	private var shouldBeginEditing: Bool = true // to receive calls from user clicking x within search bar - see below
 
@@ -69,6 +80,11 @@ class FeaturedView: UIView {
 		set {
 			displayImageView.image = newValue
 		}
+	}
+	
+	func updateConstraintsForSafeAreaEdgeInsets() {
+		menuButtonTopConstraint?.constant = Self.buttonTopMargin
+		loginButtonTopConstraint?.constant = Self.buttonTopMargin
 	}
 	
 	
@@ -136,15 +152,17 @@ class FeaturedView: UIView {
 		gradientOverlayView.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
 		gradientOverlayView.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
 		
-		menuButton.topAnchor.constraint(equalTo: topAnchor, constant: 20.0).isActive = true
 		menuButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16.0).isActive = true
 		menuButton.widthAnchor.constraint(equalToConstant: Self.buttonDimension).isActive = true
 		menuButton.heightAnchor.constraint(equalToConstant: Self.buttonDimension).isActive = true
+		menuButtonTopConstraint = menuButton.topAnchor.constraint(equalTo: topAnchor, constant: Self.buttonTopMargin)
+		menuButtonTopConstraint?.isActive = true
 
-		loginButton.topAnchor.constraint(equalTo: topAnchor, constant: 20.0).isActive = true
 		loginButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16.0).isActive = true
 		loginButton.widthAnchor.constraint(equalToConstant: Self.buttonDimension).isActive = true
 		loginButton.heightAnchor.constraint(equalToConstant: Self.buttonDimension).isActive = true
+		loginButtonTopConstraint = loginButton.topAnchor.constraint(equalTo: topAnchor, constant: Self.buttonTopMargin)
+		loginButtonTopConstraint?.isActive = true
 
 		vertStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16.0).isActive = true
 		vertStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16.0).isActive = true

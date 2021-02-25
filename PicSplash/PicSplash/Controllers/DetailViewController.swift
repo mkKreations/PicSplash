@@ -15,7 +15,20 @@ protocol DetailButtonActionsProvider: AnyObject {
 class DetailViewController: UIViewController {
 	// class vars
 	static private let tapFadeAnimationDuration: TimeInterval = 0.5
-	static private let navStackViewTopMargin: CGFloat = 30.0
+	static private var navStackViewTopMargin: CGFloat {
+		// keyWindow is "deprecated" but as long as we know that
+		// we're not supporting iPad - we're fine
+		
+		// get the value from the window since accessing the
+		// safeAreaInset of the view in viewDidLoad returns 0
+		
+		// we're safe here in DetailViewController because views
+		// have been loaded into the frame buffer at least once,
+		// but if no views have been loaded into the frame buffer,
+		// then safeAreaEdgeInsets will always return 0
+		let safeAreaInset: CGFloat = UIApplication.shared.keyWindow?.safeAreaInsets.top ?? 0.0
+		return safeAreaInset + 10.0
+	}
 	
 	// internal vars
 	let detailImageView: UIImageView = UIImageView(frame: .zero) // expose to public for view controller transition
@@ -63,7 +76,6 @@ class DetailViewController: UIViewController {
 		configureSubviews()
 		constrainSubviews()
 	}
-	
 	
 	
 	// MARK: tap gest/animation

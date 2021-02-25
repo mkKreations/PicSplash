@@ -34,10 +34,12 @@ extension HomeViewController {
 	}
 	
 	private func constrainTrendingCollectionView() {
-		trendingCollectionView.topAnchor.constraint(equalTo: view.topAnchor, constant: Self.navMinHeight).isActive = true
 		trendingCollectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
 		trendingCollectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
 		trendingCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+		trendingCollectionViewTopConstraint = trendingCollectionView.topAnchor.constraint(equalTo: view.topAnchor,
+																																											constant: Self.navMinHeight)
+		trendingCollectionViewTopConstraint?.isActive = true
 	}
 	
 	private func configureTrendingCompositionalLayout() -> UICollectionViewCompositionalLayout {
@@ -215,7 +217,9 @@ extension HomeViewController {
 	private func constrainSearchResultsCollectionView() {
 		searchResultsCollectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
 		searchResultsCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
-		searchResultsCollectionView.topAnchor.constraint(equalTo: view.topAnchor, constant: Self.navMinHeight).isActive = true
+		searchResultsCollectionViewTopConstraint = searchResultsCollectionView.topAnchor.constraint(equalTo: view.topAnchor,
+																																																constant: Self.navMinHeight)
+		searchResultsCollectionViewTopConstraint?.isActive = true
 		searchResultsCollectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
 	}
 	

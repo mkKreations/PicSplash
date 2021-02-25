@@ -14,10 +14,12 @@ var showSampleData: Bool = false
 final class HomeViewController: UIViewController {
 	// class vars
 	private static let navMaxHeight: CGFloat = 320.0
-	static let navMinHeight: CGFloat = 70.0
+	static var navMinHeight: CGFloat {
+		let safeAreaInset: CGFloat = UIApplication.shared.keyWindow?.safeAreaInsets.top ?? 20.0
+		return safeAreaInset + 50.0
+	}
 	private static let navSnapToTopBuffer: CGFloat = 162.0
 	static let trendingAnimationDuration: TimeInterval = 0.4
-	private static let scrollToTopMargin: CGFloat = 22.0
 	private static let searchResultsTopMargin: CGFloat = 100.0
 
 	
@@ -39,6 +41,7 @@ final class HomeViewController: UIViewController {
 	private var isShowingLoginView: Bool = false
 	private var isObservingKeyboard: Bool = false
 	let trendingCollectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+	var trendingCollectionViewTopConstraint: NSLayoutConstraint?
 	var trendingDatasource: UICollectionViewDiffableDataSource<TrendingSection, Trending>?
 	var isShowingTrending: Bool = false
 	let loadingView: UIView = UIView(frame: .zero)
@@ -46,6 +49,7 @@ final class HomeViewController: UIViewController {
 	var loadingViewTopConstraint: NSLayoutConstraint?
 	var isShowingLoadingView: Bool = false
 	let searchResultsCollectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+	var searchResultsCollectionViewTopConstraint: NSLayoutConstraint?
 	var searchResultsDatasource: UICollectionViewDiffableDataSource<PhotoSectionType, Photo>?
 	var sampleSearchResultsDatasource: UICollectionViewDiffableDataSource<SectionPlaceHolder, ImagePlaceholder>? // TODO: REMOVE SAMPLE DATA
 	var isShowingSearchResults: Bool = false
@@ -113,7 +117,7 @@ final class HomeViewController: UIViewController {
 	
 	override func viewWillAppear(_ animated: Bool) {
 		super.viewWillAppear(animated)
-		
+				
 		// add ourselves as keyboard notification observer
 		if !isObservingKeyboard {
 			NotificationCenter.default.addObserver(self,
@@ -130,7 +134,7 @@ final class HomeViewController: UIViewController {
 	
 	override func viewDidAppear(_ animated: Bool) {
 		super.viewDidAppear(animated)
-		
+	
 		// we know our loginView will have size by now
 		adjustLoginViewPositionForAppearance()
 	}
@@ -144,7 +148,19 @@ final class HomeViewController: UIViewController {
 			isObservingKeyboard = false
 		}
 	}
-			
+	
+	override func viewDidLayoutSubviews() {
+		super.viewDidLayoutSubviews()
+		
+		// update any view constraints that depend on the view's safeAreaEdgeInsets
+		// the reason for this is because safeAreaEdgeInsets return 0 in viewDidLoad,
+		// where we're currently doing all of our layout, so we capture any constraints
+		// that depend on that value and update them appropriately here with the correct
+		// value - all the values we're setting constraint constants to use the safeArea
+		featuredView.updateConstraintsForSafeAreaEdgeInsets()
+		trendingCollectionViewTopConstraint?.constant = Self.navMinHeight
+		searchResultsCollectionViewTopConstraint?.constant = Self.navMinHeight
+	}
 	
 	// MARK: subviews config
 	
