@@ -139,6 +139,7 @@ class FeaturedView: UIView {
 		searchBar.searchTextField.leftView?.tintColor = .white // set magnifying glass tintColor
 		searchBar.searchTextField.backgroundColor = UIColor.picSplashBlack.withAlphaComponent(0.2)
 		searchBar.searchTextField.delegate = self // to receive textField should clear events
+		searchBar.searchTextField.keyboardAppearance = .dark
 	}
 	
 	private func constrainSubviews() {
