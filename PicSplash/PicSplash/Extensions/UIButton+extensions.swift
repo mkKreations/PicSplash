@@ -24,7 +24,7 @@ enum MenuOption: Int {
 		case .review:
 			return "Write a review"
 		case .visit:
-			return "Visit picSplash.com"
+			return "Visit PicSplash.com"
 		case .license:
 			return "License"
 		}
