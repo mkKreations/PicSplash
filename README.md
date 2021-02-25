@@ -26,7 +26,7 @@ PicSplash uses a custom app icon and custom assets - all created in the Sketch p
 ## Features
 
 - Lazily loads images using custom Operations/OperationQueues
-- Prefetching/Downsampling images via Apple guidelines for system/device efficacy
+- Prefetches data and downsampling images via Apple guidelines for system/device efficacy
 - Custom view controller transitions and animations to enhance user experience
 - Provides [blurred image produced from unique hash](https://github.com/woltapp/blurhash) while image loads in background
 - Light/Dark mode compatible
