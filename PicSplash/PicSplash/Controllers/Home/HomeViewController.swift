@@ -233,6 +233,7 @@ final class HomeViewController: UIViewController {
 	
 	private func presentCancelAlert(withMessage message: String) {
 		let alert = UIAlertController(title: "PicSplash", message: message, preferredStyle: .alert)
+		alert.overrideUserInterfaceStyle = .dark
 		let okAction = UIAlertAction(title: "OK", style: .cancel, handler: nil)
 		alert.addAction(okAction)
 		present(alert, animated: true, completion: nil)
