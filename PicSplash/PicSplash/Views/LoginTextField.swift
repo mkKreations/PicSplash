@@ -91,11 +91,13 @@ class LoginTextField: UIView {
 		stackView.spacing = 10.0
 		addSubview(stackView)
 		
-		textField.placeholder = textFieldState.rawValue
 		textField.font = UIFont.systemFont(ofSize: 16.0)
 		textField.delegate = self
 		textField.returnKeyType = textFieldState == .email ? .next : .done
 		textField.tintColor = .white // for white cursor
+		textField.keyboardAppearance = .dark
+		textField.attributedPlaceholder = NSAttributedString(string: textFieldState.rawValue,
+																												 attributes: [.foregroundColor: UIColor.white])
 		
 		if textFieldState == .password { // add lock icon
 			textField.rightViewMode = .always
