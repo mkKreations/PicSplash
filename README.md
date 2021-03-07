@@ -12,7 +12,7 @@
 ## Description
 
 PicSplash is my custom clone of the old version of the Unsplash app. The app displays high quality images, rendered at their 
-original aspect ratios, and allows the user to search through these images, all using the Unsplash API. 
+original aspect ratios, and allows the user to search through these images, all using the Unsplash API.  
 
 PicSplash contains many of the notable features of its predecessor including a parallax image that adjusts its size as a user scrolls, 
 as well as a group-centered horizontal list of Collections.
